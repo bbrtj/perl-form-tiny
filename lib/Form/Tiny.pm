@@ -57,6 +57,7 @@ has "errors" => (
 	lazy => 1,
 	default => sub { [] },
 	clearer => "_clear_errors",
+	predicate => 1,
 );
 
 around "BUILDARGS" => sub {
@@ -94,7 +95,6 @@ sub _validate
 		$self->add_error(Form::Tiny::Error::DoesNotValidate->new(field => $field, error => $error));
 	};
 
-	my $form_valid = 1;
 	my $found_args = 0;
 	my $dirty = {};
 
@@ -121,8 +121,6 @@ sub _validate
 				$$current = $validator->get_coerced($$current);
 				if ($validator->validate($add_error, $$current)) {
 					$$current = $validator->get_adjusted($$current);
-				} else {
-					$form_valid = 0;
 				}
 
 				# found and valid, go to next field
@@ -132,22 +130,20 @@ sub _validate
 
 		# for when it didn't pass the existence test
 		if ($validator->required) {
-			$form_valid = 0;
 			$self->add_error(Form::Tiny::Error::DoesNotExist->new(field => $curr_f));
 		}
 	}
 
 	if ($self->does("Form::Tiny::Strict") && $self->strict && $found_args < keys %{$fields}) {
-		$form_valid = 0;
 		$self->add_error(Form::Tiny::Error::IsntStrict->new);
 	}
 
-	if ($form_valid) {
-		if ($self->can("clean")) {
-			$dirty = $self->clean($dirty);
-		}
-		$self->_set_fields($dirty);
-	}
+	$dirty = $self->clean($dirty)
+		if $self->can("clean") && !$self->has_errors;
+
+	my $form_valid = !$self->has_errors;
+	$self->_set_fields($dirty)
+		if $form_valid;
 
 	return $form_valid;
 }
