@@ -159,7 +159,78 @@ Form::Tiny - Tiny form implementation centered around Type::Tiny
 
 =head1 SYNOPSIS
 
-  use Form::Tiny;
+	use Moo;
+	use Types::Common::String qw(SimpleStr);
+	use Types::Common::Numeric qw(PositiveInt);
+
+	with "Form::Tiny";
+
+	sub build_fields {
+		{
+			name => "name",
+			type => SimpleStr,
+			adjust => sub { ucfirst shift },
+			required => 1,
+		},
+		{
+			name => "lucky_number",
+			type => PositiveInt,
+			required => 1,
+		}
+	}
+
+	sub clean {
+		my ($self, $data) = @_;
+
+		if ($data->{name} eq "Perl" && $data->{lucky_number} == 6) {
+			$self->add_error(Form::Tiny::Error::DoesNotValidate->new("Perl6 is Raku"));
+		}
+
+		return $data;
+	}
 
 =head1 DESCRIPTION
 
+Form validation engine that can reuse all the type constraints you're already familiar with.
+
+=head1 FORM BUILDING
+
+Every class applying the I<Form::Tiny> role has to have a sub called I<build_fields>. This method should return a list of hashrefs, where each of them will be coerced into an object of the L<Form::Tiny::FieldDefinition> class.
+
+The only required element of this hashref is I<name>, which contains the string name of the field in the form input. Other possible elements are:
+
+=over
+
+=item type
+
+A type that the field will be validated against. Effectively, this needs to be an object with I<validate> and I<check> methods.
+
+=item coerce
+
+A coercion that will be made B<before> the type is validated and will change the value of the field. This can be a coderef or a boolean:
+
+Value of I<1> means that coercion will be applied from the specified I<type>. This requires the type to also provide I<coerce> and I<has_coercion> method, and the return value of the second one must be true.
+
+Value of I<0> means no coercion will be made.
+
+Value that is a coderef will be passed a single scalar, which is the value of the field. It is required to make its own checks and return a scalar which will replace the old value.
+
+=item adjust
+
+An adjustment that will be made B<after> the type is validated and the validation is successful. This must be a coderef that gets passed the validated value and returns the new value for the field.
+
+=item required
+
+Controls if the field should be skipped silently if it has no value or the value is empty. Possible values are:
+
+I<0> - The field can be non-existent in the input, empty or undefined
+
+I<"soft"> - The field has to exist in the input, but can be empty or undefined
+
+I<1> or I<"hard"> - The field has to exist in the input, must be defined and non-empty (value of I<0> is allowed)
+
+=item message
+
+A static string that should be output instead of an error message returned by the I<type> when the validation fail.
+
+=back
