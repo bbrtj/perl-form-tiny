@@ -1,44 +1,45 @@
 use Modern::Perl "2010";
 use Test::More;
 
-BEGIN { use_ok('Form::Tiny') };
+BEGIN { use_ok('Form::Tiny::Inline') };
 
-{
-	package TestForm;
-	use Moo;
-
-	with "Form::Tiny";
-
-	sub build_fields
-	{
-		{name => "arg", required => 1},
-		{name => "arg2", required => 0}
-	}
-
-	1;
-}
-
-my @data = (
-	[0, {}],
-	[1, {arg => "test"}],
-	[0, {arg => undef}],
-	[0, {arg => ""}],
-	[1, {arg => "0"}],
-	[1, {arg => 22, arg2 => 15}],
-	[0, {arg2 => "more data"}],
+my @valid_data_hard = (
+	{arg => "test"},
+	{arg => 5},
+	{arg => "0"},
+	{arg => []},
 );
 
-for my $aref (@data) {
-	my ($result, $input) = @$aref;
-	my $form = TestForm->new($input);
-	is !!$form->valid, !!$result, "validation output ok";
-	if ($form->valid) {
-		for my $field (keys %$input) {
-			is $form->fields->{$field}, $input->{$field}, "value for `$field` ok";
-		}
-	} else {
-		for my $error (@{$form->errors}) {
-			isa_ok($error, "Form::Tiny::Error::DoesNotExist");
+my @valid_data_soft = (
+	{arg => ""},
+	{arg => undef},
+);
+
+my @invalid_data = (
+	{},
+	{argx => 33},
+);
+
+my @test_data = (
+	[{name => "arg", required => 1}, [@valid_data_hard], [@valid_data_soft, @invalid_data]],
+	[{name => "arg", required => "hard"}, [@valid_data_hard], [@valid_data_soft, @invalid_data]],
+	[{name => "arg", required => "soft"}, [@valid_data_hard, @valid_data_soft], [@invalid_data]],
+	[{name => "arg", required => 0}, [@valid_data_hard, @valid_data_soft, @invalid_data], []],
+);
+
+for my $case (@test_data) {
+	my ($defs, $valid, $invalid) = @$case;
+	for my $case_type ([1, @$valid], [0, @$invalid]) {
+		my $result = shift @$case_type;
+		for my $case_data (@$case_type) {
+			my $form = Form::Tiny::Inline->new(
+				field_defs => [$defs],
+				input => $case_data,
+			);
+			is !!$form->valid, !!$result, "validation output ok";
+			for my $error (@{$form->errors}) {
+				isa_ok($error, "Form::Tiny::Error::DoesNotExist");
+			}
 		}
 	}
 }

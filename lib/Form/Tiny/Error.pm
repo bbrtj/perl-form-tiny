@@ -5,6 +5,8 @@ use Moo;
 use Types::Standard qw(Maybe Str Object);
 use Carp qw(confess);
 
+use namespace::clean;
+
 use overload
   q{""}    => "as_string",
   fallback => 1;
@@ -69,5 +71,4 @@ sub as_string
 	}
 }
 
-no Moo;
 1;

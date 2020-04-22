@@ -5,6 +5,8 @@ use Moo;
 use Types::Standard qw(HasMethods CodeRef);
 use Carp qw(croak);
 
+use namespace::clean;
+
 has "type" => (
 	is => "ro",
 	isa => HasMethods["check"],
@@ -37,5 +39,4 @@ sub filter
 	return $value;
 }
 
-no Moo;
 1;

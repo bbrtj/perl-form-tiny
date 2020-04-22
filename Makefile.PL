@@ -17,6 +17,7 @@ WriteMakefile(
 		"Moo" => "0",
 		"Type::Tiny" => "0",
 		"Text::Trim" => "0",
+		"namespace::clean" => "0",
 	},
 
 	META_MERGE => {

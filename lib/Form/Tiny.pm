@@ -1,12 +1,13 @@
 package Form::Tiny;
 
 use Modern::Perl "2010";
-use Moo::Role;
-use Types::Standard qw(Str Maybe ArrayRef InstanceOf HashRef Bool);
+use Types::Standard qw(Str Maybe ArrayRef InstanceOf HashRef Bool CodeRef);
 use Carp qw(croak);
+use Storable qw(dclone);
 
 use Form::Tiny::FieldDefinition;
 use Form::Tiny::Error;
+use Moo::Role;
 
 our $VERSION = '1.00';
 
@@ -38,6 +39,7 @@ has "fields" => (
 	writer => "_set_fields",
 	clearer => "_clear_fields",
 	predicate => 1,
+	init_arg => undef,
 );
 
 has "valid" => (
@@ -48,6 +50,7 @@ has "valid" => (
 	builder => "_validate",
 	clearer => 1,
 	predicate => "is_validated",
+	init_arg => undef,
 );
 
 has "errors" => (
@@ -58,14 +61,24 @@ has "errors" => (
 	default => sub { [] },
 	clearer => "_clear_errors",
 	predicate => 1,
+	init_arg => undef,
 );
 
-around "BUILDARGS" => sub {
+has "cleaner" => (
+	is => "rw",
+	isa => Maybe[CodeRef],
+	default => sub {
+		shift->can("build_cleaner");
+	},
+);
+
+around BUILDARGS => sub {
 	my ($orig, $class, @args) = @_;
 
-	croak "Argument to Form::Tiny->new must be a single hashref"
-		unless @args == 1 && ref $args[0] eq ref {};
-	return {input => @args};
+	return {input => @args}
+		if @args == 1 && ref $args[0] eq ref {};
+
+	return {@args};
 };
 
 sub _clear_form {
@@ -87,7 +100,7 @@ sub add_error
 sub _validate
 {
 	my ($self) = @_;
-	my $fields = $self->input;
+	my $fields = dclone($self->input);
 	$self->_clear_errors;
 
 	my $add_error = sub {
@@ -95,16 +108,12 @@ sub _validate
 		$self->add_error(Form::Tiny::Error::DoesNotValidate->new(field => $field, error => $error));
 	};
 
-	my $found_args = 0;
 	my $dirty = {};
 
 	foreach my $validator (@{$self->field_defs}) {
 		my $curr_f = $validator->name;
 
 		if (exists $fields->{$curr_f}) {
-
-			# argument exists, so count that
-			$found_args += 1;
 
 			# apply global filters, set up a scalarref to dirty arg
 			$dirty->{$curr_f} = $fields->{$curr_f};
@@ -123,7 +132,7 @@ sub _validate
 					$$current = $validator->get_adjusted($$current);
 				}
 
-				# found and valid, go to next field
+				# found and valid, go to the next field
 				next;
 			}
 		}
@@ -134,21 +143,19 @@ sub _validate
 		}
 	}
 
-	if ($self->does("Form::Tiny::Strict") && $self->strict && $found_args < keys %{$fields}) {
-		$self->add_error(Form::Tiny::Error::IsntStrict->new);
+	if ($self->does("Form::Tiny::Strict")) {
+		$self->_check_strict($fields);
 	}
 
-	$dirty = $self->clean($dirty)
-		if $self->can("clean") && !$self->has_errors;
+	$dirty = $self->cleaner->($self, $dirty)
+		if defined $self->cleaner && !$self->has_errors;
 
 	my $form_valid = !$self->has_errors;
-	$self->_set_fields($dirty)
-		if $form_valid;
+	$self->_set_fields($form_valid ? $dirty : undef);
 
 	return $form_valid;
 }
 
-no Moo::Role;
 1;
 
 __END__
@@ -179,7 +186,7 @@ Form::Tiny - Tiny form implementation centered around Type::Tiny
 		}
 	}
 
-	sub clean {
+	sub build_cleaner {
 		my ($self, $data) = @_;
 
 		if ($data->{name} eq "Perl" && $data->{lucky_number} == 6) {

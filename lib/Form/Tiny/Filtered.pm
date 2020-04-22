@@ -1,11 +1,12 @@
 package Form::Tiny::Filtered;
 
 use Modern::Perl "2010";
-use Moo::Role;
 use Types::Standard qw(Str ArrayRef InstanceOf);
 use Text::Trim;
 
 use Form::Tiny::Filter;
+
+use Moo::Role;
 
 requires qw(_clear_form);
 
@@ -38,5 +39,4 @@ sub _apply_filters
 	return $value;
 }
 
-no Moo::Role;
 1;

@@ -6,6 +6,8 @@ use Types::Standard qw(Enum Bool HasMethods CodeRef Maybe Str);
 use Types::Common::String qw(NonEmptySimpleStr);
 use Carp qw(croak);
 
+use namespace::clean;
+
 has "name" => (
 	is => "ro",
 	isa => NonEmptySimpleStr,
@@ -108,5 +110,4 @@ sub validate
 	return $valid;
 }
 
-no Moo;
 1;
