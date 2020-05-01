@@ -6,6 +6,8 @@ use Types::Standard qw(Enum Bool HasMethods CodeRef Maybe Str);
 use Types::Common::String qw(NonEmptySimpleStr);
 use Carp qw(croak);
 
+use Form::Tiny::Error;
+
 use namespace::clean;
 
 has "name" => (
@@ -54,6 +56,13 @@ sub BUILD
 	}
 }
 
+sub get_name_path
+{
+	my ($self) = @_;
+
+	return split /(?<!\\)\./, $self->name;
+}
+
 sub hard_required
 {
 	my ($self) = @_;
@@ -87,7 +96,7 @@ sub get_adjusted
 
 sub validate
 {
-	my ($self, $add_error, $value) = @_;
+	my ($self, $form, $value) = @_;
 
 	# no validation if no type specified
 	return 1
@@ -104,7 +113,11 @@ sub validate
 	}
 
 	if (!$valid) {
-		$add_error->($self->name, $error);
+		my $exception = Form::Tiny::Error::DoesNotValidate->new({
+			field => $self->name,
+			error => $error,
+		});
+		$form->add_error($exception);
 	}
 
 	return $valid;

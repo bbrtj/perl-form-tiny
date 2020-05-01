@@ -39,4 +39,11 @@ sub _apply_filters
 	return $value;
 }
 
+around "_pre_mangle" => sub {
+	my ($orig, $self, $def, $value_ref) = @_;
+
+	$self->$orig($def, $value_ref);
+	$$value_ref = $self->_apply_filters($$value_ref);
+};
+
 1;

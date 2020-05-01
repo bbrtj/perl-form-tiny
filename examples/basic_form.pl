@@ -8,6 +8,7 @@ use Data::Dumper;
 	use Types::Standard qw(Enum);
 	use Types::Common::Numeric qw(IntRange);
 	use Types::Common::String qw(SimpleStr StrongPassword StrLength);
+	use Form::Tiny::Error;
 
 	with "Form::Tiny";
 
@@ -49,7 +50,7 @@ use Data::Dumper;
 		}
 	}
 
-	sub clean
+	sub build_cleaner
 	{
 		my ($self, $data) = @_;
 
@@ -59,6 +60,7 @@ use Data::Dumper;
 
 		return $data;
 	}
+
 	1;
 }
 
@@ -75,5 +77,14 @@ ok ($form->valid, "Registration successful");
 if (!$form->valid) {
 	note Dumper($form->errors);
 }
+
+$form->input({
+	%{$form->input},
+	repeat_password => "eperl-55",
+});
+
+ok (!$form->valid, "passwords do not match");
+
+note Dumper($form->errors);
 
 done_testing();

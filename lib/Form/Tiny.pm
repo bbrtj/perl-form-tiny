@@ -8,6 +8,7 @@ use Storable qw(dclone);
 use Form::Tiny::FieldDefinition;
 use Form::Tiny::Error;
 use Moo::Role;
+use Sub::HandlesVia;
 
 our $VERSION = '1.00';
 
@@ -54,14 +55,16 @@ has "valid" => (
 );
 
 has "errors" => (
-	is => "rw",
+	is => "ro",
 	isa => ArrayRef[InstanceOf["Form::Tiny::Error"]],
-	writer => "_set_errors",
-	lazy => 1,
 	default => sub { [] },
-	clearer => "_clear_errors",
-	predicate => 1,
 	init_arg => undef,
+	handles_via => "Array",
+	handles => {
+		"add_error" => "push",
+		"has_errors" => "count",
+		"_clear_errors" => "clear",
+	},
 );
 
 has "cleaner" => (
@@ -89,62 +92,87 @@ sub _clear_form {
 	$self->_clear_errors;
 }
 
-sub add_error
-{
-	my ($self, $error) = @_;
+sub _pre_mangle {}
+sub _pre_validate {}
 
-	push @{$self->errors}, $error;
+sub _mangle_field
+{
+	my ($self, $def, $current) = @_;
+
+	# if the parameter is required (hard), we only consider it if not empty
+	if (!$def->hard_required || ref $$current || length($$current // "")) {
+
+		# coerce, validate, adjust
+		$$current = $def->get_coerced($$current);
+		if ($def->validate($self, $$current)) {
+			$$current = $def->get_adjusted($$current);
+		}
+		return 1;
+	}
+	return 0;
+}
+
+sub _find_field
+{
+	my ($self, $fields, $field_def) = @_;
+
+	my @parts = $field_def->get_name_path;
+	my $current = $fields;
+	for my $i (0 .. $#parts) {
+		last unless ref $current eq ref {} && exists $current->{$parts[$i]};
+
+		if ($i == $#parts) {
+			return \$current->{$parts[$i]};
+		} else {
+			$current = $current->{$parts[$i]};
+		}
+	}
+
 	return;
+}
+
+sub _assign_field
+{
+	my ($self, $fields, $field_def, $val_ref) = @_;
+
+	my @parts = $field_def->get_name_path;
+	my $current = $fields;
+	for my $i (0 .. $#parts) {
+		if ($i == $#parts) {
+			$current->{$parts[$i]} = $$val_ref;
+			return \$current->{$parts[$i]};
+		} else {
+			$current->{$parts[$i]} //= {};
+			$current = $current->{$parts[$i]};
+		}
+	}
 }
 
 sub _validate
 {
 	my ($self) = @_;
 	my $fields = dclone($self->input);
+	my $dirty = {};
 	$self->_clear_errors;
 
-	my $add_error = sub {
-		my ($field, $error) = @_;
-		$self->add_error(Form::Tiny::Error::DoesNotValidate->new(field => $field, error => $error));
-	};
-
-	my $dirty = {};
-
+	$self->_pre_validate($fields);
 	foreach my $validator (@{$self->field_defs}) {
 		my $curr_f = $validator->name;
 
-		if (exists $fields->{$curr_f}) {
+		my $current = $self->_find_field($fields, $validator);
+		if (defined $current) {
 
-			# apply global filters, set up a scalarref to dirty arg
-			$dirty->{$curr_f} = $fields->{$curr_f};
-			my $current = \$dirty->{$curr_f};
+			$current = $self->_assign_field($dirty, $validator, $current);
+			$self->_pre_mangle($validator, $current);
 
-			if ($self->does("Form::Tiny::Filtered")) {
-				$$current = $self->_apply_filters($$current);
-			}
-
-			# if the parameter is required (hard), we only consider it if not empty
-			if (!$validator->hard_required || ref $$current || length($$current // "")) {
-
-				# coerce, validate, adjust
-				$$current = $validator->get_coerced($$current);
-				if ($validator->validate($add_error, $$current)) {
-					$$current = $validator->get_adjusted($$current);
-				}
-
-				# found and valid, go to the next field
-				next;
-			}
+			# found and valid, go to the next field
+			next if $self->_mangle_field($validator, $current);
 		}
 
 		# for when it didn't pass the existence test
 		if ($validator->required) {
 			$self->add_error(Form::Tiny::Error::DoesNotExist->new(field => $curr_f));
 		}
-	}
-
-	if ($self->does("Form::Tiny::Strict")) {
-		$self->_check_strict($fields);
 	}
 
 	$dirty = $self->cleaner->($self, $dirty)
@@ -241,3 +269,6 @@ I<1> or I<"hard"> - The field has to exist in the input, must be defined and non
 A static string that should be output instead of an error message returned by the I<type> when the validation fail.
 
 =back
+
+TODO nested forms
+TODO nested hashes
