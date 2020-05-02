@@ -25,8 +25,6 @@ my $form = Form::Tiny::Inline->new(
 		$self->add_error(
 			Form::Tiny::Error::DoesNotValidate->new(error => "input and output is the same file")
 		) if $data->{output_file} && $data->{input_file} eq $data->{output_file};
-
-		return $data;
 	},
 );
 

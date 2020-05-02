@@ -177,7 +177,7 @@ sub _validate
 		$self->add_error(Form::Tiny::Error::InvalidFormat->new);
 	}
 
-	$dirty = $self->cleaner->($self, $dirty)
+	$self->cleaner->($self, $dirty)
 		if defined $self->cleaner && !$self->has_errors;
 
 	my $form_valid = !$self->has_errors;
@@ -238,17 +238,36 @@ Form::Tiny - Tiny form implementation centered around Type::Tiny
 		if ($data->{name} eq "Perl" && $data->{lucky_number} == 6) {
 			$self->add_error(Form::Tiny::Error::DoesNotValidate->new("Perl6 is Raku"));
 		}
-
-		return $data;
 	}
 
 =head1 DESCRIPTION
 
-Form validation engine that can reuse all the type constraints you're already familiar with.
+Form validation engine that can use all the type constraints you're already familiar with. The module does not ship with any field definitions on its own, instead it provides tools to reuse any type constraints from L<Type::Tiny> and other similar systems.
 
-=head1 FORM BUILDING
+=head2 Basic usage
 
-Every class applying the I<Form::Tiny> role has to have a sub called I<build_fields>. This method should return a list of hashrefs, where each of them will be coerced into an object of the L<Form::Tiny::FieldDefinition> class.
+To use Form::Tiny as data validator you have to declare your own class mixing in the I<Form::Tiny> role and define a I<build_fields> sub, returning a list of field definitions for the form. A class containing these two basic requirements is ready to be instantiated and passed input to be validated.
+
+Input can be passed as a hashref to the constructor or with the I<set_input> method. Every call to that method will cause the form instance to be cleared, so that it can be used again for different data.
+
+With input in place, a I<valid> method can be called, which will return a validation result and fill in the I<errors> and I<fields> properties. These properties are mutually exclusive: errors are only present if the validation is unsuccessful, otherwise the fields are present.
+
+The example below illustrates how a form class could be used to validate data.
+
+	my $form = MyForm->new;
+	$form->set_input($some_input);
+
+	if ($form->valid) {
+		my $fields = $form->fields; # a hash reference
+		...
+	} else {
+		my $errors = $form->errors; # an array reference
+		...
+	}
+
+=head2 Form building
+
+Every class applying the I<Form::Tiny> role has to have a sub called I<build_fields>. This method should return a list of hashrefs, where each of them will be coerced into an object of the L<Form::Tiny::FieldDefinition> class. You can also provide an instance of the class yourself, which should be helpful if you're willing to use your own definition implementation.
 
 The only required element of this hashref is I<name>, which contains the string name of the field in the form input. Other possible elements are:
 
@@ -271,6 +290,7 @@ Value that is a coderef will be passed a single scalar, which is the value of th
 =item adjust
 
 An adjustment that will be made B<after> the type is validated and the validation is successful. This must be a coderef that gets passed the validated value and returns the new value for the field.
+At the point of adjustment, you can be sure that the value passed to the coderef meets the type constraint specified. It's probably a good idea to provide adjustment along with a type to avoid unnecessary checks in the subroutine.
 
 =item required
 
@@ -280,10 +300,84 @@ I<0> - The field can be non-existent in the input, empty or undefined
 
 I<"soft"> - The field has to exist in the input, but can be empty or undefined
 
-I<1> or I<"hard"> - The field has to exist in the input, must be defined and non-empty (value of I<0> is allowed)
+I<1> or I<"hard"> - The field has to exist in the input, must be defined and non-empty (a value I<0> is allowed)
 
 =item message
 
-A static string that should be output instead of an error message returned by the I<type> when the validation fail.
+A static string that should be output instead of an error message returned by the I<type> when the validation fails.
 
 =back
+
+=head2 Cleaning
+
+While I<build_fields> allows for single-field validation, sometimes a need arises to check if some fields are synchronized correctly. This can be done with the I<build_cleaner> method, which will be only fired after the validation for every individual field was successful. The cleaner subroutine should look like this:
+
+	sub build_cleaner {
+		my ($self, $data) = @_;
+
+		# do something with $data
+		# call $self->add_error if necessary
+	}
+
+Cleaning sub is also allowed to change the $data, which is a hash reference to the runnig copy of the input. Note that this is the final step in the validation process, so anything that is in $data after cleaning will be available in the form's I<fields> after validation.
+
+=head2 Optional behavior
+
+Attaching more behavior to the form is possible by overriding I<_pre_mangle> and I<_pre_validate> methods in the final class. These methods do nothing by default so it's fine to discard the SUPER version.
+
+I<_pre_mangle> is fired for every field, just before it is changed ("mangled"). This method will be passed the definition of the field (L<Form::Tiny::FieldDefinition>) and a scalar reference to its value.
+
+I<_pre_validate> is fired just once for the form, before any field is validated. It is passed a single hashref - a copy of the input data.
+
+The module provides two roles which use these mechanisms to achieve common tasks.
+
+=over
+
+=item L<Form::Tiny::Strict>
+
+Enables strict mode for the form. Validation will fail if the form input contains any data not specified in the field definitions.
+
+=item L<Form::Tiny::Filtered>
+
+Enables initial filtering for the input fields. By default, this will only cause strings to be trimmed, but any code can be attached to any field that meets a given type constraint.
+
+=back
+
+=head2 Inline forms
+
+The module also enables a way to create a form without the need of a dedicated module. This is done with the L<Form::Tiny::Inline> class. This requires the user to pass all the data to the constructor, as shown in the example:
+
+	my $form = Form::Tiny::Inline # An inline form ...
+		        ->is(qw/Strict/)   # ... with the strict role mixed in ...
+		        ->new(             # ... will be created with properties:
+		field_defs => [{name => "my_field"}],
+		cleaner => sub { ... },
+	);
+
+The names changes a little - the regular I<build_fields> builder method becomes a I<field_defs> property, I<build_cleaner> becomes just a I<cleaner> property. This is because these methods implemented in classes are only builders for the underlying Moo properties, and with inline class these properties have to be assigned directly, not built.
+
+=head2 Advanced topics
+
+=head3 Nested fields
+
+A dot (I<.>) can be used in the name of a field to express hashref nesting. A field with C<name => "a.b.c"> will be expected to be found under the key "c", in the hashref under the key "b", in the hashref under the key "a", in the root input hashref.
+
+This is the default behavior of a dot in a field name, so if what you want is the actual dot it has to be preceded with a backslash (I<\.>).
+
+=head3 Nested forms
+
+Every form class created with the I<Form::Tiny> role mixed in can be used as a field definition type in other form. The outer and inner forms will validate independently, but inner form errors will be added to outer form as a single error, containing an array reference.
+
+	# in Form2
+	sub build_fields {
+		my $inst = Form1->new;
+		# everything under "nested" key will be validated using Form1 instance
+		return ({
+			name => "nested",
+			type => $inst,
+			# an extra adjustment, so we get the final fields instead of the input
+			adjust => sub { $inst->fields },
+		});
+	}
+
+TODO extra data to fields
