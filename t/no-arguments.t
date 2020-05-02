@@ -27,6 +27,16 @@ my @data = (
 	[{name => undef},],
 );
 
+# test for invalid format rejection
+for my $input ([], 0, "", "a", \1, sub {}) {
+	my $form = TestForm->new($input);
+	ok !$form->valid, "non-hashref is not accepted";
+	my $errors = $form->errors;
+	is scalar @$errors, 1, "only one error reported";
+	isa_ok shift @$errors, "Form::Tiny::Error::InvalidFormat",
+		"error type matches";
+}
+
 for my $aref (@data) {
 	my ($input, $ignore) = @$aref;
 	my $form = TestForm->new($input);

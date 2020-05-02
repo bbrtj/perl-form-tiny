@@ -2,7 +2,7 @@ package Form::Tiny::Error;
 
 use Modern::Perl "2010";
 use Moo;
-use Types::Standard qw(Maybe Str Object);
+use Types::Standard qw(Maybe Str Object ArrayRef InstanceOf);
 use Carp qw(confess);
 
 use namespace::clean;
@@ -19,7 +19,7 @@ has "field" => (
 
 has "error" => (
 	is => "ro",
-	isa => Str | Object,
+	isa => Str | Object | ArrayRef[InstanceOf["Form::Tiny::Error"]],
 	builder => "_default_error",
 );
 
@@ -40,6 +40,16 @@ sub as_string
 }
 
 # in-place subclasses
+
+{
+	package Form::Tiny::Error::InvalidFormat;
+	use parent "Form::Tiny::Error";
+
+	sub _default_error
+	{
+		return "input data has invalid format";
+	}
+}
 
 {
 	package Form::Tiny::Error::DoesNotExist;

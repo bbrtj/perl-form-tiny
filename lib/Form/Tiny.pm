@@ -29,7 +29,6 @@ has "field_defs" => (
 
 has "input" => (
 	is => "rw",
-	isa => HashRef,
 	writer => "set_input",
 	trigger => \&_clear_form,
 );
@@ -39,7 +38,6 @@ has "fields" => (
 	isa => Maybe[HashRef],
 	writer => "_set_fields",
 	clearer => "_clear_fields",
-	predicate => 1,
 	init_arg => undef,
 );
 
@@ -79,7 +77,7 @@ around BUILDARGS => sub {
 	my ($orig, $class, @args) = @_;
 
 	return {input => @args}
-		if @args == 1 && ref $args[0] eq ref {};
+		if @args == 1;
 
 	return {@args};
 };
@@ -151,28 +149,32 @@ sub _assign_field
 sub _validate
 {
 	my ($self) = @_;
-	my $fields = dclone($self->input);
 	my $dirty = {};
 	$self->_clear_errors;
 
-	$self->_pre_validate($fields);
-	foreach my $validator (@{$self->field_defs}) {
-		my $curr_f = $validator->name;
+	if (ref $self->input eq ref {}) {
+		my $fields = dclone($self->input);
+		$self->_pre_validate($fields);
+		foreach my $validator (@{$self->field_defs}) {
+			my $curr_f = $validator->name;
 
-		my $current = $self->_find_field($fields, $validator);
-		if (defined $current) {
+			my $current = $self->_find_field($fields, $validator);
+			if (defined $current) {
 
-			$current = $self->_assign_field($dirty, $validator, $current);
-			$self->_pre_mangle($validator, $current);
+				$current = $self->_assign_field($dirty, $validator, $current);
+				$self->_pre_mangle($validator, $current);
 
-			# found and valid, go to the next field
-			next if $self->_mangle_field($validator, $current);
+				# found and valid, go to the next field
+				next if $self->_mangle_field($validator, $current);
+			}
+
+			# for when it didn't pass the existence test
+			if ($validator->required) {
+				$self->add_error(Form::Tiny::Error::DoesNotExist->new(field => $curr_f));
+			}
 		}
-
-		# for when it didn't pass the existence test
-		if ($validator->required) {
-			$self->add_error(Form::Tiny::Error::DoesNotExist->new(field => $curr_f));
-		}
+	} else {
+		$self->add_error(Form::Tiny::Error::InvalidFormat->new);
 	}
 
 	$dirty = $self->cleaner->($self, $dirty)
@@ -182,6 +184,22 @@ sub _validate
 	$self->_set_fields($form_valid ? $dirty : undef);
 
 	return $form_valid;
+}
+
+sub check
+{
+	my ($self, $input) = @_;
+
+	$self->set_input($input);
+	return $self->valid;
+}
+
+sub validate
+{
+	my ($self, $input) = @_;
+
+	return if $self->check($input);
+	return $self->errors;
 }
 
 1;
@@ -269,6 +287,3 @@ I<1> or I<"hard"> - The field has to exist in the input, must be defined and non
 A static string that should be output instead of an error message returned by the I<type> when the validation fail.
 
 =back
-
-TODO nested forms
-TODO nested hashes
