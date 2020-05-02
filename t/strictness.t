@@ -1,7 +1,10 @@
 use Modern::Perl "2010";
 use Test::More;
 
-BEGIN { use_ok('Form::Tiny') };
+BEGIN {
+	use_ok('Form::Tiny');
+	use_ok('Form::Tiny::Strict');
+};
 
 {
 	package TestForm;

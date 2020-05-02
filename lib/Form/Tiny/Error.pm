@@ -8,7 +8,7 @@ use Carp qw(confess);
 use namespace::clean;
 
 use overload
-  q{""}    => "as_string",
+  q{""} => "as_string",
   fallback => 1;
 
 has "field" => (

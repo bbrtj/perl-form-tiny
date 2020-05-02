@@ -3,8 +3,7 @@ use Test::More;
 
 BEGIN { use_ok('Form::Tiny::Inline') };
 
-my $form = Form::Tiny::Inline->new(
-	is => [qw(Filtered Strict)],
+my $form = Form::Tiny::Inline->is(qw(Filtered Strict))->new(
 	field_defs => [{name => "test"}],
 	input => {test => "   asd "},
 );

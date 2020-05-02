@@ -2,30 +2,22 @@ package Form::Tiny::Inline;
 
 use Modern::Perl "2010";
 use Moo;
-use Types::Standard qw(ArrayRef RoleName Str);
+use Types::Standard qw(RoleName Str);
 
 use namespace::clean;
 
 with "Form::Tiny";
 
-has "roles" => (
-	is => "ro",
-	isa => ArrayRef[
-		RoleName->plus_coercions(Str, q{ my $n = "Form::Tiny::$_"; eval "require $n"; $n; })
-	],
-	coerce => 1,
-	init_arg => "is",
-	predicate => 1,
-);
-
-sub BUILD
+sub is
 {
-	my ($self, $args) = @_;
+	my ($class, @roles) = @_;
 
-	if ($self->has_roles) {
-		require Moo::Role;
-		Moo::Role->apply_roles_to_object($self, @{$self->roles});
-	}
+	my $loader = q{ my $n = "Form::Tiny::$_"; eval "require $n"; $n; };
+	my $type = RoleName->plus_coercions(Str, $loader);
+	@roles = map { $type->assert_coerce($_) } @roles;
+
+	require Moo::Role;
+	return Moo::Role->create_class_with_roles($class, @roles);
 }
 
 sub build_fields {}

@@ -38,8 +38,11 @@ BEGIN { use_ok('Form::Tiny') };
 my @data = (
 	[1, {form => {nested => "asdf"}}],
 	[1, {}],
+	# nested form is strict
 	[0, {form => {nested => "a string", more => 1}}],
+	# nested field needs to validate as well
 	[0, {form => {nested => []}}],
+	# nested field is required
 	[0, {form => {}}],
 );
 
