@@ -12,6 +12,8 @@ use Sub::HandlesVia;
 
 our $VERSION = '1.00';
 
+with "Form::Tiny::Form";
+
 requires qw(build_fields);
 
 has "field_defs" => (
@@ -360,7 +362,7 @@ The names changes a little - the regular I<build_fields> builder method becomes 
 
 =head3 Nested fields
 
-A dot (I<.>) can be used in the name of a field to express hashref nesting. A field with C<name => "a.b.c"> will be expected to be found under the key "c", in the hashref under the key "b", in the hashref under the key "a", in the root input hashref.
+A dot (I<.>) can be used in the name of a field to express hashref nesting. A field with C<< name => "a.b.c" >> will be expected to be found under the key "c", in the hashref under the key "b", in the hashref under the key "a", in the root input hashref.
 
 This is the default behavior of a dot in a field name, so if what you want is the actual dot it has to be preceded with a backslash (I<\.>).
 

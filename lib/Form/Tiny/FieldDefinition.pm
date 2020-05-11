@@ -5,10 +5,13 @@ use Moo;
 use Types::Standard qw(Enum Bool HasMethods CodeRef Maybe Str);
 use Types::Common::String qw(NonEmptySimpleStr);
 use Carp qw(croak);
+use Scalar::Util qw(blessed);
 
 use Form::Tiny::Error;
 
 use namespace::clean;
+
+our $nesting_separator = ".";
 
 has "name" => (
 	is => "ro",
@@ -24,7 +27,8 @@ has "required" => (
 
 has "type" => (
 	is => "ro",
-	isa => Maybe[HasMethods["validate", "check"]],
+	isa => HasMethods["validate", "check"],
+	predicate => 1,
 );
 
 has "coerce" => (
@@ -52,7 +56,7 @@ sub BUILD
 		# checks for coercion == 1
 		my $t = $self->type;
 		croak "the type doesn't provide coercion"
-			if !defined $t || !($t->can("coerce") && $t->can("has_coercion") && $t->has_coercion);
+			if !$self->has_type || !($t->can("coerce") && $t->can("has_coercion") && $t->has_coercion);
 	}
 }
 
@@ -60,7 +64,8 @@ sub get_name_path
 {
 	my ($self) = @_;
 
-	return split /(?<!\\)\./, $self->name;
+	my $sep = quotemeta $nesting_separator;
+	return split /(?<!\\)$sep/, $self->name;
 }
 
 sub hard_required
@@ -100,7 +105,7 @@ sub validate
 
 	# no validation if no type specified
 	return 1
-		if !defined $self->type;
+		if !$self->has_type;
 
 	my $valid;
 	my $error;
@@ -113,11 +118,27 @@ sub validate
 	}
 
 	if (!$valid) {
-		my $exception = Form::Tiny::Error::DoesNotValidate->new({
-			field => $self->name,
-			error => $error,
-		});
-		$form->add_error($exception);
+		if ($self->type->DOES("Form::Tiny::Form") && ref $error eq ref []) {
+			foreach my $exception (@$error) {
+				if (defined blessed $exception && $exception->isa("Form::Tiny::Error")) {
+					$exception->field($self->name);
+				} else {
+					$exception = Form::Tiny::Error::DoesNotValidate->new({
+						field => $self->name,
+						error => $exception,
+					});
+				}
+
+				$form->add_error($exception);
+			}
+		} else {
+			my $exception = Form::Tiny::Error::DoesNotValidate->new({
+				field => $self->name,
+				error => $error,
+			});
+
+			$form->add_error($exception);
+		}
 	}
 
 	return $valid;

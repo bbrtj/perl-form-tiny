@@ -19,7 +19,7 @@ has "field" => (
 
 has "error" => (
 	is => "ro",
-	isa => Str | Object | ArrayRef[InstanceOf["Form::Tiny::Error"]],
+	isa => Str | Object,
 	builder => "_default_error",
 );
 

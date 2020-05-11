@@ -1,34 +1,17 @@
 use Modern::Perl "2010";
 use Test::More;
 use Data::Dumper;
+use lib 't/lib';
 
-BEGIN { use_ok('Form::Tiny') };
-
-{
-	package TestForm;
-	use Moo;
-	use Types::Common::String qw(SimpleStr);
-
-	with "Form::Tiny", "Form::Tiny::Strict";
-
-	sub build_fields
-	{
-		{name => "name.first_name", type => SimpleStr},
-		{name => "name.last_name"},
-	}
-
-	1;
-}
+BEGIN { use_ok('TestForm') };
 
 my @data = (
-	[1, {name => {first_name => "name", last_name => "surname"}}],
-	[1, {name => {last_name => {isa_hash => 1}}}],
-	# name is not a hash
-	[0, {name => "test"}],
-	# name.first_name is a hash, and we wanted Str
-	[0, {name => {first_name => {isa_hash => 1}}}],
-	# value is not declared as a field, and we're strict
-	[0, {value => 5}],
+	[1, {nested => {name => "name"}}],
+	[1, {nested => {name => {isa_hash => 1}}}],
+	[1, {'not.nested' => 1}],
+	# nested is not a hash
+	[0, {nested => "test"}],
+	[0, {not => {nested => "invalid"}}],
 );
 
 for my $aref (@data) {

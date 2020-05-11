@@ -31,12 +31,13 @@ sub check_exists
 
 sub count_recursive
 {
-	my ($self, $data) = @_;
+	my ($self, $data, $skip, $path) = @_;
+	$path //= [];
 
-	return 1 if ref $data ne ref {};
+	return 1 if ref $data ne ref {} || $skip->{join $Form::Tiny::FieldDefinition::nesting_separator, @$path};
 	my $total = 0;
 	for my $key (keys %$data) {
-		$total += $self->count_recursive($data->{$key});
+		$total += $self->count_recursive($data->{$key}, $skip, [@$path, $key]);
 	}
 	return $total;
 }
@@ -46,12 +47,16 @@ sub _check_strict
 	my ($self, $input) = @_;
 
 	my $total = 0;
+	my %skip;
 	foreach my $def (@{$self->field_defs}) {
 		$total += $self->check_exists($input, $def->get_name_path);
+		if ($def->has_type && $def->type->DOES("Form::Tiny::Form")) {
+			$skip{$def->name} = 1;
+		}
 	}
 
 	$self->add_error(Form::Tiny::Error::IsntStrict->new)
-		if $total < $self->count_recursive($input);
+		if $total < $self->count_recursive($input, \%skip);
 }
 
 around "_pre_validate" => sub {

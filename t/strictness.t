@@ -1,45 +1,37 @@
 use Modern::Perl "2010";
 use Test::More;
+use Data::Dumper;
+use lib 't/lib';
 
-BEGIN {
-	use_ok('Form::Tiny');
-	use_ok('Form::Tiny::Strict');
-};
-
-{
-	package TestForm;
-	use Moo;
-
-	with "Form::Tiny",
-		"Form::Tiny::Strict";
-
-	sub build_fields
-	{
-		{name => "arg"}
-	}
-
-	1;
-}
+BEGIN { use_ok('TestForm') };
 
 my @data = (
 	[1, {}],
-	[1, {arg => "test"}],
-	[0, {arg => 22, arg2 => 15}],
+	[1, {no_type => "test"}],
+	[1, {nested => {name => 1}}],
+	[1, {nested => {second => {name => 1}}}],
+	[1, {nested_form => {optional => "yes", int => 1}}],
+	[0, {nested => "not really"}],
+	[0, {nested => {second => 1}}],
+	[0, {nested_form => {int => 5, nothere => 1}}],
+	[0, {int => 3, arg2 => 15}],
 	[0, {arg2 => "more data"}],
+	[0, {not => {nested => "more data"}}],
 );
 
 for my $aref (@data) {
 	my ($result, $input) = @$aref;
 	my $form = TestForm->new($input);
 	is !!$form->valid, !!$result, "validation output ok";
-	if ($form->valid) {
-		for my $field (keys %$input) {
-			is $form->fields->{$field}, $input->{$field}, "value for `$field` ok";
+	if ($form->valid && $result) {
+		is_deeply ($form->fields, $input, "fields do match");
+	} elsif (!$result) {
+		for (@{$form->errors}) {
+			isa_ok($_, "Form::Tiny::Error::IsntStrict");
 		}
+		note Dumper($form->errors) if @{$form->errors} > 1;
 	} else {
-		for my $error (@{$form->errors}) {
-			isa_ok($error, "Form::Tiny::Error::IsntStrict");
-		}
+		note Dumper($form->errors);
 	}
 }
 
