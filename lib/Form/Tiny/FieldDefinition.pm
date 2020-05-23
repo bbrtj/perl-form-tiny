@@ -65,7 +65,8 @@ sub get_name_path
 	my ($self) = @_;
 
 	my $sep = quotemeta $nesting_separator;
-	return split /(?<!\\)$sep/, $self->name;
+	my @parts = split /(?<!\\)$sep/, $self->name;
+	return map { s/\\$sep/$nesting_separator/; $_ } @parts;
 }
 
 sub hard_required

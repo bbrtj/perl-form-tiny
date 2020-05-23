@@ -16,6 +16,7 @@ my @data = (
 
 for my $aref (@data) {
 	my ($result, $input) = @$aref;
+	note Dumper($input);
 	my $form = TestForm->new($input);
 	is !!$form->valid, !!$result, "validation output ok";
 	note Dumper($form->errors);

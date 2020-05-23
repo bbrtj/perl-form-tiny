@@ -4,6 +4,7 @@ use Modern::Perl "2010";
 use Types::Standard qw(Bool);
 
 use Form::Tiny::Error;
+use Form::Tiny::FieldDefinition;
 use Moo::Role;
 
 requires qw(_clear_form field_defs add_error);
