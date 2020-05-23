@@ -33,8 +33,7 @@ BEGIN { use_ok('Form::Tiny') };
 
 	sub build_fields
 	{
-		my $inner = InnerForm->new;
-		{name => "form.inner", type => $inner, adjust => sub { $inner->fields }},
+		{name => "form.inner", type => InnerForm->new},
 		{name => "form.inner.something"},
 	}
 }

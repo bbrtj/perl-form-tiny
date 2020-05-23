@@ -41,11 +41,13 @@ has "adjust" => (
 	is => "ro",
 	isa => CodeRef,
 	predicate => "is_adjusted",
+	writer => "set_adjustment",
 );
 
 has "message" => (
 	is => "ro",
-	isa => Maybe[Str],
+	isa => Str,
+	predicate => 1,
 );
 
 sub BUILD
@@ -58,6 +60,17 @@ sub BUILD
 		croak "the type doesn't provide coercion"
 			if !$self->has_type || !($t->can("coerce") && $t->can("has_coercion") && $t->has_coercion);
 	}
+
+	if ($self->is_subform && ! $self->is_adjusted) {
+		$self->set_adjustment(sub { $self->type->fields });
+	}
+}
+
+sub is_subform
+{
+	my ($self) = @_;
+
+	return $self->has_type && $self->type->DOES("Form::Tiny::Form");
 }
 
 sub get_name_path
@@ -110,7 +123,7 @@ sub validate
 
 	my $valid;
 	my $error;
-	if (defined $self->message) {
+	if ($self->has_message) {
 		$valid = $self->type->check($value);
 		$error = $self->message;
 	} else {
@@ -119,10 +132,10 @@ sub validate
 	}
 
 	if (!$valid) {
-		if ($self->type->DOES("Form::Tiny::Form") && ref $error eq ref []) {
+		if ($self->is_subform && ref $error eq ref []) {
 			foreach my $exception (@$error) {
 				if (defined blessed $exception && $exception->isa("Form::Tiny::Error")) {
-					$exception->field($self->name);
+					$exception->set_field(join $nesting_separator, $self->name, ($exception->field // ()));
 				} else {
 					$exception = Form::Tiny::Error::DoesNotValidate->new({
 						field => $self->name,

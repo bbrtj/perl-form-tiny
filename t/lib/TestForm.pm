@@ -12,8 +12,6 @@ with qw/Form::Tiny Form::Tiny::Strict/;
 
 sub build_fields
 {
-	my $inner = TestInnerForm->new;
-
 	{name => "no_type"},
 	{name => "sub_coerced", coerce => sub { shift() // 'undef' }},
 	{name => "int", type => Int->where(q{$_ >= 0})},
@@ -24,7 +22,8 @@ sub build_fields
 	{name => "nested.name"},
 	{name => "nested.second.name"},
 	{name => "not\\.nested"},
-	{name => "nested_form", type => $inner, adjust => sub { $inner->fields }},
+	{name => "nested_form", type => TestInnerForm->new},
+	{name => "nested_form_unadjusted", type => TestInnerForm->new, adjust => sub { @_ }},
 }
 
 sub build_cleaner

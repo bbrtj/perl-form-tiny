@@ -368,18 +368,22 @@ This is the default behavior of a dot in a field name, so if what you want is th
 
 =head3 Nested forms
 
-Every form class created with the I<Form::Tiny> role mixed in can be used as a field definition type in other form. The outer and inner forms will validate independently, but inner form errors will be added to outer form as a single error, containing an array reference.
+Every form class created with the I<Form::Tiny> role mixed in can be used as a field definition type in other form. The outer and inner forms will validate independently, but inner form errors will be added to outer form with the outer field name prepended.
 
 	# in Form2
 	sub build_fields {
-		my $inst = Form1->new;
 		# everything under "nested" key will be validated using Form1 instance
+		# every error for "nested" will also start with "nested"
 		return ({
 			name => "nested",
-			type => $inst,
-			# an extra adjustment, so we get the final fields instead of the input
-			adjust => sub { $inst->fields },
+			type => Form1->new,
 		});
 	}
+
+Note that an adjustment will be inserted here automatically, in form of:
+
+	adjust => sub { $instance->fields }
+
+this will make sure that any coercions and adjustments made in the nested form will be added to the outer form as well. If you want to specify your own adjustment here, make sure to use the data provided by the I<fields> method of the nested form.
 
 TODO extra data to fields

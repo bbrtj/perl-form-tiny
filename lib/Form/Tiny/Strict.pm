@@ -51,7 +51,7 @@ sub _check_strict
 	my %skip;
 	foreach my $def (@{$self->field_defs}) {
 		$total += $self->check_exists($input, $def->get_name_path);
-		if ($def->has_type && $def->type->DOES("Form::Tiny::Form")) {
+		if ($def->is_subform) {
 			$skip{$def->name} = 1;
 		}
 	}
