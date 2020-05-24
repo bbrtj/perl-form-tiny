@@ -12,7 +12,7 @@ my $form = Form::Tiny::Inline->is(qw(Strict))->new(
 ok ($form->valid, "validation ok");
 is ($form->fields->{one}{two}{three}, 3, "value ok");
 
-$form->input({one => {two => 2}});
+$form->set_input({one => {two => 2}});
 
 ok (!$form->valid, "invalid form validation ok");
 

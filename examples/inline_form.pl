@@ -28,7 +28,7 @@ my $form = Form::Tiny::Inline->new(
 	},
 );
 
-$form->input({
+$form->set_input({
 	input_file => "/home/user/test",
 	output_file => "/home/user/test_out",
 });

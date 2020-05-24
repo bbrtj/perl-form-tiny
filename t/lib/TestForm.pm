@@ -24,13 +24,16 @@ sub build_fields
 	{name => "not\\.nested"},
 	{name => "nested_form", type => TestInnerForm->new},
 	{name => "nested_form_unadjusted", type => TestInnerForm->new, adjust => sub { @_ }},
+	{name => "array.*.name"},
+	{name => "array.*.second.*.name"},
+	{name => "marray.*.*", type => Int},
 }
 
 sub build_cleaner
 {
 	my ($self, $data) = @_;
 	if (exists $data->{bool_cleaned}) {
-		$self->add_error(Form::Tiny::Error->new(error => "bool needs to be true"))
+		$self->add_error(Form::Tiny::Error->new(field => "bool_cleaned", error => "bool needs to be true"))
 			unless $data->{bool_cleaned};
 		$data->{bool_cleaned} = "Yes";
 	}

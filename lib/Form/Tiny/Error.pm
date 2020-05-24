@@ -12,7 +12,7 @@ use overload
   fallback => 1;
 
 has "field" => (
-	is => "rw",
+	is => "ro",
 	isa => Maybe[Str],
 	writer => "set_field",
 );

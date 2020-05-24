@@ -11,7 +11,7 @@ my $form = Form::Tiny::Inline->is(qw(Filtered Strict))->new(
 ok ($form->valid, "still strict");
 is ($form->fields->{test}, "asd", "Str filtered");
 
-$form->input({%{$form->input}, more => 1});
+$form->set_input({%{$form->input}, more => 1});
 
 ok (!$form->valid, "not strict anymore");
 

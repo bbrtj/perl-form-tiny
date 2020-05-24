@@ -76,7 +76,7 @@ if (!$form->valid) {
 	note Dumper($form->errors);
 }
 
-$form->input({
+$form->set_input({
 	%{$form->input},
 	repeat_password => "eperl-55",
 });

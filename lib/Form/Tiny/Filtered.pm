@@ -11,7 +11,7 @@ use Moo::Role;
 requires qw(_clear_form);
 
 has "filters" => (
-	is => "rw",
+	is => "ro",
 	isa => ArrayRef[
 		(InstanceOf["Form::Tiny::Filter"])
 			->plus_coercions(ArrayRef, q{ Form::Tiny::Filter->new($_) })
@@ -21,6 +21,7 @@ has "filters" => (
 		[ shift->build_filters ]
 	},
 	trigger => sub { shift->_clear_form },
+	writer => "set_filters",
 );
 
 sub build_filters

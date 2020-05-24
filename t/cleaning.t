@@ -5,11 +5,10 @@ use TestForm;
 use Data::Dumper;
 
 my @data = (
-	[1, {}, {}],
-	[1, {str_adjusted => ""}, {str_adjusted => ">>"}],
-	[1, {str_adjusted => "5"}, {str_adjusted => ">>5"}],
-	[1, {str_adjusted => ">>"}, {str_adjusted => ">>>>"}],
-	[0, {str_adjusted => undef}],
+	[1, {bool_cleaned => 1}, {bool_cleaned => "Yes"}],
+	[0, {bool_cleaned => 0}],
+	[0, {bool_cleaned => 2}],
+	[0, {bool_cleaned => "Yes"}],
 );
 
 for my $aref (@data) {
@@ -20,8 +19,9 @@ for my $aref (@data) {
 		is_deeply $form->fields, $expected, "result values ok";
 	}
 	for my $error (@{$form->errors}) {
-		is($error->field, "str_adjusted", "error namespace valid");
+		is($error->field, "bool_cleaned", "error namespace valid");
 	}
+
 
 	note Dumper($input);
 	note Dumper($form->errors);

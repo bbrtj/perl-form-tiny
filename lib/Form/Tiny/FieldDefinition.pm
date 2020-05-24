@@ -11,7 +11,8 @@ use Form::Tiny::Error;
 
 use namespace::clean;
 
-our $nesting_separator = ".";
+our $nesting_separator = q{.};
+our $array_marker = q{*};
 
 has "name" => (
 	is => "ro",
@@ -61,7 +62,7 @@ sub BUILD
 			if !$self->has_type || !($t->can("coerce") && $t->can("has_coercion") && $t->has_coercion);
 	}
 
-	if ($self->is_subform && ! $self->is_adjusted) {
+	if ($self->is_subform && !$self->is_adjusted) {
 		$self->set_adjustment(sub { $self->type->fields });
 	}
 }
@@ -79,7 +80,25 @@ sub get_name_path
 
 	my $sep = quotemeta $nesting_separator;
 	my @parts = split /(?<!\\)$sep/, $self->name;
-	return map { s/\\$sep/$nesting_separator/; $_ } @parts;
+	return map { s/\\$sep/$nesting_separator/g; $_ } @parts;
+}
+
+sub want_array
+{
+	my ($self) = @_;
+
+	my $sep = quotemeta $nesting_separator;
+	my $arr = quotemeta $array_marker;
+	return $self->name =~ /$sep $arr ($sep | \z)/x;
+}
+
+sub join_path
+{
+	my ($self, $path) = @_;
+
+	my $sep = quotemeta $nesting_separator;
+	@$path = map { s/$sep/\\$nesting_separator/g; $_ } @$path;
+	return join $nesting_separator, @$path;
 }
 
 sub hard_required

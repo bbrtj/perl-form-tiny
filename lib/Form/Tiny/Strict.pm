@@ -7,57 +7,82 @@ use Form::Tiny::Error;
 use Form::Tiny::FieldDefinition;
 use Moo::Role;
 
+use constant META_SKIP => "skip";
+use constant META_ARRAY => "array";
+use constant META_LEAF => "leaf";
+
 requires qw(_clear_form field_defs add_error);
 
 has "strict" => (
-	is => "rw",
+	is => "ro",
 	isa => Bool,
 	builder => "build_strict",
 	trigger => sub { shift->_clear_form },
+	writer => "set_strict",
 );
 
 sub build_strict { 1 }
 
-sub check_exists
+sub _check_recursive
 {
-	my ($self, $el, @keys) = @_;
-
-	for my $key (@keys) {
-		return 0 unless ref $el eq ref {};
-		return 0 unless exists $el->{$key};
-		$el = $el->{$key};
-	}
-	return 1;
-}
-
-sub count_recursive
-{
-	my ($self, $data, $skip, $path) = @_;
+	my ($self, $data, $meta, $path) = @_;
 	$path //= [];
 
-	return 1 if ref $data ne ref {} || $skip->{join $Form::Tiny::FieldDefinition::nesting_separator, @$path};
-	my $total = 0;
-	for my $key (keys %$data) {
-		$total += $self->count_recursive($data->{$key}, $skip, [@$path, $key]);
+	my $current_path = Form::Tiny::FieldDefinition->join_path($path);
+	my $metadata = $meta->{$current_path} // "";
+
+	return if $metadata eq META_SKIP;
+
+	if ($metadata eq META_LEAF) {
+		# we're at leaf and no error occured - we're good.
 	}
-	return $total;
+
+	elsif ($metadata eq META_ARRAY) {
+		die $current_path unless ref $data eq ref [];
+		foreach my $value (@$data) {
+			$self->_check_recursive($value, $meta, [@$path, $Form::Tiny::FieldDefinition::array_marker]);
+		}
+	}
+
+	else {
+		# only leaves are allowed to be anything
+		# on regular elements we expect a hashref
+		die $current_path unless ref $data eq ref {};
+		for my $key (keys %$data) {
+			$self->_check_recursive($data->{$key}, $meta, [@$path, $key]);
+		}
+	}
 }
 
 sub _check_strict
 {
 	my ($self, $input) = @_;
 
-	my $total = 0;
-	my %skip;
+	my %meta;
 	foreach my $def (@{$self->field_defs}) {
-		$total += $self->check_exists($input, $def->get_name_path);
 		if ($def->is_subform) {
-			$skip{$def->name} = 1;
+			$meta{$def->name} = META_SKIP;
+		} else {
+			$meta{$def->name} = META_LEAF;
+		}
+
+		if ($def->want_array) {
+			my @path = $def->get_name_path;
+			for my $i (0 .. $#path) {
+				my $el = $path[$i];
+				if ($el eq $Form::Tiny::FieldDefinition::array_marker) {
+					my @current_path = @path[0 .. $i - 1];
+					$meta{Form::Tiny::FieldDefinition->join_path(\@current_path)} = META_ARRAY;
+				}
+			}
 		}
 	}
 
-	$self->add_error(Form::Tiny::Error::IsntStrict->new)
-		if $total < $self->count_recursive($input, \%skip);
+	local $@;
+	eval { $self->_check_recursive($input, \%meta) };
+	if ($@) {
+		$self->add_error(Form::Tiny::Error::IsntStrict->new);
+	}
 }
 
 around "_pre_validate" => sub {

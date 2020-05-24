@@ -14,9 +14,10 @@ has "type" => (
 );
 
 has "code" => (
-	is => "rw",
+	is => "ro",
 	isa => CodeRef,
 	required => 1,
+	writer => "set_code",
 );
 
 

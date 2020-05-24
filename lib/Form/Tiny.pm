@@ -17,7 +17,7 @@ with "Form::Tiny::Form";
 requires qw(build_fields);
 
 has "field_defs" => (
-	is => "rw",
+	is => "ro",
 	isa => ArrayRef[
 		(InstanceOf["Form::Tiny::FieldDefinition"])
 			->plus_coercions(HashRef, q{ Form::Tiny::FieldDefinition->new($_) })
@@ -27,16 +27,17 @@ has "field_defs" => (
 		[ shift->build_fields ]
 	},
 	trigger => \&_clear_form,
+	writer => "set_field_defs",
 );
 
 has "input" => (
-	is => "rw",
+	is => "ro",
 	writer => "set_input",
 	trigger => \&_clear_form,
 );
 
 has "fields" => (
-	is => "rw",
+	is => "ro",
 	isa => Maybe[HashRef],
 	writer => "_set_fields",
 	clearer => "_clear_fields",
@@ -68,7 +69,7 @@ has "errors" => (
 );
 
 has "cleaner" => (
-	is => "rw",
+	is => "ro",
 	isa => Maybe[CodeRef],
 	default => sub {
 		shift->can("build_cleaner");
@@ -117,33 +118,51 @@ sub _find_field
 	my ($self, $fields, $field_def) = @_;
 
 	my @parts = $field_def->get_name_path;
-	my $current = $fields;
-	for my $i (0 .. $#parts) {
-		last unless ref $current eq ref {} && exists $current->{$parts[$i]};
+	my %search_in = ("" => $fields);
+	my $valid = 0;
 
-		if ($i == $#parts) {
-			return \$current->{$parts[$i]};
-		} else {
-			$current = $current->{$parts[$i]};
+	for my $i (0 .. $#parts) {
+
+		my %new_search;
+		my $want_array = $parts[$i] eq $Form::Tiny::FieldDefinition::array_marker;
+
+		for my $key (keys %search_in) {
+			my $el = $search_in{$key};
+
+			if ($want_array && ref $el eq ref []) {
+				for my $index (0 .. $#$el) {
+					$new_search{"$key,$index"} = $el->[$index];
+				}
+			} elsif (ref $el eq ref {} && exists $el->{$parts[$i]}) {
+				$new_search{$key} = $el->{$parts[$i]};
+			}
 		}
+
+		%search_in = %new_search;
 	}
 
-	return;
+	return if !%search_in;
+	return \%search_in;
 }
 
 sub _assign_field
 {
-	my ($self, $fields, $field_def, $val_ref) = @_;
+	my ($self, $fields, $field_def, $array_path, $val_ref) = @_;
 
 	my @parts = $field_def->get_name_path;
-	my $current = $fields;
+	my $current = \$fields;
 	for my $i (0 .. $#parts) {
-		if ($i == $#parts) {
-			$current->{$parts[$i]} = $$val_ref;
-			return \$current->{$parts[$i]};
+		my $want_array = $parts[$i] eq $Form::Tiny::FieldDefinition::array_marker;
+
+		if ($want_array) {
+			$current = \$$current->[shift @$array_path];
 		} else {
-			$current->{$parts[$i]} //= {};
-			$current = $current->{$parts[$i]};
+			$current = \$$current->{$parts[$i]};
+		}
+
+		if ($i == $#parts) {
+			$$current = $val_ref;
+			return $current;
 		}
 	}
 }
@@ -160,14 +179,22 @@ sub _validate
 		foreach my $validator (@{$self->field_defs}) {
 			my $curr_f = $validator->name;
 
-			my $current = $self->_find_field($fields, $validator);
-			if (defined $current) {
+			my $current_href = $self->_find_field($fields, $validator);
+			if (defined $current_href) {
+				my $all_ok = 1;
 
-				$current = $self->_assign_field($dirty, $validator, $current);
-				$self->_pre_mangle($validator, $current);
+				foreach my $current_apath (keys %$current_href) {
+					my $current = $current_href->{$current_apath};
+					my @array_path = grep length, split /,/, $current_apath;
+
+					$current = $self->_assign_field($dirty, $validator, \@array_path, $current);
+					$self->_pre_mangle($validator, $current);
+
+					$all_ok = $self->_mangle_field($validator, $current) && $all_ok;
+				}
 
 				# found and valid, go to the next field
-				next if $self->_mangle_field($validator, $current);
+				next if $all_ok;
 			}
 
 			# for when it didn't pass the existence test
@@ -245,6 +272,22 @@ Form::Tiny - Tiny form implementation centered around Type::Tiny
 =head1 DESCRIPTION
 
 Form validation engine that can use all the type constraints you're already familiar with. The module does not ship with any field definitions on its own, instead it provides tools to reuse any type constraints from L<Type::Tiny> and other similar systems.
+
+=head2 Policy
+
+Form::Tiny is designed to be a comprehensive data validation and filtering system based on existing validation solutions. Type::Tiny libraries cover most of the validation and coercion needs in models, and now with Form::Tiny they can be empowered to do the same with input data.
+
+The module itself isn't much more than a hashref filter - it accepts one as input and returns the transformed one as output. The pipeline is as follows:
+
+	input
+	  ┃
+	  ┗━▶ filtering ━ coercion ━ validation ━ adjustment ━ cleaning ━┓
+	                                                                 ┃
+	                                                               output
+
+I<(Note that not every step on that pipeline is ran every time - it depends on form configuration)>
+
+The module always tries to get as much data from input as possible and copy that into output. It will never copy any data that is not explicitly specified in the form fields configuration.
 
 =head2 Basic usage
 
@@ -365,6 +408,16 @@ The names changes a little - the regular I<build_fields> builder method becomes 
 A dot (I<.>) can be used in the name of a field to express hashref nesting. A field with C<< name => "a.b.c" >> will be expected to be found under the key "c", in the hashref under the key "b", in the hashref under the key "a", in the root input hashref.
 
 This is the default behavior of a dot in a field name, so if what you want is the actual dot it has to be preceded with a backslash (I<\.>).
+
+=head3 Nested arrays
+
+Nesting adds many new options, but it can only handle hashes. Regular arrays can of course be handled by I<ArrayRef> type from TypeTiny, but that's a hassle. Instead, you can use a star (I<*>) as the only element inside the nesting segment to expect an array there. Adding named fields can be resumed after that, but needn't.
+
+For example, C<< name => "arr.*.some_key" >> expects I<arr> to be an array reference, with each element being a hash reference containing a key I<some_key>. Note that each array element that fails to contain any nested hash elements will be set to C<undef>. If you want the validation to fail instead, you need to make the nested element required.
+
+Other example is two nested arrays that not necessarily contain a hash at the end: C<< name => "arr.*.*" >>. The leaf values here can be simple scalars. Empty array elements will be turned to C<undef>, same as in the example above.
+
+In general, it is a good idea to keep values nested in arrays required, so that you'll be sure no C<undef> values will sneak in when the n-th value does not meet the requirements. This behavior is in line with Form::Tiny policy of getting as much data as possible, but let me know if the undef values are problematic in ways that required values do not fix.
 
 =head3 Nested forms
 
