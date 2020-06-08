@@ -93,8 +93,8 @@ sub _clear_form {
 	$self->_clear_errors;
 }
 
-sub _pre_mangle {}
-sub _pre_validate {}
+sub pre_mangle { $_[2] }
+sub pre_validate { $_[1] }
 
 sub _mangle_field
 {
@@ -174,8 +174,7 @@ sub _validate
 	$self->_clear_errors;
 
 	if (ref $self->input eq ref {}) {
-		my $fields = dclone($self->input);
-		$self->_pre_validate($fields);
+		my $fields = $self->pre_validate(dclone($self->input));
 		foreach my $validator (@{$self->field_defs}) {
 			my $curr_f = $validator->name;
 
@@ -188,7 +187,7 @@ sub _validate
 					my @array_path = grep length, split /,/, $current_apath;
 
 					$current = $self->_assign_field($dirty, $validator, \@array_path, $current);
-					$self->_pre_mangle($validator, $current);
+					$$current = $self->pre_mangle($validator, $$current);
 
 					$all_ok = $self->_mangle_field($validator, $current) && $all_ok;
 				}
@@ -368,11 +367,11 @@ Cleaning sub is also allowed to change the $data, which is a hash reference to t
 
 =head2 Optional behavior
 
-Attaching more behavior to the form is possible by overriding I<_pre_mangle> and I<_pre_validate> methods in the final class. These methods do nothing by default so it's fine to discard the SUPER version.
+Attaching more behavior to the form is possible by overriding I<pre_mangle> and I<pre_validate> methods in the final class. These methods do nothing by default, but roles that are introducing extra behavior set up C<around> hooks for them. It's okay not to invoke the SUPER version of these methods if you're overriding them.
 
-I<_pre_mangle> is fired for every field, just before it is changed ("mangled"). This method will be passed the definition of the field (L<Form::Tiny::FieldDefinition>) and a scalar reference to its value.
+I<pre_mangle> is fired for every field, just before it is changed ("mangled"). In addition to an object reference, this method will be passed the definition of the field (L<Form::Tiny::FieldDefinition>) and a scalar value of the field. The field must exist in the input data for this method to fire, but can be undefined. The return value of this method will become the new value for the field.
 
-I<_pre_validate> is fired just once for the form, before any field is validated. It is passed a single hashref - a copy of the input data.
+I<pre_validate> is fired just once for the form, before any field is validated. It is passed a single hashref - a copy of the input data. This method is free to do anything with the input, and its return value will become the real input to the validation.
 
 The module provides two roles which use these mechanisms to achieve common tasks.
 

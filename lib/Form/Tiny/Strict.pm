@@ -11,7 +11,7 @@ use constant META_SKIP => "skip";
 use constant META_ARRAY => "array";
 use constant META_LEAF => "leaf";
 
-requires qw(_clear_form field_defs add_error);
+requires qw(pre_validate _clear_form field_defs add_error);
 
 has "strict" => (
 	is => "ro",
@@ -85,13 +85,15 @@ sub _check_strict
 	}
 }
 
-around "_pre_validate" => sub {
+around "pre_validate" => sub {
 	my ($orig, $self, $input) = @_;
 
-	$self->$orig($input);
+	$input = $self->$orig($input);
 	if ($self->strict) {
 		$self->_check_strict($input);
 	}
+
+	return $input;
 };
 
 1;

@@ -8,7 +8,7 @@ use Form::Tiny::Filter;
 
 use Moo::Role;
 
-requires qw(_clear_form);
+requires qw(pre_mangle _clear_form);
 
 has "filters" => (
 	is => "ro",
@@ -40,11 +40,11 @@ sub _apply_filters
 	return $value;
 }
 
-around "_pre_mangle" => sub {
-	my ($orig, $self, $def, $value_ref) = @_;
+around "pre_mangle" => sub {
+	my ($orig, $self, $def, $value) = @_;
 
-	$self->$orig($def, $value_ref);
-	$$value_ref = $self->_apply_filters($$value_ref);
+	$value = $self->$orig($def, $value);
+	return $self->_apply_filters($value);
 };
 
 1;
