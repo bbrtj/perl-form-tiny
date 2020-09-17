@@ -1,6 +1,6 @@
 package Form::Tiny;
 
-use Modern::Perl "2010";
+use v5.10; use warnings;
 use Types::Standard qw(Str Maybe ArrayRef InstanceOf HashRef Bool CodeRef);
 use Carp qw(croak);
 use Storable qw(dclone);

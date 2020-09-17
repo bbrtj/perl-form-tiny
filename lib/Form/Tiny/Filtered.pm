@@ -1,6 +1,6 @@
 package Form::Tiny::Filtered;
 
-use Modern::Perl "2010";
+use v5.10; use warnings;
 use Types::Standard qw(Str ArrayRef InstanceOf);
 use Text::Trim;
 

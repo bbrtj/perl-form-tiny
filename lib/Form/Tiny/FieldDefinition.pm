@@ -1,6 +1,6 @@
 package Form::Tiny::FieldDefinition;
 
-use Modern::Perl "2010";
+use v5.10; use warnings;
 use Moo;
 use Types::Standard qw(Enum Bool HasMethods CodeRef Maybe Str);
 use Types::Common::String qw(NonEmptySimpleStr);

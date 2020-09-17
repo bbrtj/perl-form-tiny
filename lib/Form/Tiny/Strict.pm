@@ -1,6 +1,6 @@
 package Form::Tiny::Strict;
 
-use Modern::Perl "2010";
+use v5.10; use warnings;
 use Types::Standard qw(Bool);
 
 use Form::Tiny::Error;
