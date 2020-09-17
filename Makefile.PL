@@ -30,6 +30,6 @@ WriteMakefile(
 	},
 
 	ABSTRACT_FROM => 'lib/Form/Tiny.pm',
-	AUTHOR => 'bartosz <bartosz@(none)>',
+	AUTHOR => 'Bartosz Jarzyna <brtastic@gmail.com>',
 	LICENSE => 'perl',
 );
