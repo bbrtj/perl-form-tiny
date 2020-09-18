@@ -16,7 +16,6 @@ WriteMakefile(
 		"Moo" => "0",
 		"Sub::HandlesVia" => "0",
 		"Type::Tiny" => "0",
-		"Text::Trim" => "0",
 		"namespace::clean" => "0",
 	},
 
