@@ -4,11 +4,11 @@ use v5.10; use warnings;
 use Types::Standard qw(Str Maybe ArrayRef InstanceOf HashRef Bool CodeRef);
 use Carp qw(croak);
 use Storable qw(dclone);
+use Scalar::Util qw(blessed);
 
 use Form::Tiny::FieldDefinition;
 use Form::Tiny::Error;
 use Moo::Role;
-use Sub::HandlesVia;
 
 our $VERSION = '1.00';
 
@@ -60,12 +60,6 @@ has "errors" => (
 	isa => ArrayRef [InstanceOf ["Form::Tiny::Error"]],
 	default => sub { [] },
 	init_arg => undef,
-	handles_via => "Array",
-	handles => {
-		"add_error" => "push",
-		"has_errors" => "count",
-		"_clear_errors" => "clear",
-	},
 );
 
 has "cleaner" => (
@@ -234,6 +228,29 @@ sub validate
 	return $self->errors;
 }
 
+sub add_error
+{
+	my ($self, $error) = @_;
+	croak "error has to be an instance of Form::Tiny::Error"
+		unless blessed $error && $error->isa("Form::Tiny::Error");
+
+	push @{$self->errors}, $error;
+	return;
+}
+
+sub has_errors
+{
+	my ($self) = @_;
+	return @{$self->errors} > 0;
+}
+
+sub _clear_errors
+{
+	my ($self) = @_;
+	@{$self->errors} = ();
+	return;
+}
+
 1;
 
 __END__
@@ -251,17 +268,19 @@ Form::Tiny - Tiny form implementation centered around Type::Tiny
 	with "Form::Tiny";
 
 	sub build_fields {
-		{
-			name => "name",
-			type => SimpleStr,
-			adjust => sub { ucfirst shift },
-			required => 1,
-		},
-		{
-			name => "lucky_number",
-			type => PositiveInt,
-			required => 1,
-		}
+		return (
+			{
+				name => "name",
+				type => SimpleStr,
+				adjust => sub { ucfirst shift },
+				required => 1,
+			},
+			{
+				name => "lucky_number",
+				type => PositiveInt,
+				required => 1,
+			}
+		);
 	}
 
 	sub build_cleaner {
