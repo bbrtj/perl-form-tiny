@@ -18,13 +18,13 @@ requires qw(build_fields);
 
 has "field_defs" => (
 	is => "ro",
-	isa => ArrayRef[
-		(InstanceOf["Form::Tiny::FieldDefinition"])
-			->plus_coercions(HashRef, q{ Form::Tiny::FieldDefinition->new($_) })
+	isa => ArrayRef [
+		(InstanceOf ["Form::Tiny::FieldDefinition"])
+		->plus_coercions(HashRef, q{ Form::Tiny::FieldDefinition->new($_) })
 	],
 	coerce => 1,
 	default => sub {
-		[ shift->build_fields ]
+		[shift->build_fields]
 	},
 	trigger => \&_clear_form,
 	writer => "set_field_defs",
@@ -38,7 +38,7 @@ has "input" => (
 
 has "fields" => (
 	is => "ro",
-	isa => Maybe[HashRef],
+	isa => Maybe [HashRef],
 	writer => "_set_fields",
 	clearer => "_clear_fields",
 	init_arg => undef,
@@ -57,7 +57,7 @@ has "valid" => (
 
 has "errors" => (
 	is => "ro",
-	isa => ArrayRef[InstanceOf["Form::Tiny::Error"]],
+	isa => ArrayRef [InstanceOf ["Form::Tiny::Error"]],
 	default => sub { [] },
 	init_arg => undef,
 	handles_via => "Array",
@@ -70,7 +70,7 @@ has "errors" => (
 
 has "cleaner" => (
 	is => "ro",
-	isa => Maybe[CodeRef],
+	isa => Maybe [CodeRef],
 	default => sub {
 		shift->can("build_cleaner");
 	},
@@ -85,7 +85,8 @@ around BUILDARGS => sub {
 	return {@args};
 };
 
-sub _clear_form {
+sub _clear_form
+{
 	my ($self) = @_;
 
 	$self->_clear_fields;
@@ -133,7 +134,8 @@ sub _find_field
 				for my $index (0 .. $#$el) {
 					$new_search{"$key,$index"} = $el->[$index];
 				}
-			} elsif (ref $el eq ref {} && exists $el->{$parts[$i]}) {
+			}
+			elsif (ref $el eq ref {} && exists $el->{$parts[$i]}) {
 				$new_search{$key} = $el->{$parts[$i]};
 			}
 		}
@@ -156,7 +158,8 @@ sub _assign_field
 
 		if ($want_array) {
 			$current = \$$current->[shift @$array_path];
-		} else {
+		}
+		else {
 			$current = \$$current->{$parts[$i]};
 		}
 
@@ -201,7 +204,8 @@ sub _validate
 				$self->add_error(Form::Tiny::Error::DoesNotExist->new(field => $curr_f));
 			}
 		}
-	} else {
+	}
+	else {
 		$self->add_error(Form::Tiny::Error::InvalidFormat->new);
 	}
 

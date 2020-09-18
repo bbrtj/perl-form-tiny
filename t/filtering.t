@@ -5,7 +5,7 @@ use Types::Standard qw(Int);
 BEGIN {
 	use_ok('Form::Tiny::Inline');
 	use_ok('Form::Tiny::Filtered');
-};
+}
 
 my $form = Form::Tiny::Inline->is(qw(Filtered))->new(
 	field_defs => [{name => "test"}],

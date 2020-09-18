@@ -8,12 +8,12 @@ use Carp qw(confess);
 use namespace::clean;
 
 use overload
-  q{""} => "as_string",
-  fallback => 1;
+	q{""} => "as_string",
+	fallback => 1;
 
 has "field" => (
 	is => "ro",
-	isa => Maybe[Str],
+	isa => Maybe [Str],
 	writer => "set_field",
 );
 
@@ -22,7 +22,6 @@ has "error" => (
 	isa => Str | Object,
 	builder => "_default_error",
 );
-
 
 sub _default_error
 {
@@ -42,6 +41,7 @@ sub as_string
 # in-place subclasses
 
 {
+
 	package Form::Tiny::Error::InvalidFormat;
 	use parent "Form::Tiny::Error";
 
@@ -52,6 +52,7 @@ sub as_string
 }
 
 {
+
 	package Form::Tiny::Error::DoesNotExist;
 	use parent "Form::Tiny::Error";
 
@@ -62,6 +63,7 @@ sub as_string
 }
 
 {
+
 	package Form::Tiny::Error::IsntStrict;
 	use parent "Form::Tiny::Error";
 
@@ -72,6 +74,7 @@ sub as_string
 }
 
 {
+
 	package Form::Tiny::Error::DoesNotValidate;
 	use parent "Form::Tiny::Error";
 

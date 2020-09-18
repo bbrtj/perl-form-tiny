@@ -3,7 +3,7 @@ use Test::More;
 use Data::Dumper;
 use lib 't/lib';
 
-BEGIN { use_ok('TestForm') };
+BEGIN { use_ok('TestForm') }
 
 my @data = (
 	[1, {}],
@@ -24,13 +24,15 @@ for my $aref (@data) {
 	my $form = TestForm->new($input);
 	is !!$form->valid, !!$result, "validation output ok";
 	if ($form->valid && $result) {
-		is_deeply ($form->fields, $input, "fields do match");
-	} elsif (!$result) {
+		is_deeply($form->fields, $input, "fields do match");
+	}
+	elsif (!$result) {
 		for (@{$form->errors}) {
 			isa_ok($_, "Form::Tiny::Error::IsntStrict");
 		}
 		note Dumper($form->errors) if @{$form->errors} > 1;
-	} else {
+	}
+	else {
 		note Dumper($form->errors);
 	}
 }

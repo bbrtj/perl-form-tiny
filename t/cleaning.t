@@ -22,7 +22,6 @@ for my $aref (@data) {
 		is($error->field, "bool_cleaned", "error namespace valid");
 	}
 
-
 	note Dumper($input);
 	note Dumper($form->errors);
 }

@@ -2,9 +2,10 @@ use v5.10; use warnings;
 use Test::More;
 use Data::Dumper;
 
-BEGIN { use_ok('Form::Tiny') };
+BEGIN { use_ok('Form::Tiny') }
 
 {
+
 	package TestForm;
 	use Moo;
 	use Types::Standard qw(Int);
@@ -16,7 +17,9 @@ BEGIN { use_ok('Form::Tiny') };
 
 	sub build_fields
 	{
-		{name => 'name.*', type => Int},
+		(
+			{name => 'name.*', type => Int},
+		)
 	}
 
 	sub pre_validate
@@ -61,6 +64,5 @@ for my $aref (@data) {
 	note Dumper($input);
 	note Dumper($form->errors);
 }
-
 
 done_testing();

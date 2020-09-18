@@ -1,9 +1,9 @@
 use v5.10; use warnings;
 use Test::More;
-BEGIN { use_ok('Form::Tiny::Inline') };
+BEGIN { use_ok('Form::Tiny::Inline') }
 
 # test for invalid format rejection
-for my $input ([], 0, "", "a", \1, sub {}) {
+for my $input ([], 0, "", "a", \1, sub { }) {
 	my $form = Form::Tiny::Inline->new(
 		field_defs => [],
 		input => $input,

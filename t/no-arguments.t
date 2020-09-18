@@ -1,9 +1,10 @@
 use v5.10; use warnings;
 use Test::More;
 
-BEGIN { use_ok('Form::Tiny') };
+BEGIN { use_ok('Form::Tiny') }
 
 {
+
 	package TestForm;
 	use Moo;
 
@@ -11,8 +12,10 @@ BEGIN { use_ok('Form::Tiny') };
 
 	sub build_fields
 	{
-		{name => "name"},
-		{name => "value"}
+		(
+			{name => "name"},
+			{name => "value"}
+		)
 	}
 
 	1;
@@ -33,7 +36,8 @@ for my $aref (@data) {
 	ok $form->valid, "validation output ok";
 	for my $field (keys %$input) {
 		if (!defined $ignore || !$ignore->{$field}) {
-			is defined $form->fields->{$field}, defined $input->{$field}, "definedness for `$field` ok";
+			is defined $form->fields->{$field}, defined $input->{$field},
+				"definedness for `$field` ok";
 			is $form->fields->{$field}, $input->{$field}, "value for `$field` ok";
 		}
 	}

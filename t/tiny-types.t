@@ -1,9 +1,10 @@
 use v5.10; use warnings;
 use Test::More;
 
-BEGIN { use_ok('Form::Tiny') };
+BEGIN { use_ok('Form::Tiny') }
 
 {
+
 	package TestForm;
 	use Moo;
 	use Types::Common::String qw(StrLength LowerCaseStr);
@@ -13,15 +14,17 @@ BEGIN { use_ok('Form::Tiny') };
 
 	sub build_fields
 	{
-		{
-			name => "string",
-			type => StrLength[1, 10] & LowerCaseStr,
-		},
+		(
+			{
+				name => "string",
+				type => StrLength [1, 10] &LowerCaseStr,
+			},
 
-		{
-			name => "integer",
-			type => (IntRange[2, 8])->where(q{ $_ % 2 == 0 }),
-		}
+			{
+				name => "integer",
+				type => (IntRange [2, 8])->where(q{ $_ % 2 == 0 }),
+			}
+		)
 	}
 
 	1;
@@ -47,10 +50,12 @@ for my $aref (@data) {
 	is !!$form->valid, !!$result, "validation output ok";
 	if ($form->valid) {
 		for my $field (keys %$input) {
-			is defined $form->fields->{$field}, defined $input->{$field}, "definedness for `$field` ok";
+			is defined $form->fields->{$field}, defined $input->{$field},
+				"definedness for `$field` ok";
 			is $form->fields->{$field}, $input->{$field}, "value for `$field` ok";
 		}
-	} else {
+	}
+	else {
 		for my $error (@{$form->errors}) {
 			isa_ok($error, "Form::Tiny::Error::DoesNotValidate");
 		}

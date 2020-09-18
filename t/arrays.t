@@ -6,15 +6,28 @@ use TestForm;
 
 my @data = (
 	[1, {array => [{name => "a"}, {name => "b"}]}],
-	[1, {array => [{name => "a"}, {}, {name => "b"}]}, {array => [{name => "a"}, undef, {name => "b"}]}],
-	[1, {array => [{name => "Han", second => [{name => "Wookie"}, {name => "Leia"}]}, {name => "Luke", second => [{name => "R2D2"}]}]}],
+	[
+		1,
+		{array => [{name => "a"}, {}, {name => "b"}]},
+		{array => [{name => "a"}, undef, {name => "b"}]}
+	],
+	[
+		1, {
+			array => [
+				{name => "Han", second => [{name => "Wookie"}, {name => "Leia"}]},
+				{name => "Luke", second => [{name => "R2D2"}]}
+			]
+		}
+	],
 
 	[1, {marray => [[1, 2], [3, 4]]}],
 	[1, {marray => [[], [3, 4, -1]]}, {marray => [undef, [3, 4, -1]]}],
+
 	# we still keep it strict
 	[0, {array => [{name => "x", unknown_name => "a"}, {name => "b"}]}],
 	[0, {array => [{name => "x", second => [{unknown => "a"}]}, {name => "b"}]}],
 	[0, {marray => [[3, 4, -1], {a => 5}]}],
+
 	# we wanted an array
 	[0, {array => {name => "x"}}],
 

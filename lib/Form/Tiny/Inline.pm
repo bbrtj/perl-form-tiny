@@ -20,6 +20,6 @@ sub is
 	return Moo::Role->create_class_with_roles($class, @roles);
 }
 
-sub build_fields {}
+sub build_fields { }
 
 1;

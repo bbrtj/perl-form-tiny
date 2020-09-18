@@ -1,9 +1,10 @@
 use v5.10; use warnings;
 use Test::More;
 
-BEGIN { use_ok('Form::Tiny') };
+BEGIN { use_ok('Form::Tiny') }
 
 {
+
 	package TestForm;
 	use Moo;
 	use Types::Common::String qw(LowerCaseStr);
@@ -13,18 +14,19 @@ BEGIN { use_ok('Form::Tiny') };
 
 	sub build_fields
 	{
-		{
-			name => "string",
-			type => LowerCaseStr->plus_coercions(Str, q{ lc $_ }),
-			coerce => 1,
-		},
+		(
+			{
+				name => "string",
+				type => LowerCaseStr->plus_coercions(Str, q{ lc $_ }),
+				coerce => 1,
+			},
 
-		{
-			name => "integer",
-			type => Int->plus_coercions(Num, q{ int($_) }),
-			coerce => 1,
-		}
-
+			{
+				name => "integer",
+				type => Int->plus_coercions(Num, q{ int($_) }),
+				coerce => 1,
+			}
+		)
 	}
 
 	1;

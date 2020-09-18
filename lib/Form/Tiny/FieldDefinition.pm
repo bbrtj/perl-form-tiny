@@ -22,13 +22,13 @@ has "name" => (
 
 has "required" => (
 	is => "ro",
-	isa => Enum[0, 1, "soft", "hard"],
+	isa => Enum [0, 1, "soft", "hard"],
 	default => sub { 0 },
 );
 
 has "type" => (
 	is => "ro",
-	isa => HasMethods["validate", "check"],
+	isa => HasMethods ["validate", "check"],
 	predicate => 1,
 );
 
@@ -56,10 +56,12 @@ sub BUILD
 	my ($self, $args) = @_;
 
 	if ($self->coerce && ref $self->coerce ne "CODE") {
+
 		# checks for coercion == 1
 		my $t = $self->type;
 		croak "the type doesn't provide coercion"
-			if !$self->has_type || !($t->can("coerce") && $t->can("has_coercion") && $t->has_coercion);
+			if !$self->has_type
+			|| !($t->can("coerce") && $t->can("has_coercion") && $t->has_coercion);
 	}
 
 	if ($self->is_subform && !$self->is_adjusted) {
@@ -115,9 +117,11 @@ sub get_coerced
 	my $coerce = $self->coerce;
 	if (ref $coerce eq "CODE") {
 		return $coerce->($value);
-	} elsif ($coerce) {
+	}
+	elsif ($coerce) {
 		return $self->type->coerce($value);
-	} else {
+	}
+	else {
 		return $value;
 	}
 }
@@ -145,7 +149,8 @@ sub validate
 	if ($self->has_message) {
 		$valid = $self->type->check($value);
 		$error = $self->message;
-	} else {
+	}
+	else {
 		$error = $self->type->validate($value);
 		$valid = !defined $error;
 	}
@@ -154,21 +159,28 @@ sub validate
 		if ($self->is_subform && ref $error eq ref []) {
 			foreach my $exception (@$error) {
 				if (defined blessed $exception && $exception->isa("Form::Tiny::Error")) {
-					$exception->set_field(join $nesting_separator, $self->name, ($exception->field // ()));
-				} else {
+					$exception->set_field(
+						join $nesting_separator,
+						$self->name, ($exception->field // ())
+					);
+				}
+				else {
 					$exception = Form::Tiny::Error::DoesNotValidate->new({
-						field => $self->name,
-						error => $exception,
-					});
+							field => $self->name,
+							error => $exception,
+						}
+					);
 				}
 
 				$form->add_error($exception);
 			}
-		} else {
+		}
+		else {
 			my $exception = Form::Tiny::Error::DoesNotValidate->new({
-				field => $self->name,
-				error => $error,
-			});
+					field => $self->name,
+					error => $error,
+				}
+			);
 
 			$form->add_error($exception);
 		}

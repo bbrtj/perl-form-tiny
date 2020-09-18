@@ -2,9 +2,10 @@ use v5.10; use warnings;
 use Test::More;
 use Data::Dumper;
 
-BEGIN { use_ok('Form::Tiny') };
+BEGIN { use_ok('Form::Tiny') }
 
 {
+
 	package InnerForm;
 	use Moo;
 	use Types::Standard qw(Undef);
@@ -14,18 +15,21 @@ BEGIN { use_ok('Form::Tiny') };
 
 	sub build_fields
 	{
-		{
-			name => "nested",
-			type => SimpleStr->plus_coercions(Undef, q{ '' }),
-			coerce => 1,
-			required => "soft",
-		},
+		(
+			{
+				name => "nested",
+				type => SimpleStr->plus_coercions(Undef, q{ '' }),
+				coerce => 1,
+				required => "soft",
+			},
+		);
 	}
 
 	1;
 }
 
 {
+
 	package OuterForm;
 	use Moo;
 
@@ -34,7 +38,7 @@ BEGIN { use_ok('Form::Tiny') };
 	sub build_fields
 	{
 		{name => "form.inner", type => InnerForm->new},
-		{name => "form.inner.something"},
+			{name => "form.inner.something"},;
 	}
 }
 

@@ -29,10 +29,11 @@ my $form = Form::Tiny::Inline->new(
 );
 
 $form->set_input({
-	input_file => "/home/user/test",
-	output_file => "/home/user/test_out",
-});
+		input_file => "/home/user/test",
+		output_file => "/home/user/test_out",
+	}
+);
 
-ok ($form->valid, "The form has been validated successfully");
+ok($form->valid, "The form has been validated successfully");
 
 done_testing();

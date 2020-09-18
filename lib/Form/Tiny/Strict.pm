@@ -34,13 +34,17 @@ sub _check_recursive
 	return if $metadata eq META_SKIP;
 
 	if ($metadata eq META_LEAF) {
+
 		# we're at leaf and no error occured - we're good.
 	}
 
 	elsif ($metadata eq META_ARRAY) {
 		die $current_path unless ref $data eq ref [];
 		foreach my $value (@$data) {
-			$self->_check_recursive($value, $meta, [@$path, $Form::Tiny::FieldDefinition::array_marker]);
+			$self->_check_recursive(
+				$value, $meta,
+				[@$path, $Form::Tiny::FieldDefinition::array_marker]
+			);
 		}
 	}
 
@@ -62,7 +66,8 @@ sub _check_strict
 	foreach my $def (@{$self->field_defs}) {
 		if ($def->is_subform) {
 			$meta{$def->name} = META_SKIP;
-		} else {
+		}
+		else {
 			$meta{$def->name} = META_LEAF;
 		}
 

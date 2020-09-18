@@ -2,9 +2,10 @@ use v5.10; use warnings;
 use Test::More;
 use Data::Dumper;
 
-BEGIN { use_ok('Form::Tiny') };
+BEGIN { use_ok('Form::Tiny') }
 
 {
+
 	package TestForm;
 	use Moo;
 	use Types::Standard qw(Str);
@@ -13,22 +14,24 @@ BEGIN { use_ok('Form::Tiny') };
 
 	sub build_fields
 	{
-		{
-			name => "sub_based",
-			type => Str->where(q{ /\A0x[0-9a-fA-F]+\z/ }),
+		(
+			{
+				name => "sub_based",
+				type => Str->where(q{ /\A0x[0-9a-fA-F]+\z/ }),
 
-			coerce => sub {
-				my $val = shift;
-				if (defined $val && $val =~ /\A[0-9]+\z/) {
-					return "0x" . sprintf("%x", $val);
-				}
-				return $val;
-			},
+				coerce => sub {
+					my $val = shift;
+					if (defined $val && $val =~ /\A[0-9]+\z/) {
+						return "0x" . sprintf("%x", $val);
+					}
+					return $val;
+				},
 
-			adjust => sub {
-				return lc shift;
-			},
-		}
+				adjust => sub {
+					return lc shift;
+				},
+			}
+		)
 	}
 
 	1;
@@ -66,10 +69,12 @@ for my $aref (@data) {
 
 	if ($form->valid) {
 		for my $field (keys %$output) {
-			is defined $form->fields->{$field}, defined $output->{$field}, "definedness for `$field` ok";
+			is defined $form->fields->{$field}, defined $output->{$field},
+				"definedness for `$field` ok";
 			is $form->fields->{$field}, $output->{$field}, "value for `$field` ok";
 		}
-	} elsif ($result) {
+	}
+	elsif ($result) {
 		note Dumper($form->dirty_fields);
 	}
 }

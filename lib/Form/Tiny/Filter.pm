@@ -9,7 +9,7 @@ use namespace::clean;
 
 has "type" => (
 	is => "ro",
-	isa => HasMethods["check"],
+	isa => HasMethods ["check"],
 	required => 1,
 );
 
@@ -19,7 +19,6 @@ has "code" => (
 	required => 1,
 	writer => "set_code",
 );
-
 
 around "BUILDARGS" => sub {
 	my ($orig, $class, @args) = @_;
