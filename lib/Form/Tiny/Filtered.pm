@@ -16,6 +16,8 @@ sub trim
 
 use Moo::Role;
 
+our $VERSION = '1.00';
+
 requires qw(pre_mangle _clear_form);
 
 has "filters" => (

@@ -7,6 +7,8 @@ use Form::Tiny::Error;
 use Form::Tiny::FieldDefinition;
 use Moo::Role;
 
+our $VERSION = '1.00';
+
 use constant META_SKIP => "skip";
 use constant META_ARRAY => "array";
 use constant META_LEAF => "leaf";

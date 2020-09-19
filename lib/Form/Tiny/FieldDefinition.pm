@@ -11,6 +11,8 @@ use Form::Tiny::Error;
 
 use namespace::clean;
 
+our $VERSION = '1.00';
+
 our $nesting_separator = q{.};
 our $array_marker = q{*};
 

@@ -6,6 +6,8 @@ use Types::Standard qw(RoleName Str);
 
 use namespace::clean;
 
+our $VERSION = '1.00';
+
 with "Form::Tiny";
 
 sub is

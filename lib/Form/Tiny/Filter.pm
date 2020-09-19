@@ -7,6 +7,8 @@ use Carp qw(croak);
 
 use namespace::clean;
 
+our $VERSION = '1.00';
+
 has "type" => (
 	is => "ro",
 	isa => HasMethods ["check"],
