@@ -257,7 +257,7 @@ __END__
 
 =head1 NAME
 
-Form::Tiny - Tiny form implementation centered around Type::Tiny
+Form::Tiny - Input validator implementation centered around Type::Tiny
 
 =head1 SYNOPSIS
 
@@ -302,10 +302,10 @@ Form::Tiny is designed to be a comprehensive data validation and filtering syste
 The module itself isn't much more than a hashref filter - it accepts one as input and returns the transformed one as output. The pipeline is as follows:
 
 	input
-	  ┃
-	  ┗━▶ filtering ━ coercion ━ validation ━ adjustment ━ cleaning ━┓
-	                                                                 ┃
-	                                                               output
+	  |
+	  |--> filtering -- coercion -- validation -- adjustment -- cleaning --|
+	                                                                       v
+	                                                                     output
 
 I<(Note that not every step on that pipeline is ran every time - it depends on form configuration)>
 
@@ -317,9 +317,20 @@ To use Form::Tiny as data validator you have to declare your own class mixing in
 
 Input can be passed as a hashref to the constructor or with the I<set_input> method. Every call to that method will cause the form instance to be cleared, so that it can be used again for different data.
 
+	use MyForm;
+
+	# either ...
+	my $form = MyForm->new(\%data);
+
+	# or ...
+	my $form = MyForm->new;
+	$form->set_input(\%data);
+
 With input in place, a I<valid> method can be called, which will return a validation result and fill in the I<errors> and I<fields> properties. These properties are mutually exclusive: errors are only present if the validation is unsuccessful, otherwise the fields are present.
 
 The example below illustrates how a form class could be used to validate data.
+
+	use MyForm;
 
 	my $form = MyForm->new;
 	$form->set_input($some_input);
@@ -336,13 +347,20 @@ The example below illustrates how a form class could be used to validate data.
 
 Every class applying the I<Form::Tiny> role has to have a sub called I<build_fields>. This method should return a list of hashrefs, where each of them will be coerced into an object of the L<Form::Tiny::FieldDefinition> class. You can also provide an instance of the class yourself, which should be helpful if you're willing to use your own definition implementation.
 
-The only required element of this hashref is I<name>, which contains the string name of the field in the form input. Other possible elements are:
+	sub build_fields {
+		return (
+			{ name => "some_name" },
+			{ ... },
+		);
+	}
+
+The only required element of this hashref is key I<name>, which contains the string with name of the field in the form input. Other possible elements are:
 
 =over
 
 =item type
 
-A type that the field will be validated against. Effectively, this needs to be an object with I<validate> and I<check> methods.
+The type that the field will be validated against. Effectively, this needs to be an object with I<validate> and I<check> methods implemented. All types from Type::Tiny meet this criteria.
 
 =item coerce
 
@@ -350,24 +368,25 @@ A coercion that will be made B<before> the type is validated and will change the
 
 Value of I<1> means that coercion will be applied from the specified I<type>. This requires the type to also provide I<coerce> and I<has_coercion> method, and the return value of the second one must be true.
 
-Value of I<0> means no coercion will be made.
+Value of I<0> means no coercion will be made. This is the default behavior.
 
 Value that is a coderef will be passed a single scalar, which is the value of the field. It is required to make its own checks and return a scalar which will replace the old value.
 
 =item adjust
 
-An adjustment that will be made B<after> the type is validated and the validation is successful. This must be a coderef that gets passed the validated value and returns the new value for the field.
-At the point of adjustment, you can be sure that the value passed to the coderef meets the type constraint specified. It's probably a good idea to provide adjustment along with a type to avoid unnecessary checks in the subroutine.
+An adjustment that will be made B<after> the type is validated and the validation is successful. This must be a coderef that gets passed the validated value and returns the new value for the field (just like the coderef version of coercion).
+
+At the point of adjustment, you can be sure that the value passed to the coderef meets the type constraint specified. It's probably a good idea to provide a type along with the adjustment to avoid unnecessary checks in the subroutine - if no type is specified, then any value from the input data will end up in the coderef.
 
 =item required
 
 Controls if the field should be skipped silently if it has no value or the value is empty. Possible values are:
 
-I<0> - The field can be non-existent in the input, empty or undefined
+I<0> - The field can be non-existent in the input, empty or undefined. This is the default behavior
 
 I<"soft"> - The field has to exist in the input, but can be empty or undefined
 
-I<1> or I<"hard"> - The field has to exist in the input, must be defined and non-empty (a value I<0> is allowed)
+I<1> or I<"hard"> - The field has to exist in the input, must be defined and non-empty (a value I<0> is allowed, but an empty string is disallowed)
 
 =item message
 
@@ -392,9 +411,25 @@ Cleaning sub is also allowed to change the $data, which is a hash reference to t
 
 Attaching more behavior to the form is possible by overriding I<pre_mangle> and I<pre_validate> methods in the final class. These methods do nothing by default, but roles that are introducing extra behavior set up C<around> hooks for them. It's okay not to invoke the SUPER version of these methods if you're overriding them.
 
-I<pre_mangle> is fired for every field, just before it is changed ("mangled"). In addition to an object reference, this method will be passed the definition of the field (L<Form::Tiny::FieldDefinition>) and a scalar value of the field. The field must exist in the input data for this method to fire, but can be undefined. The return value of this method will become the new value for the field.
+B<pre_mangle> is fired for every field, just before it is changed ("mangled"). In addition to an object reference, this method will be passed the definition of the field (L<Form::Tiny::FieldDefinition>) and a scalar value of the field. The field must exist in the input data for this method to fire, but can be undefined. The return value of this method will become the new value for the field.
 
-I<pre_validate> is fired just once for the form, before any field is validated. It is passed a single hashref - a copy of the input data. This method is free to do anything with the input, and its return value will become the real input to the validation.
+	sub pre_mangle {
+		my ($self, $field_definition, $value) = @_;
+
+		// do something with $value
+
+		return $value;
+	}
+
+B<pre_validate> is fired just once for the form, before any field is validated. It is passed a single hashref - a copy of the input data. This method is free to do anything with the input, and its return value will become the real input to the validation.
+
+	sub pre_validate {
+		my ($self, $input_data) = @_;
+
+		// do something with $input_data
+
+		return $input_data;
+	}
 
 The module provides two roles which use these mechanisms to achieve common tasks.
 
@@ -406,13 +441,13 @@ Enables strict mode for the form. Validation will fail if the form input contain
 
 =item L<Form::Tiny::Filtered>
 
-Enables initial filtering for the input fields. By default, this will only cause strings to be trimmed, but any code can be attached to any field that meets a given type constraint.
+Enables initial filtering for the input fields. By default, this will only cause strings to be trimmed, but any code can be attached to any field that meets a given type constraint. See the role documentation for details
 
 =back
 
 =head2 Inline forms
 
-The module also enables a way to create a form without the need of a dedicated module. This is done with the L<Form::Tiny::Inline> class. This requires the user to pass all the data to the constructor, as shown in the example:
+The module also enables a way to create a form without the need of a dedicated package. This is done with the L<Form::Tiny::Inline> class. This requires the user to pass all the data to the constructor, as shown in the example:
 
 	my $form = Form::Tiny::Inline # An inline form ...
 		        ->is(qw/Strict/)   # ... with the strict role mixed in ...
@@ -433,9 +468,29 @@ This is the default behavior of a dot in a field name, so if what you want is th
 
 =head3 Nested arrays
 
-Nesting adds many new options, but it can only handle hashes. Regular arrays can of course be handled by I<ArrayRef> type from TypeTiny, but that's a hassle. Instead, you can use a star (I<*>) as the only element inside the nesting segment to expect an array there. Adding named fields can be resumed after that, but needn't.
+Nesting adds many new options, but it can only handle hashes. Regular arrays can of course be handled by I<ArrayRef> type from Type::Tiny, but that's a hassle. Instead, you can use a star (I<*>) as the only element inside the nesting segment to expect an array there. Adding named fields can be resumed after that, but needn't.
 
 For example, C<< name => "arr.*.some_key" >> expects I<arr> to be an array reference, with each element being a hash reference containing a key I<some_key>. Note that each array element that fails to contain any nested hash elements will be set to C<undef>. If you want the validation to fail instead, you need to make the nested element required.
+
+	# This input data ...
+	{
+		arr => [
+			{ some_key => 1 },
+			{ some_other_key => 2 },
+			{ some_key => 3 },
+		]
+	}
+
+	# Would become ...
+	{
+		arr => [
+			{ some_key => 1 },
+			undef,
+			{ some_key => 3 },
+		]
+	}
+
+	# Make the element required to make the validation fail instead
 
 Other example is two nested arrays that not necessarily contain a hash at the end: C<< name => "arr.*.*" >>. The leaf values here can be simple scalars. Empty array elements will be turned to C<undef>, same as in the example above.
 
