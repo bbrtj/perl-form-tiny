@@ -42,3 +42,46 @@ sub filter
 }
 
 1;
+
+__END__
+
+=head1 NAME
+
+Form::Tiny::Filter - a representation of filtering condition
+
+=head1 SYNOPSIS
+
+	# in your form class
+	sub build_filters
+	{
+		return (
+			# the following will be coerced into Form::Tiny::Filter
+			# [ type, filtering sub ]
+			[Str, sub { ... }],
+		);
+	}
+
+=head1 DESCRIPTION
+
+This is a simple class which stores a L<Type::Tiny> type and a sub which will perform the filtering.
+
+=head1 ATTRIBUTES
+
+=head2 type
+
+A Type::Tiny type that will be checked against.
+
+Required.
+
+=head2 code
+
+A code reference accepting a single scalar and performing the filtering. The scalar will already be checked against the type.
+
+Required.
+=head1 METHODS
+
+=head2 filter
+
+Accepts a single scalar, checks if it matches the type and runs the code reference with it as an argument.
+
+The return value is the scalar value, either changed or unchanged.
