@@ -5,6 +5,17 @@ use Types::Standard qw(Bool);
 
 use Form::Tiny::Error;
 use Form::Tiny::FieldDefinition;
+
+sub join_path
+{
+	my ($path) = @_;
+	my $nesting_separator = $Form::Tiny::FieldDefinition::nesting_separator;
+
+	my $sep = quotemeta $nesting_separator;
+	@$path = map { s/$sep/\\$nesting_separator/g; $_ } @$path;
+	return join $nesting_separator, @$path;
+}
+
 use Moo::Role;
 
 our $VERSION = '1.00';
@@ -30,7 +41,7 @@ sub _check_recursive
 	my ($self, $data, $meta, $path) = @_;
 	$path //= [];
 
-	my $current_path = Form::Tiny::FieldDefinition->join_path($path);
+	my $current_path = join_path($path);
 	my $metadata = $meta->{$current_path} // "";
 
 	return if $metadata eq META_SKIP;
@@ -73,14 +84,12 @@ sub _check_strict
 			$meta{$def->name} = META_LEAF;
 		}
 
-		if ($def->want_array) {
-			my @path = $def->get_name_path;
-			for my $i (0 .. $#path) {
-				my $el = $path[$i];
-				if ($el eq $Form::Tiny::FieldDefinition::array_marker) {
-					my @current_path = @path[0 .. $i - 1];
-					$meta{Form::Tiny::FieldDefinition->join_path(\@current_path)} = META_ARRAY;
-				}
+		my @path = $def->get_name_path;
+		for my $i (0 .. $#path) {
+			my $el = $path[$i];
+			if ($el eq $Form::Tiny::FieldDefinition::array_marker) {
+				my @current_path = @path[0 .. $i - 1];
+				$meta{join_path(\@current_path)} = META_ARRAY;
 			}
 		}
 	}

@@ -56,7 +56,7 @@ has "message" => (
 has "data" => (
 	is => "ro",
 	writer => "set_data",
-	predicate => "has_data",
+	predicate => 1,
 );
 
 sub BUILD
@@ -91,24 +91,6 @@ sub get_name_path
 	my $sep = quotemeta $nesting_separator;
 	my @parts = split /(?<!\\)$sep/, $self->name;
 	return map { s/\\$sep/$nesting_separator/g; $_ } @parts;
-}
-
-sub want_array
-{
-	my ($self) = @_;
-
-	my $sep = quotemeta $nesting_separator;
-	my $arr = quotemeta $array_marker;
-	return $self->name =~ /$sep $arr ($sep | \z)/x;
-}
-
-sub join_path
-{
-	my ($self, $path) = @_;
-
-	my $sep = quotemeta $nesting_separator;
-	@$path = map { s/$sep/\\$nesting_separator/g; $_ } @$path;
-	return join $nesting_separator, @$path;
 }
 
 sub hard_required
@@ -198,3 +180,110 @@ sub validate
 }
 
 1;
+
+__END__
+
+=head1 NAME
+
+Form::Tiny::FieldDefinition - a class representing field to be validated
+
+=head1 SYNOPSIS
+
+	# you usually don't have to do this by hand, see examples in Form::Tiny::Manual
+	# name is the only required attribute
+	my $definition = Form::Tiny::FieldDefinition->new(
+		name => "something",
+		...
+	);
+
+=head1 DESCRIPTION
+
+Main class of the Form::Tiny system - this is a role that provides most of the module's functionality.
+
+=head1 ATTRIBUTES
+
+Each of the attributes can be accessed by calling its name as a function on Form::Tiny::FieldDefinition object. See L<Form::Tiny::Manual> for more in depth examples.
+
+=head2 name
+
+A string which should specify the hash structure path of the field.
+
+Special characters are:
+
+=over
+
+=item * dot [.], which specifies nesting. Can be escaped with backslash [\]
+
+=item * star [*], which specifies any number of array elements, but only if it is the only character on level, like a.*.b
+
+=back
+
+=head2 required
+
+A field is not required by default (value 0), which means that its absence does not produce an error.
+
+A field can also be soft required ("soft") or hard required ("hard" or 1).
+
+Soft required field errors only if it is undefined or not present in the input data.
+
+Hard required field also checks if the field is not an empty string.
+
+=head2 type
+
+A type is where you can plug in a Type::Tiny check. It has to be an instance of a class that provider I<validate> and I<check> methods, just like Type::Tiny. This can also be a different Form::Tiny form instance.
+
+B<predicate:> I<has_type>
+
+=head2 coerce
+
+Coercions take place just before the validation. By default, values are not coerced. Specifying value I<1> will turn on coercions from the type object.
+
+It can also be a code reference which will be called to coerce the value.
+
+=head2 adjust
+
+Adjustments take place just after the validation. By default, values are not adjusted. You can specify a code reference which will be called to adjust the value (change the value after the validation).
+
+B<predicate:> I<is_adjusted>
+
+B<writer:> I<set_adjustment>
+
+=head2 message
+
+If type class error messages are not helpful enough, you can specify your own message string which will be inserted into form errors if the validation for the field fails.
+
+B<predicate:> I<has_message>
+
+=head2 data
+
+Custom data for the field. Can be anything and will not be used by Form::Tiny system itself. It should be anything that will help user's own system use the form instance.
+
+B<writer:> I<set_data>
+
+B<predicate:> I<has_data>
+
+=head1 METHODS
+
+=head2 is_subform
+
+Checks if the field definition's type is a form - mixes in L<Form::Tiny::Form> role.
+
+=head2 get_name_path
+
+Parses and returns the name of the field as an array - a path to get the value in a hash.
+
+=head2 hard_required
+
+Checks if the field is hard-required (any of the two values which are allowed for this flag)
+
+=head2 get_coerced
+
+Coerces and returns a scalar value, according to the definition.
+
+=head2 get_adjusted
+
+Adjusts and returns a scalar value, according to the definition.
+
+=head2 validate
+
+Validates a scalar value. Arguments are C<$parent_form, $field_value>. Returns a boolean, whether the validation passed.
