@@ -4,16 +4,6 @@ use v5.10; use warnings;
 use Types::Standard qw(Str ArrayRef InstanceOf);
 
 use Form::Tiny::Filter;
-
-sub trim
-{
-	my ($value) = @_;
-	$value =~ s/\A\s+//;
-	$value =~ s/\s+\z//;
-
-	return $value;
-}
-
 use Moo::Role;
 
 our $VERSION = '1.00';
@@ -34,9 +24,22 @@ has "filters" => (
 	writer => "set_filters",
 );
 
+sub trim
+{
+	my ($self, $value) = @_;
+	$value =~ s/\A\s+//;
+	$value =~ s/\s+\z//;
+
+	return $value;
+}
+
 sub build_filters
 {
-	[Str, \&trim]
+	my ($self) = @_;
+
+	return (
+		[Str, sub { $self->trim(@_) }],
+	);
 }
 
 sub _apply_filters
