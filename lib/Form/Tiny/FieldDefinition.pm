@@ -53,6 +53,12 @@ has "message" => (
 	predicate => 1,
 );
 
+has "data" => (
+	is => "ro",
+	writer => "set_data",
+	predicate => "has_data",
+);
+
 sub BUILD
 {
 	my ($self, $args) = @_;

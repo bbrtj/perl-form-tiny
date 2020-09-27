@@ -534,4 +534,28 @@ Be aware of a special case, an adjustment will be inserted here automatically li
 
 this will make sure that any coercions and adjustments made in the nested form will be added to the outer form as well. If you want to specify your own adjustment here, make sure to use the data provided by the I<fields> method of the nested form.
 
-TODO extra data to fields
+=head3 Extra data for fields
+
+While building your form fields, it's possible to save some extra data along with each field. This data can be used to hint the user what to input, insert some HTML generation objects or hints on how to fill the field properly.
+
+	use Types::Common::String qw(NonEmptySimpleStr);
+
+	sub build_fields {
+		return ({
+			name => "first name",
+			type => NonEmptySimpleStr,
+			data => {
+				element => "input",
+				properties => {
+					type => "text",
+				},
+			},
+		});
+	}
+
+The data field can hold any value you want and later retrieved with an instantiated form object:
+
+	for my $def (@{$form->field_defs}) {
+		say "field: " . $def->name;
+		say "data: " . Dumper($def->data);
+	}
