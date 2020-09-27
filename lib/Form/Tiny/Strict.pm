@@ -104,10 +104,10 @@ sub _check_strict
 around "pre_validate" => sub {
 	my ($orig, $self, $input) = @_;
 
-	$input = $self->$orig($input);
 	if ($self->strict) {
 		$self->_check_strict($input);
 	}
+	$input = $self->$orig($input);
 
 	return $input;
 };

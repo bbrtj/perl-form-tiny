@@ -56,8 +56,8 @@ sub _apply_filters
 around "pre_mangle" => sub {
 	my ($orig, $self, $def, $value) = @_;
 
-	$value = $self->$orig($def, $value);
-	return $self->_apply_filters($value);
+	$value = $self->_apply_filters($value);
+	return $self->$orig($def, $value);
 };
 
 1;
