@@ -63,7 +63,7 @@ for my $aref (@data) {
 	my ($result, $input, $output) = @$aref;
 	$output //= $input;
 
-	my $form = TestForm->new($input);
+	my $form = TestForm->new(input => $input);
 	is !!$form->valid, !!$result, "validation output ok";
 
 	if ($form->valid) {

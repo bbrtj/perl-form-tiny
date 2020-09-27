@@ -44,13 +44,18 @@ sub build_fields
 
 sub build_cleaner
 {
-	my ($self, $data) = @_;
-	if (exists $data->{bool_cleaned}) {
-		$self->add_error(
-			Form::Tiny::Error->new(field => "bool_cleaned", error => "bool needs to be true")
-		) unless $data->{bool_cleaned};
-		$data->{bool_cleaned} = "Yes";
-	}
+	my ($self) = @_;
+
+	return sub {
+		my ($self, $data) = @_;
+
+		if (exists $data->{bool_cleaned}) {
+			$self->add_error(
+				Form::Tiny::Error->new(field => "bool_cleaned", error => "bool needs to be true")
+			) unless $data->{bool_cleaned};
+			$data->{bool_cleaned} = "Yes";
+		}
+	};
 }
 
 1;

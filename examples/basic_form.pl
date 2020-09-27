@@ -55,17 +55,19 @@ use Data::Dumper;
 
 	sub build_cleaner
 	{
-		my ($self, $data) = @_;
+		return sub {
+			my ($self, $data) = @_;
 
-		$self->add_error(
-			Form::Tiny::Error::DoesNotValidate->new(error => "passwords are not identical")
-		) if $data->{password} ne $data->{repeat_password};
+			$self->add_error(
+				Form::Tiny::Error::DoesNotValidate->new(error => "passwords are not identical")
+			) if $data->{password} ne $data->{repeat_password};
+		};
 	}
 
 	1;
 }
 
-my $form = RegistationForm->new({
+my $form = RegistationForm->new(input => {
 		username => "perl",
 		password => "meperl-5",
 		repeat_password => "meperl-5",

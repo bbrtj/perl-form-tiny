@@ -50,7 +50,7 @@ my @data = (
 for my $aref (@data) {
 	my ($result, $input, $expected) = @$aref;
 
-	my $form = TestForm->new($input);
+	my $form = TestForm->new(input => $input);
 	is !!$form->valid, !!$result, "validation output ok";
 	if ($form->valid && $expected) {
 		is_deeply $form->fields, $expected, "result values ok";

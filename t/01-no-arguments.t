@@ -32,7 +32,7 @@ my @data = (
 
 for my $aref (@data) {
 	my ($input, $ignore) = @$aref;
-	my $form = TestForm->new($input);
+	my $form = TestForm->new(input => $input);
 	ok $form->valid, "validation output ok";
 	for my $field (keys %$input) {
 		if (!defined $ignore || !$ignore->{$field}) {

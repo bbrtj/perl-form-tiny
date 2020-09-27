@@ -19,7 +19,7 @@ my @data = (
 for my $aref (@data) {
 	my ($result, $input) = @$aref;
 	note Dumper($input);
-	my $form = TestForm->new($input);
+	my $form = TestForm->new(input => $input);
 	is !!$form->valid, !!$result, "validation output ok";
 	if ($form->valid && $result) {
 		is_deeply $form->fields, $input, "hash contents ok";

@@ -49,7 +49,7 @@ my @data = (
 
 for my $aref (@data) {
 	my ($result, $input) = @$aref;
-	my $form = OuterForm->new($input);
+	my $form = OuterForm->new(input => $input);
 	is !!$form->valid, !!$result, "validation output ok";
 	note Dumper($input);
 	note Dumper($form->errors);

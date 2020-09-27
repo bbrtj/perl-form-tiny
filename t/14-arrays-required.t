@@ -34,7 +34,7 @@ for my $aref (@data) {
 	my ($result, $input, $expected) = @$aref;
 	$expected //= $input;
 
-	my $form = TestForm->new($input);
+	my $form = TestForm->new(input => $input);
 	is !!$form->valid, !!$result, "validation output ok";
 	if ($form->valid && $result) {
 		note Dumper($form->fields);

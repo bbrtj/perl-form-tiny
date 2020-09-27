@@ -21,7 +21,7 @@ my @data = (
 
 for my $aref (@data) {
 	my ($result, $input) = @$aref;
-	my $form = TestForm->new($input);
+	my $form = TestForm->new(input => $input);
 	is !!$form->valid, !!$result, "validation output ok";
 	for my $error (@{$form->errors}) {
 		like($error->field, qr/^nested_form(\..+?)*$/, "error namespace valid");
