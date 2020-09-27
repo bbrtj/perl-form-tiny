@@ -8,6 +8,7 @@ use Scalar::Util qw(blessed);
 
 use Form::Tiny::FieldDefinition;
 use Form::Tiny::Error;
+use Form::Tiny::FieldData;
 use Moo::Role;
 
 our $VERSION = '1.00';
@@ -93,75 +94,93 @@ sub pre_validate { $_[1] }
 
 sub _mangle_field
 {
-	my ($self, $def, $current) = @_;
+	my ($self, $def, $path_value) = @_;
+
+	my $current = $path_value->value;
 
 	# if the parameter is required (hard), we only consider it if not empty
-	if (!$def->hard_required || ref $$current || length($$current // "")) {
+	if (!$def->hard_required || ref $current || length($current // "")) {
 
 		# coerce, validate, adjust
-		$$current = $def->get_coerced($$current);
-		if ($def->validate($self, $$current)) {
-			$$current = $def->get_adjusted($$current);
+		$current = $def->get_coerced($current);
+		if ($def->validate($self, $current)) {
+			$current = $def->get_adjusted($current);
 		}
+
+		$path_value->set_value($current);
 		return 1;
 	}
-	return 0;
+
+	return;
 }
 
 sub _find_field
 {
 	my ($self, $fields, $field_def) = @_;
 
-	my @parts = $field_def->get_name_path;
-	my %search_in = ("" => $fields);
-	my $valid = 0;
+	my @found;
+	my $traverser; $traverser = sub {
+		my ($curr_path, $next_path, $value) = @_;
 
-	for my $i (0 .. $#parts) {
+		if (@$next_path == 0) {
+			push @found, [$curr_path, $value];
+		}
+		else {
+			my $next = shift @$next_path;
+			my $want_array = $next eq $Form::Tiny::FieldDefinition::array_marker;
 
-		my %new_search;
-		my $want_array = $parts[$i] eq $Form::Tiny::FieldDefinition::array_marker;
+			if ($want_array && ref $value eq ref []) {
+				for my $index (0 .. $#$value) {
+					return # may be an error, exit early
+						unless $traverser->([@$curr_path, $index], [@$next_path], $value->[$index]);
+				}
 
-		for my $key (keys %search_in) {
-			my $el = $search_in{$key};
-
-			if ($want_array && ref $el eq ref []) {
-				for my $index (0 .. $#$el) {
-					$new_search{"$key,$index"} = $el->[$index];
+				if (@$value == 0) {
+					if (@$next_path > 0) {
+						return;
+					} else {
+						# we had aref here, so we want it back in resulting hash
+						push @found, [$curr_path, [], 1];
+					}
 				}
 			}
-			elsif (ref $el eq ref {} && exists $el->{$parts[$i]}) {
-				$new_search{$key} = $el->{$parts[$i]};
+			elsif (!$want_array && ref $value eq ref {} && exists $value->{$next}) {
+				push @$curr_path, $next;
+				return $traverser->($curr_path, $next_path, $value->{$next});
+			}
+			else {
+				return;
 			}
 		}
 
-		%search_in = %new_search;
-	}
+		return 1; # all ok
+	};
 
-	return if !%search_in;
-	return \%search_in;
+	my @parts = $field_def->get_name_path;
+	if ($traverser->([], \@parts, $fields)) {
+		return Form::Tiny::FieldData->new(items => \@found);
+	}
+	return;
 }
 
 sub _assign_field
 {
-	my ($self, $fields, $field_def, $array_path, $val_ref) = @_;
+	my ($self, $fields, $field_def, $path_value) = @_;
 
-	my @parts = $field_def->get_name_path;
+	my @arrays = map { $_ eq $Form::Tiny::FieldDefinition::array_marker } $field_def->get_name_path;
+	my @parts = @{$path_value->path};
 	my $current = \$fields;
 	for my $i (0 .. $#parts) {
-		my $want_array = $parts[$i] eq $Form::Tiny::FieldDefinition::array_marker;
-
-		if ($want_array) {
-			$current = \$$current->[shift @$array_path];
+		# array_path will contain array indexes for each array marker
+		if ($arrays[$i]) {
+			$current = \${$current}->[$parts[$i]];
 		}
 		else {
-			$current = \$$current->{$parts[$i]};
-		}
-
-		if ($i == $#parts) {
-			$$current = $val_ref;
-			return $current;
+			$current = \${$current}->{$parts[$i]};
 		}
 	}
+
+	$$current = $path_value->value;
 }
 
 sub _validate
@@ -175,18 +194,17 @@ sub _validate
 		foreach my $validator (@{$self->field_defs}) {
 			my $curr_f = $validator->name;
 
-			my $current_href = $self->_find_field($fields, $validator);
-			if (defined $current_href) {
+			my $current_data = $self->_find_field($fields, $validator);
+			if (defined $current_data) {
 				my $all_ok = 1;
 
-				foreach my $current_apath (keys %$current_href) {
-					my $current = $current_href->{$current_apath};
-					my @array_path = grep length, split /,/, $current_apath;
-
-					$current = $self->_assign_field($dirty, $validator, \@array_path, $current);
-					$$current = $self->pre_mangle($validator, $$current);
-
-					$all_ok = $self->_mangle_field($validator, $current) && $all_ok;
+				# This may have multiple iterations only if there's an array
+				foreach my $path_value (@{$current_data->items}) {
+					unless ($path_value->structure) {
+						$path_value->set_value($self->pre_mangle($validator, $path_value->value));
+						$all_ok = $self->_mangle_field($validator, $path_value) && $all_ok;
+					}
+					$self->_assign_field($dirty, $validator, $path_value);
 				}
 
 				# found and valid, go to the next field
@@ -470,7 +488,7 @@ This is the default behavior of a dot in a field name, so if what you want is th
 
 Nesting adds many new options, but it can only handle hashes. Regular arrays can of course be handled by I<ArrayRef> type from Type::Tiny, but that's a hassle. Instead, you can use a star (I<*>) as the only element inside the nesting segment to expect an array there. Adding named fields can be resumed after that, but needn't.
 
-For example, C<< name => "arr.*.some_key" >> expects I<arr> to be an array reference, with each element being a hash reference containing a key I<some_key>. Note that each array element that fails to contain any nested hash elements will be set to C<undef>. If you want the validation to fail instead, you need to make the nested element required.
+For example, C<< name => "arr.*.some_key" >> expects I<arr> to be an array reference, with each element being a hash reference containing a key I<some_key>. Note that any array element that fails to contain wanted hash elements will cause the field to be ignored in the output (since input does not meet the specification entirely). If you want the validation to fail instead, you need to make the nested element required.
 
 	# This input data ...
 	{
@@ -494,8 +512,6 @@ For example, C<< name => "arr.*.some_key" >> expects I<arr> to be an array refer
 
 Other example is two nested arrays that not necessarily contain a hash at the end: C<< name => "arr.*.*" >>. The leaf values here can be simple scalars. Empty array elements will be turned to C<undef>, same as in the example above.
 
-In general, it is a good idea to keep values nested in arrays required, so that you'll be sure no C<undef> values will sneak in when the n-th value does not meet the requirements. This behavior is in line with Form::Tiny policy of getting as much data as possible, but let me know if the undef values are problematic in ways that required values do not fix.
-
 =head3 Nested forms
 
 Every form class created with the I<Form::Tiny> role mixed in can be used as a field definition type in other form. The outer and inner forms will validate independently, but inner form errors will be added to outer form with the outer field name prepended.
@@ -510,7 +526,7 @@ Every form class created with the I<Form::Tiny> role mixed in can be used as a f
 		});
 	}
 
-Note that an adjustment will be inserted here automatically, in form of:
+Be aware of a special case, an adjustment will be inserted here automatically like the following:
 
 	adjust => sub { $instance->fields }
 
