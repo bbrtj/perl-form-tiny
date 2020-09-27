@@ -1,4 +1,4 @@
-use 5.010000;
+use 5.010001;
 use strict;
 use warnings;
 use ExtUtils::MakeMaker;
@@ -6,7 +6,7 @@ use ExtUtils::MakeMaker;
 WriteMakefile(
 	NAME => 'Form::Tiny',
 	VERSION_FROM => 'lib/Form/Tiny.pm',
-	MIN_PERL_VERSION => '5.010',
+	MIN_PERL_VERSION => '5.010001',
 
 	TEST_REQUIRES => {
 		'Test::Exception' => "0",

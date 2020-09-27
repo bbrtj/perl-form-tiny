@@ -67,7 +67,8 @@ use Data::Dumper;
 	1;
 }
 
-my $form = RegistationForm->new(input => {
+my $form = RegistationForm->new(
+	input => {
 		username => "perl",
 		password => "meperl-5",
 		repeat_password => "meperl-5",
