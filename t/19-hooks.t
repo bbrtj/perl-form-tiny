@@ -1,8 +1,7 @@
 use v5.10; use warnings;
 use Test::More;
 use Data::Dumper;
-
-BEGIN { use_ok('Form::Tiny') }
+use Form::Tiny;
 
 {
 
@@ -45,8 +44,7 @@ my @data = (
 	[1, {}, {}],
 	[1, {name => [2, 3]}, {name => [21, 31]}],
 	[1, {name => [0, undef, 3]}, {name => ["01", 31]}],
-	[1, {name => [undef, undef, undef]}, {}],
-	[0, {name => {}}],
+	[1, {name => [undef, undef, undef]}, {name => []}],
 );
 
 for my $aref (@data) {

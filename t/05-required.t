@@ -1,7 +1,6 @@
 use v5.10; use warnings;
 use Test::More;
-
-BEGIN { use_ok('Form::Tiny::Inline') }
+use Form::Tiny::Inline;
 
 my @valid_data_hard = (
 	{arg => "test"},

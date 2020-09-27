@@ -2,8 +2,7 @@ use v5.10; use warnings;
 use Test::More;
 use Data::Dumper;
 use lib 't/lib';
-
-BEGIN { use_ok('TestForm') }
+use TestForm;
 
 my @data = (
 	[1, {nested_form => {int => 5}}],

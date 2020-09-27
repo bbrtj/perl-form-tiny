@@ -1,6 +1,6 @@
 use v5.10; use warnings;
 use Test::More;
-BEGIN { use_ok('Form::Tiny::Inline') }
+use Form::Tiny::Inline;
 
 # test for invalid format rejection
 for my $input ([], 0, "", "a", \1, sub { }) {

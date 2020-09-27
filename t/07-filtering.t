@@ -1,9 +1,9 @@
 use v5.10; use warnings;
 use Test::More;
 use Types::Standard qw(Int);
+use Form::Tiny::Inline;
 
 BEGIN {
-	use_ok('Form::Tiny::Inline');
 	use_ok('Form::Tiny::Filtered');
 }
 

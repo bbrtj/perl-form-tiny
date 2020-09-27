@@ -1,8 +1,7 @@
 use v5.10; use warnings;
 use Test::More;
 use Data::Dumper;
-
-BEGIN { use_ok('Form::Tiny') }
+use Form::Tiny;
 
 {
 

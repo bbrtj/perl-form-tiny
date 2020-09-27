@@ -1,8 +1,7 @@
 use v5.10; use warnings;
 use Test::More;
 use Types::Standard qw(Int);
-
-BEGIN { use_ok('Form::Tiny::Inline') }
+use Form::Tiny::Inline;
 
 my $form = Form::Tiny::Inline->is(qw(Strict))->new(
 	field_defs => [{name => "test", type => Int, required => 1}],

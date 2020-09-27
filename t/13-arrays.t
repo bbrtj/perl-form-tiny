@@ -8,8 +8,9 @@ my @data = (
 	[1, {array => [{name => "a"}, {name => "b"}]}],
 	[
 		1,
+		# since not every array element meets our criteria, we ignore the field altogether
 		{array => [{name => "a"}, {}, {name => "b"}]},
-		{array => [{name => "a"}, undef, {name => "b"}]}
+		{},
 	],
 	[
 		1, {
@@ -21,7 +22,7 @@ my @data = (
 	],
 
 	[1, {marray => [[1, 2], [3, 4]]}],
-	[1, {marray => [[], [3, 4, -1]]}, {marray => [undef, [3, 4, -1]]}],
+	[1, {marray => [[], [3, 4, -1]]}, {marray => [[], [3, 4, -1]]}],
 
 	# we still keep it strict
 	[0, {array => [{name => "x", unknown_name => "a"}, {name => "b"}]}],
@@ -32,6 +33,7 @@ my @data = (
 	[0, {array => {name => "x"}}],
 
 	[0, {marray => [[3, 4, -1], ["test"]]}],
+	[0, {marray => {}}],
 );
 
 for my $aref (@data) {
