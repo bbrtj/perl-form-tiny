@@ -131,14 +131,15 @@ sub _find_field
 
 			if ($want_array && ref $value eq ref []) {
 				for my $index (0 .. $#$value) {
-					return # may be an error, exit early
+					return    # may be an error, exit early
 						unless $traverser->([@$curr_path, $index], [@$next_path], $value->[$index]);
 				}
 
 				if (@$value == 0) {
 					if (@$next_path > 0) {
 						return;
-					} else {
+					}
+					else {
 						# we had aref here, so we want it back in resulting hash
 						push @found, [$curr_path, [], 1];
 					}
@@ -153,7 +154,7 @@ sub _find_field
 			}
 		}
 
-		return 1; # all ok
+		return 1;    # all ok
 	};
 
 	my @parts = $field_def->get_name_path;
@@ -171,6 +172,7 @@ sub _assign_field
 	my @parts = @{$path_value->path};
 	my $current = \$fields;
 	for my $i (0 .. $#parts) {
+
 		# array_path will contain array indexes for each array marker
 		if ($arrays[$i]) {
 			$current = \${$current}->[$parts[$i]];

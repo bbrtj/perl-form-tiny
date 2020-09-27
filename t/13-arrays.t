@@ -8,6 +8,7 @@ my @data = (
 	[1, {array => [{name => "a"}, {name => "b"}]}],
 	[
 		1,
+
 		# since not every array element meets our criteria, we ignore the field altogether
 		{array => [{name => "a"}, {}, {name => "b"}]},
 		{},

@@ -11,14 +11,18 @@ our $VERSION = '1.00';
 
 has "items" => (
 	is => "ro",
-	isa => ArrayRef[(InstanceOf["Form::Tiny::PathValue"])
-		->plus_coercions([ArrayRef, q{
-			Form::Tiny::PathValue->new(
-				path => shift @$_,
-				value => shift @$_,
-				structure => shift @$_
-			)
-		}])
+	isa => ArrayRef [
+		(InstanceOf ["Form::Tiny::PathValue"])
+		->plus_coercions([
+				ArrayRef, q{
+					Form::Tiny::PathValue->new(
+						path => shift @$_,
+						value => shift @$_,
+						structure => shift @$_
+					)
+				}
+			]
+		)
 	],
 	coerce => 1,
 );
