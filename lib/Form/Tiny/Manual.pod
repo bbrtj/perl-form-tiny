@@ -184,11 +184,11 @@ The module provides two roles which use these mechanisms to achieve common tasks
 
 =over
 
-=item L<Form::Tiny::Strict>
+=item * L<Form::Tiny::Strict>
 
 Enables strict mode for the form. Validation will fail if the form input contains any data not specified in the field definitions.
 
-=item L<Form::Tiny::Filtered>
+=item * L<Form::Tiny::Filtered>
 
 Enables initial filtering for the input fields. By default, this will only cause strings to be trimmed, but any code can be attached to any field that meets a given type constraint. See the role documentation for details
 
@@ -293,8 +293,8 @@ The data field can hold any value you want and later retrieved with an instantia
 
 =over
 
-=item L<Type::Tiny>, the awesome type system
+=item * L<Type::Tiny>, the awesome type system
 
-=item L<Form::Tiny>, the base class for this distribution
+=item * L<Form::Tiny>, the base class for this distribution
 
 =back
