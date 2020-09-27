@@ -87,3 +87,22 @@ sub as_string
 }
 
 1;
+
+__END__
+
+=head1 NAME
+
+Form::Tiny::Error - form validation process error
+
+=head1 SYNOPSIS
+
+	my $field = $error->field; # field name or undef
+	my $error = $error->error; # error message or nested error object
+
+	my $message = $error->as_string;
+
+=head1 DESCRIPTION
+
+Form errors feature field name which caused validation error, error message and automatic stringification.
+
+The C<< $error->error >> can return a nested error object in case of nested forms.
