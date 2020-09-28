@@ -6,7 +6,7 @@ use Types::Standard qw(ArrayRef);
 
 use namespace::clean;
 
-our $VERSION = '1.00';
+our $VERSION = '1.01';
 
 has "path" => (
 	is => "ro",

@@ -11,7 +11,7 @@ use Form::Tiny::Error;
 use Form::Tiny::FieldData;
 use Moo::Role;
 
-our $VERSION = '1.00';
+our $VERSION = '1.01';
 
 with "Form::Tiny::Form";
 
