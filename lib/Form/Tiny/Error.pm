@@ -92,12 +92,17 @@ __END__
 
 =head1 NAME
 
-Form::Tiny::Error - form validation process error
+Form::Tiny::Error - form error wrapper
 
 =head1 SYNOPSIS
 
+	my $error = Form::Tiny::Error::DoesNotValidate->new(
+		field => "some_field",
+		error => "some message"
+	);
+
 	my $field = $error->field; # field name or undef
-	my $error = $error->error; # error message or nested error object
+	my $data = $error->error; # error message or nested error object
 
 	my $message = $error->as_string;
 
@@ -106,3 +111,17 @@ Form::Tiny::Error - form validation process error
 Form errors feature field name which caused validation error, error message and automatic stringification.
 
 The C<< $error->error >> can return a nested error object in case of nested forms.
+
+A couple of in-place subclasses are provided to differentiate the type of error which occured. There are:
+
+=over
+
+=item * Form::Tiny::Error::InvalidFormat
+
+=item * Form::Tiny::Error::DoesNotExist
+
+=item * Form::Tiny::Error::IsntStrict
+
+=item * Form::Tiny::Error::DoesNotValidate
+
+=back

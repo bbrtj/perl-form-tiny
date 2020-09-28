@@ -57,7 +57,7 @@ Form::Tiny::Filter - a representation of filtering condition
 		return (
 			# the following will be coerced into Form::Tiny::Filter
 			# [ type, filtering sub ]
-			[Str, sub { ... }],
+			[Str, sub { uc shift() }],
 		);
 	}
 
@@ -78,6 +78,7 @@ Required.
 A code reference accepting a single scalar and performing the filtering. The scalar will already be checked against the type.
 
 Required.
+
 =head1 METHODS
 
 =head2 filter

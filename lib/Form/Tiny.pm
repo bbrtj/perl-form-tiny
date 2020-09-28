@@ -369,7 +369,7 @@ An optional cleaner is a function that will be called as the very last step of t
 
 Using I<add_error> inside this function will cause the form to fail the validation process.
 
-In I<build_cleaner> method you're required to return a subroutine reference that will be called with two arguments: a form being validated and a set of "dirty" fields - validated and ready to be cleaned.
+In I<build_cleaner> method you're required to return a subroutine reference that will be called with two arguments: a form being validated and a set of "dirty" fields - validated and ready to be cleaned. This subroutine should not return the data - its return value will be discarded.
 
 =head2 pre_mangle
 

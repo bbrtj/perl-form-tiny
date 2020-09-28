@@ -185,7 +185,7 @@ __END__
 
 =head1 NAME
 
-Form::Tiny::FieldDefinition - a class representing field to be validated
+Form::Tiny::FieldDefinition - definition of a field to be validated
 
 =head1 SYNOPSIS
 
@@ -193,6 +193,7 @@ Form::Tiny::FieldDefinition - a class representing field to be validated
 	# name is the only required attribute
 	my $definition = Form::Tiny::FieldDefinition->new(
 		name => "something",
+		type => Str,
 		...
 	);
 

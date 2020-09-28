@@ -66,7 +66,7 @@ __END__
 
 =head1 NAME
 
-Form::Tiny::Filtered - data filter before validation
+Form::Tiny::Filtered - early filtering for form fields
 
 =head1 SYNOPSIS
 

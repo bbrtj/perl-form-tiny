@@ -40,11 +40,11 @@ Form::Tiny::Manual - reference for working with Form::Tiny
 
 =head1 DESCRIPTION
 
-Form::Tiny is a form validation engine that can use all the type constraints you're already familiar with. The module does not ship with any field definitions on its own, instead it provides tools to reuse any type constraints from L<Type::Tiny> and other similar systems.
+L<Form::Tiny> is a form validation engine that can use all the type constraints you're already familiar with. The module does not ship with any field definitions on its own, instead it provides tools to reuse any type constraints from L<Type::Tiny> and other similar systems.
 
 =head2 Policy
 
-Form::Tiny is designed to be a comprehensive data validation and filtering system based on existing validation solutions. Type::Tiny libraries cover most of the validation and coercion needs in models, and now with Form::Tiny they can be empowered to do the same with input data.
+L<Form::Tiny> is designed to be a comprehensive data validation and filtering system based on existing validation solutions. Type::Tiny libraries cover most of the validation and coercion needs in models, and now with Form::Tiny they can be empowered to do the same with input data.
 
 The module itself isn't much more than a hashref filter - it accepts one as input and returns the transformed one as output. The pipeline is as follows:
 
@@ -139,6 +139,32 @@ I<1> or I<"hard"> - The field has to exist in the input, must be defined and non
 
 A static string that should be output instead of an error message returned by the I<type> when the validation fails.
 
+=item data
+
+While building your form fields, it's possible to save some extra data along with each field. This data can be used to prompt the user what to input, insert some HTML generation objects or store hints on how to fill the field properly.
+
+	use Types::Common::String qw(NonEmptySimpleStr);
+
+	sub build_fields {
+		return ({
+			name => "first name",
+			type => NonEmptySimpleStr,
+			data => {
+				element => "input",
+				properties => {
+					type => "text",
+				},
+			},
+		});
+	}
+
+The data field can hold any value you want and later retrieved with an instantiated form object:
+
+	for my $def (@{$form->field_defs}) {
+		say "field: " . $def->name;
+		say "data: " . Dumper($def->data);
+	}
+
 =back
 
 =head2 Cleaning
@@ -165,7 +191,7 @@ B<pre_mangle> is fired for every field, just before it is changed ("mangled"). I
 	sub pre_mangle {
 		my ($self, $field_definition, $value) = @_;
 
-		// do something with $value
+		# do something with $value
 
 		return $value;
 	}
@@ -175,7 +201,7 @@ B<pre_validate> is fired just once for the form, before any field is validated. 
 	sub pre_validate {
 		my ($self, $input_data) = @_;
 
-		// do something with $input_data
+		# do something with $input_data
 
 		return $input_data;
 	}
@@ -199,8 +225,8 @@ Enables initial filtering for the input fields. By default, this will only cause
 The module also enables a way to create a form without the need of a dedicated package. This is done with the L<Form::Tiny::Inline> class. This requires the user to pass all the data to the constructor, as shown in the example:
 
 	my $form = Form::Tiny::Inline # An inline form ...
-		        ->is(qw/Strict/)   # ... with the strict role mixed in ...
-		        ->new(             # ... will be created with properties:
+	           ->is(qw/Strict/)   # ... with the strict role mixed in ...
+	           ->new(             # ... will be created with properties:
 		field_defs => [{name => "my_field"}],
 		cleaner => sub { ... },
 	);
@@ -230,18 +256,10 @@ For example, C<< name => "arr.*.some_key" >> expects I<arr> to be an array refer
 		]
 	}
 
-	# Would become ...
-	{
-		arr => [
-			{ some_key => 1 },
-			undef,
-			{ some_key => 3 },
-		]
-	}
-
+	# Would not get copied into output and ignored, because the second element does not meet the specification
 	# Make the element required to make the validation fail instead
 
-Other example is two nested arrays that not necessarily contain a hash at the end: C<< name => "arr.*.*" >>. The leaf values here can be simple scalars. Empty array elements will be turned to C<undef>, same as in the example above.
+Other example is two nested arrays that not necessarily contain a hash at the end: C<< name => "arr.*.*" >>. The leaf values here can be simple scalars.
 
 =head3 Nested forms
 
@@ -262,32 +280,6 @@ Be aware of a special case, an adjustment will be inserted here automatically li
 	adjust => sub { $instance->fields }
 
 this will make sure that any coercions and adjustments made in the nested form will be added to the outer form as well. If you want to specify your own adjustment here, make sure to use the data provided by the I<fields> method of the nested form.
-
-=head3 Extra data for fields
-
-While building your form fields, it's possible to save some extra data along with each field. This data can be used to prompt the user what to input, insert some HTML generation objects or store hints on how to fill the field properly.
-
-	use Types::Common::String qw(NonEmptySimpleStr);
-
-	sub build_fields {
-		return ({
-			name => "first name",
-			type => NonEmptySimpleStr,
-			data => {
-				element => "input",
-				properties => {
-					type => "text",
-				},
-			},
-		});
-	}
-
-The data field can hold any value you want and later retrieved with an instantiated form object:
-
-	for my $def (@{$form->field_defs}) {
-		say "field: " . $def->name;
-		say "data: " . Dumper($def->data);
-	}
 
 =head1 SEE ALSO
 
