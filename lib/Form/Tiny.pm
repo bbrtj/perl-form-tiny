@@ -17,8 +17,6 @@ our $VERSION = '1.11';
 
 with "Form::Tiny::Form";
 
-requires qw(build_fields);
-
 has "field_defs" => (
 	is => "ro",
 	isa => ArrayRef [
@@ -27,7 +25,8 @@ has "field_defs" => (
 	],
 	coerce => 1,
 	default => sub {
-		my @data = shift->build_fields;
+		my ($self) = @_;
+		my @data = $self->can('build_fields') ? $self->build_fields : ();
 		return shift @data
 			if @data == 1 && ref $data[0] eq ref [];
 		return \@data;
@@ -151,8 +150,6 @@ sub import
 
 	{
 		no strict 'refs';
-
-		*{"${caller}::build_fields"} = $caller->can('build_fields') // sub { () };
 
 		Moo::Role->apply_roles_to_package(
 			$caller, @wanted_roles
@@ -471,7 +468,7 @@ A form instance can be customized by overriding any of the following methods:
 
 =head2 build_fields
 
-A class is required to have this method. It should return an array or array reference of field definitions: either L<Form::Tiny::FieldDefinition> instances or hashrefs which can be used to construct these instances.
+This method should return an array or array reference of field definitions: either L<Form::Tiny::FieldDefinition> instances or hashrefs which can be used to construct these instances.
 
 =head2 build_cleaner
 
