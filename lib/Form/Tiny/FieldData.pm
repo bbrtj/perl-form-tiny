@@ -8,7 +8,7 @@ use Form::Tiny::PathValue;
 
 use namespace::clean;
 
-our $VERSION = '1.01';
+our $VERSION = '1.10';
 
 has "items" => (
 	is => "ro",

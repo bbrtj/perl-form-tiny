@@ -12,7 +12,7 @@ use Form::Tiny::Error;
 
 use namespace::clean;
 
-our $VERSION = '1.01';
+our $VERSION = '1.10';
 
 our $nesting_separator = q{.};
 our $array_marker = q{*};
