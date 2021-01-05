@@ -4,6 +4,7 @@ use v5.10;
 use warnings;
 use Types::Standard qw(Bool);
 
+use Form::Tiny::Utils;
 use Form::Tiny::Error;
 use Form::Tiny::FieldDefinition;
 
@@ -95,9 +96,11 @@ sub _check_strict
 		}
 	}
 
-	local $@;
-	eval { $self->_check_recursive($input, \%meta) };
-	if ($@) {
+	my $error = try sub {
+		$self->_check_recursive($input, \%meta)
+	};
+
+	if ($error) {
 		$self->add_error(Form::Tiny::Error::IsntStrict->new);
 	}
 }
