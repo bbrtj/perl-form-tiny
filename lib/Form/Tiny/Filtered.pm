@@ -1,6 +1,7 @@
 package Form::Tiny::Filtered;
 
-use v5.10; use warnings;
+use v5.10;
+use warnings;
 use Types::Standard qw(Str ArrayRef InstanceOf);
 
 use Form::Tiny::Filter;

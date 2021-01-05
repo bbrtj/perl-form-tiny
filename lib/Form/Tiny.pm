@@ -1,6 +1,7 @@
 package Form::Tiny;
 
-use v5.10; use warnings;
+use v5.10;
+use warnings;
 use Types::Standard qw(Str Maybe ArrayRef InstanceOf HashRef Bool CodeRef);
 use Carp qw(croak);
 use Storable qw(dclone);
@@ -202,7 +203,8 @@ sub _find_field
 	my ($self, $fields, $field_def) = @_;
 
 	my @found;
-	my $traverser; $traverser = sub {
+	my $traverser;
+	$traverser = sub {
 		my ($curr_path, $next_path, $value) = @_;
 
 		if (@$next_path == 0) {

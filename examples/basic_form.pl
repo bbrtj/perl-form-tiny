@@ -1,4 +1,5 @@
-use v5.10; use warnings;
+use v5.10;
+use warnings;
 use Test::More;
 use Data::Dumper;
 
@@ -83,7 +84,8 @@ if (!$form->valid) {
 	note Dumper($form->errors);
 }
 
-$form->set_input({
+$form->set_input(
+	{
 		%{$form->input},
 		repeat_password => "eperl-55",
 	}

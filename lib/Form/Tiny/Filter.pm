@@ -1,6 +1,7 @@
 package Form::Tiny::Filter;
 
-use v5.10; use warnings;
+use v5.10;
+use warnings;
 use Moo;
 use Types::Standard qw(HasMethods CodeRef);
 use Carp qw(croak);

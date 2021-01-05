@@ -1,6 +1,7 @@
 package Form::Tiny::FieldData;
 
-use v5.10; use warnings;
+use v5.10;
+use warnings;
 use Moo;
 use Types::Standard qw(ArrayRef InstanceOf);
 use Form::Tiny::PathValue;
@@ -13,7 +14,8 @@ has "items" => (
 	is => "ro",
 	isa => ArrayRef [
 		(InstanceOf ["Form::Tiny::PathValue"])
-		->plus_coercions([
+		->plus_coercions(
+			[
 				ArrayRef, q{
 					Form::Tiny::PathValue->new(
 						path => shift @$_,

@@ -1,6 +1,7 @@
 package Form::Tiny::Error;
 
-use v5.10; use warnings;
+use v5.10;
+use warnings;
 use Moo;
 use Types::Standard qw(Maybe Str Object ArrayRef InstanceOf);
 use Carp qw(confess);
