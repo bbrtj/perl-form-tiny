@@ -381,6 +381,26 @@ Form::Tiny - Input validator implementation centered around Type::Tiny
 
 Main class of the Form::Tiny system - this is a role that provides most of the module's functionality.
 
+=head1 IMPORTING
+
+Starting with version 1.10 you can enable syntactic sugar instead of bare-bones role mixing by using import flags:
+
+	package MyForm;
+
+	use Form::Tiny -base;
+
+	# new syntax for defining form fields
+	form_field 'field' => (
+		...
+	);
+
+	# new syntax for defining a form cleaner
+	form_cleaner sub {
+		...
+	};
+
+Consult L<Form::Tiny::Manual> for more information and examples.
+
 =head1 ADDED INTERFACE
 
 This section describes the interface added to your class after mixing in the Form::Tiny role.

@@ -60,7 +60,9 @@ use Data::Dumper;
 			my ($self, $data) = @_;
 
 			$self->add_error(
-				Form::Tiny::Error::DoesNotValidate->new(error => "passwords are not identical")
+				Form::Tiny::Error::DoesNotValidate->new(
+					error => "passwords are not identical"
+				)
 			) if $data->{password} ne $data->{repeat_password};
 		};
 	}
