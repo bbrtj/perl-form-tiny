@@ -8,6 +8,7 @@ use Types::Common::String qw(NonEmptySimpleStr);
 use Carp qw(croak);
 use Scalar::Util qw(blessed);
 
+use Form::Tiny::Utils;
 use Form::Tiny::Error;
 
 use namespace::clean;
@@ -103,18 +104,32 @@ sub hard_required
 
 sub get_coerced
 {
-	my ($self, $value) = @_;
+	my ($self, $form, $value) = @_;
 
 	my $coerce = $self->coerce;
-	if (ref $coerce eq "CODE") {
-		return $coerce->($value);
+	my $coerced = $value;
+
+	my $error = try sub {
+		if (ref $coerce eq "CODE") {
+			$coerced = $coerce->($value);
+		}
+		elsif ($coerce) {
+			$coerced = $self->type->coerce($value);
+		}
+	};
+
+	if ($error) {
+		$form->add_error(
+			Form::Tiny::Error::DoesNotValidate->new(
+				{
+					field => $self->name,
+					error => $self->has_message ? $self->message : $error,
+				}
+			)
+		);
 	}
-	elsif ($coerce) {
-		return $self->type->coerce($value);
-	}
-	else {
-		return $value;
-	}
+
+	return $coerced;
 }
 
 sub get_adjusted

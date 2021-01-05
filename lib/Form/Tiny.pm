@@ -186,7 +186,7 @@ sub _mangle_field
 	if (!$def->hard_required || ref $current || length($current // "")) {
 
 		# coerce, validate, adjust
-		$current = $def->get_coerced($current);
+		$current = $def->get_coerced($self, $current);
 		if ($def->validate($self, $current)) {
 			$current = $def->get_adjusted($current);
 		}
