@@ -12,6 +12,7 @@ our $VERSION = '1.11';
 has "path" => (
 	is => "ro",
 	isa => ArrayRef,
+	required => 1,
 );
 
 has "value" => (

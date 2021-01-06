@@ -97,7 +97,7 @@ sub _check_strict
 	}
 
 	my $error = try sub {
-		$self->_check_recursive($input, \%meta)
+		$self->_check_recursive($input, \%meta);
 	};
 
 	if ($error) {

@@ -2,6 +2,9 @@ use v5.10;
 use warnings;
 use Test::More;
 use Form::Tiny;
+use Form::Tiny::Inline;
+use Test::Exception;
+use Types::Standard qw(CodeRef);
 
 {
 
@@ -68,6 +71,21 @@ for my $aref (@data) {
 			isa_ok($error, "Form::Tiny::Error::DoesNotValidate");
 		}
 	}
+}
+
+for my $type (undef, CodeRef) {
+	dies_ok {
+		Form::Tiny::Inline->new(
+			field_defs => [
+				{
+					name => 'test',
+					(defined $type ? (type => $type) : ()),
+					coerce => 1,
+				}
+			],
+		);
+	}
+	"invalid coerce configuration dies";
 }
 
 done_testing();
