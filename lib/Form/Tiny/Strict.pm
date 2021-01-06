@@ -20,7 +20,7 @@ sub join_path
 
 use Moo::Role;
 
-our $VERSION = '1.11';
+our $VERSION = '1.12';
 
 use constant META_SKIP => "skip";
 use constant META_ARRAY => "array";
