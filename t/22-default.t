@@ -8,9 +8,11 @@ use Types::Standard qw(Int);
 {
 
 	package TestForm;
+	use Types::Standard qw(Undef);
 	use Form::Tiny -base;
 
 	form_field 'undefined' => (
+		type => Undef,
 		default => sub { undef },
 	);
 
@@ -43,14 +45,16 @@ for my $aref (@data) {
 
 for my $conf ({name => 'a.*.b'}, {name => 'aoeu.*'}, {name => 'test', type => Int}) {
 	dies_ok {
-		Form::Tiny::Inline->new(
+		my $form = Form::Tiny::Inline->new(
 			field_defs => [
 				{
-					default => 'def',
+					default => sub { 'def' },
 					%$conf,
 				}
 			],
 		);
+		$form->set_input({});
+		$form->valid;
 	}
 	'invalid form configuration dies';
 }

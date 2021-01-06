@@ -83,10 +83,6 @@ sub BUILD
 	}
 
 	if ($self->has_default) {
-		if ($self->has_type) {
-			croak "default value doesn't pass the type constraint"
-				unless $self->type->check($self->default);
-		}
 
 		croak "default value for an array field is unsupported"
 			if scalar grep { $_ eq $array_marker } $self->get_name_path;
@@ -165,10 +161,15 @@ sub get_default
 	my ($self, $form) = @_;
 
 	if ($self->has_default) {
-		return Form::Tiny::PathValue->new(
-			path => [$self->get_name_path],
-			value => scalar $self->default->($form),
-		);
+		my $default = $self->default->($form);
+		if (!$self->has_type || $self->type->check($default)) {
+			return Form::Tiny::PathValue->new(
+				path => [$self->get_name_path],
+				value => $default,
+			);
+		}
+
+		croak 'invalid default value was set';
 	}
 
 	croak 'no default value set but was requested';
