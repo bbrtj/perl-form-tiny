@@ -22,7 +22,7 @@ WriteMakefile(
 	META_MERGE => {
 		resources => {
 			license => 'https://dev.perl.org/licenses',
-			homepage => 'https://metacpan.org/release/Form-Tiny',
+			homepage => 'https://brtastic.xyz/project/form-tiny',
 			bugtracker => 'https://github.com/brtastic/perl-form-tiny/issues',
 			repository => 'https://github.com/brtastic/perl-form-tiny',
 		},
