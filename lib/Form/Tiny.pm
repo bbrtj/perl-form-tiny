@@ -13,7 +13,7 @@ use Form::Tiny::Error;
 use Form::Tiny::FieldData;
 use Moo::Role;
 
-our $VERSION = '1.12';
+our $VERSION = '1.13';
 
 with "Form::Tiny::Form";
 

@@ -7,7 +7,7 @@ use Types::Standard qw(Str ArrayRef InstanceOf);
 use Form::Tiny::Filter;
 use Moo::Role;
 
-our $VERSION = '1.12';
+our $VERSION = '1.13';
 
 requires qw(pre_mangle _clear_form);
 
