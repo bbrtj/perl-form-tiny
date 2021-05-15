@@ -127,7 +127,7 @@ Form::Tiny::Strict - mark input with extra data as invalid
 =head1 SYNOPSIS
 
 	# in your form class
-	with qw(Form::Tiny Form::Tiny::Strict);
+	use Form::Tiny -strict;
 
 	# optional - 1 by default, 0 turns strict checking off
 	sub build_strict { 0 }
