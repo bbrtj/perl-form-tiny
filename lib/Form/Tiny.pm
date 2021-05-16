@@ -387,13 +387,13 @@ Form::Tiny - Input validator implementation centered around Type::Tiny
 
 	use Form::Tiny -base;
 
-	form_filed 'my_field' => {
+	form_filed 'my_field' => (
 		required => 1,
-	};
+	);
 
-	form_filed 'another_field' => {
+	form_filed 'another_field' => (
 		required => 1,
-	};
+	);
 
 =head1 DESCRIPTION
 
