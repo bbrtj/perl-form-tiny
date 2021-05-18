@@ -29,7 +29,7 @@ has "field_defs" => (
 		my ($self) = @_;
 		my @data = $self->can('build_fields') ? $self->build_fields : ();
 		return shift @data
-			if @data == 1 && ref $data[0] eq ref [];
+			if @data == 1 && ref $data[0] eq 'ARRAY';
 		return \@data;
 	},
 	trigger => \&_clear_form,
@@ -216,39 +216,39 @@ sub _find_field
 {
 	my ($self, $fields, $field_def) = @_;
 
+	# the result goes here
 	my @found;
 	my $traverser;
 	$traverser = sub {
-		my ($curr_path, $next_path, $value) = @_;
+		my ($curr_path, $path, $index, $value) = @_;
+		my $last = $index == @{$path->meta};
 
-		if (@$next_path == 0) {
+		if ($last) {
 			push @found, [$curr_path, $value];
 		}
 		else {
-			my $next = shift @$next_path;
-			my $want_array = $next eq $Form::Tiny::FieldDefinition::array_marker;
+			my $next = $path->path->[$index];
+			my $meta = $path->meta->[$index];
 
-			if ($want_array && ref $value eq ref []) {
-				for my $index (0 .. $#$value) {
+			if ($meta eq 'ARRAY' && ref $value eq 'ARRAY') {
+				for my $ind (0 .. $#$value) {
 					return    # may be an error, exit early
-						unless $traverser->([@$curr_path, $index], [@$next_path], $value->[$index]);
+						unless $traverser->([@$curr_path, $ind], $path, $index + 1, $value->[$ind]);
 				}
 
 				if (@$value == 0) {
-					if (@$next_path > 0) {
-						return;
-					}
-					else {
-						# we had aref here, so we want it back in resulting hash
-						push @found, [$curr_path, [], 1];
-					}
+					# we wanted to have a deeper structure, but its not there, so clearly an error
+					return unless $index == $#{$path->meta};
+
+					# we had aref here, so we want it back in resulting hash
+					push @found, [$curr_path, [], 1];
 				}
 			}
-			elsif (!$want_array && ref $value eq ref {} && exists $value->{$next}) {
-				push @$curr_path, $next;
-				return $traverser->($curr_path, $next_path, $value->{$next});
+			elsif ($meta eq 'HASH' && ref $value eq 'HASH' && exists $value->{$next}) {
+				return $traverser->([@$curr_path, $next], $path, $index + 1, $value->{$next});
 			}
 			else {
+				# something's wrong with the input here - does not match the spec
 				return;
 			}
 		}
@@ -256,8 +256,7 @@ sub _find_field
 		return 1;    # all ok
 	};
 
-	my @parts = $field_def->get_name_path;
-	if ($traverser->([], \@parts, $fields)) {
+	if ($traverser->([], $field_def->get_name_path, 0, $fields)) {
 		return Form::Tiny::FieldData->new(items => \@found);
 	}
 	return;
@@ -267,7 +266,7 @@ sub _assign_field
 {
 	my ($self, $fields, $field_def, $path_value) = @_;
 
-	my @arrays = map { $_ eq $Form::Tiny::FieldDefinition::array_marker } $field_def->get_name_path;
+	my @arrays = map { $_ eq 'ARRAY' } @{$field_def->get_name_path->meta};
 	my @parts = @{$path_value->path};
 	my $current = \$fields;
 	for my $i (0 .. $#parts) {
@@ -290,7 +289,7 @@ sub _validate
 	my $dirty = {};
 	$self->_clear_errors;
 
-	if (ref $self->input eq ref {}) {
+	if (ref $self->input eq 'HASH') {
 		my $fields = $self->pre_validate(dclone($self->input));
 		foreach my $validator (@{$self->field_defs}) {
 			my $curr_f = $validator->name;
@@ -397,7 +396,7 @@ Form::Tiny - Input validator implementation centered around Type::Tiny
 
 =head1 DESCRIPTION
 
-Main class of the Form::Tiny system - this is a role that provides most of the module's functionality.
+Main package of the Form::Tiny system - this is a role that provides most of the module's functionality.
 
 =head1 DOCUMENTATION INDEX
 

@@ -27,7 +27,7 @@ around "BUILDARGS" => sub {
 	my ($orig, $class, @args) = @_;
 
 	croak "Argument to Form::Tiny::Filter->new must be a single arrayref with two elements"
-		unless @args == 1 && ref $args[0] eq ref [] && @{$args[0]} == 2;
+		unless @args == 1 && ref $args[0] eq 'ARRAY' && @{$args[0]} == 2;
 	return {type => $args[0][0], code => $args[0][1]};
 };
 

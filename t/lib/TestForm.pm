@@ -30,6 +30,9 @@ sub build_fields
 		{name => "nested.name"},
 		{name => "nested.second.name"},
 		{name => "not\\.nested"},
+		{name => "is\\\\.nested"},
+		{name => "not\\\\\\.nested"},
+		{name => "not.\\*.nested_array"},
 		{name => "nested_form", type => TestInnerForm->new},
 		{
 			name => "nested_form_unadjusted",

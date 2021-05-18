@@ -8,23 +8,16 @@ use Form::Tiny::Utils;
 use Form::Tiny::Error;
 use Form::Tiny::FieldDefinition;
 
-sub join_path
-{
-	my ($path) = @_;
-	my $nesting_separator = $Form::Tiny::FieldDefinition::nesting_separator;
-
-	my $sep = quotemeta $nesting_separator;
-	@$path = map { s/$sep/\\$nesting_separator/g; $_ } @$path;
-	return join $nesting_separator, @$path;
-}
-
 use Moo::Role;
 
 our $VERSION = '1.13';
 
-use constant META_SKIP => "skip";
-use constant META_ARRAY => "array";
-use constant META_LEAF => "leaf";
+use constant {
+	META_NOMETA => "",
+	META_SKIP => "skip",
+	META_ARRAY => "array",
+	META_LEAF => "leaf",
+};
 
 requires qw(pre_validate _clear_form field_defs add_error);
 
@@ -41,10 +34,10 @@ sub build_strict { 1 }
 sub _check_recursive
 {
 	my ($self, $data, $meta, $path) = @_;
-	$path //= [];
+	$path //= Form::Tiny::Path->empty;
 
-	my $current_path = join_path($path);
-	my $metadata = $meta->{$current_path} // "";
+	my $current_path = $path->join;
+	my $metadata = $meta->{$current_path} // META_NOMETA;
 
 	return if $metadata eq META_SKIP;
 
@@ -54,11 +47,11 @@ sub _check_recursive
 	}
 
 	elsif ($metadata eq META_ARRAY) {
-		die $current_path unless ref $data eq ref [];
+		die $current_path unless ref $data eq 'ARRAY';
 		foreach my $value (@$data) {
 			$self->_check_recursive(
 				$value, $meta,
-				[@$path, $Form::Tiny::FieldDefinition::array_marker]
+				$path->clone->append('ARRAY')
 			);
 		}
 	}
@@ -66,9 +59,12 @@ sub _check_recursive
 	else {
 		# only leaves are allowed to be anything
 		# on regular elements we expect a hashref
-		die $current_path unless ref $data eq ref {};
+		die $current_path unless ref $data eq 'HASH';
 		for my $key (keys %$data) {
-			$self->_check_recursive($data->{$key}, $meta, [@$path, $key]);
+			$self->_check_recursive(
+				$data->{$key}, $meta,
+				$path->clone->append(HASH => $key)
+			);
 		}
 	}
 }
@@ -86,12 +82,11 @@ sub _check_strict
 			$meta{$def->name} = META_LEAF;
 		}
 
-		my @path = $def->get_name_path;
-		for my $i (0 .. $#path) {
-			my $el = $path[$i];
-			if ($el eq $Form::Tiny::FieldDefinition::array_marker) {
-				my @current_path = @path[0 .. $i - 1];
-				$meta{join_path(\@current_path)} = META_ARRAY;
+		my $path = $def->get_name_path;
+		my @path_meta = @{$path->meta};
+		for my $ind (0 .. $#path_meta) {
+			if ($path_meta[$ind] eq 'ARRAY') {
+				$meta{$path->join($ind - 1)} = META_ARRAY;
 			}
 		}
 	}

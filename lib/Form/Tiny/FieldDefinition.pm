@@ -3,26 +3,33 @@ package Form::Tiny::FieldDefinition;
 use v5.10;
 use warnings;
 use Moo;
-use Types::Standard qw(Enum Bool HasMethods CodeRef Maybe Str);
+use Types::Standard qw(Enum Bool HasMethods CodeRef Maybe Str InstanceOf);
 use Types::Common::String qw(NonEmptySimpleStr);
 use Carp qw(croak);
 use Scalar::Util qw(blessed);
 
 use Form::Tiny::Utils;
 use Form::Tiny::Error;
+use Form::Tiny::Path;
 use Form::Tiny::PathValue;
 
 use namespace::clean;
 
 our $VERSION = '1.13';
 
-our $nesting_separator = q{.};
-our $array_marker = q{*};
-
 has "name" => (
 	is => "ro",
 	isa => NonEmptySimpleStr,
 	required => 1,
+);
+
+has "name_path" => (
+	is => "ro",
+	isa => InstanceOf["Form::Tiny::Path"],
+	reader => "get_name_path",
+	init_arg => undef,
+	lazy => 1,
+	default => sub { Form::Tiny::Path->from_name(shift->name) },
 );
 
 has "required" => (
@@ -85,7 +92,7 @@ sub BUILD
 	if ($self->has_default) {
 
 		croak "default value for an array field is unsupported"
-			if scalar grep { $_ eq $array_marker } $self->get_name_path;
+			if scalar grep { $_ eq 'ARRAY' } @{$self->get_name_path->meta};
 	}
 
 	if ($self->is_subform && !$self->is_adjusted) {
@@ -98,15 +105,6 @@ sub is_subform
 	my ($self) = @_;
 
 	return $self->has_type && $self->type->DOES("Form::Tiny::Form");
-}
-
-sub get_name_path
-{
-	my ($self) = @_;
-
-	my $sep = quotemeta $nesting_separator;
-	my @parts = split /(?<!\\)$sep/, $self->name;
-	return map { s/\\$sep/$nesting_separator/g; $_ } @parts;
 }
 
 sub hard_required
@@ -164,7 +162,7 @@ sub get_default
 		my $default = $self->default->($form);
 		if (!$self->has_type || $self->type->check($default)) {
 			return Form::Tiny::PathValue->new(
-				path => [$self->get_name_path],
+				path => $self->get_name_path->path,
 				value => $default,
 			);
 		}
@@ -195,13 +193,14 @@ sub validate
 	}
 
 	if (!$valid) {
-		if ($self->is_subform && ref $error eq ref []) {
+		if ($self->is_subform && ref $error eq 'ARRAY') {
 			foreach my $exception (@$error) {
 				if (defined blessed $exception && $exception->isa("Form::Tiny::Error")) {
-					$exception->set_field(
-						join $nesting_separator,
-						$self->name, ($exception->field // ())
-					);
+					my $path = $self->get_name_path;
+					$path = $path->clone->append(HASH => $exception->field)
+						if defined $exception->field;
+
+					$exception->set_field($path->join);
 				}
 				else {
 					$exception = Form::Tiny::Error::DoesNotValidate->new(
