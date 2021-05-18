@@ -9,8 +9,8 @@ use Scalar::Util qw(blessed);
 use Import::Into;
 
 use Form::Tiny::FieldDefinition;
+use Form::Tiny::PathValue;
 use Form::Tiny::Error;
-use Form::Tiny::FieldData;
 use Moo::Role;
 
 our $VERSION = '1.13';
@@ -28,12 +28,8 @@ has "field_defs" => (
 	default => sub {
 		my ($self) = @_;
 		my @data = $self->can('build_fields') ? $self->build_fields : ();
-		return shift @data
-			if @data == 1 && ref $data[0] eq 'ARRAY';
 		return \@data;
 	},
-	trigger => \&_clear_form,
-	writer => "set_field_defs",
 );
 
 has "input" => (
@@ -53,7 +49,6 @@ has "fields" => (
 has "valid" => (
 	is => "ro",
 	isa => Bool,
-	writer => "_set_valid",
 	lazy => 1,
 	builder => "_validate",
 	clearer => 1,
@@ -257,7 +252,13 @@ sub _find_field
 	};
 
 	if ($traverser->([], $field_def->get_name_path, 0, $fields)) {
-		return Form::Tiny::FieldData->new(items => \@found);
+		return [map {
+			Form::Tiny::PathValue->new(
+				path => $_->[0],
+				value => $_->[1],
+				structure => $_->[2]
+			)
+		} @found];
 	}
 	return;
 }
@@ -299,7 +300,7 @@ sub _validate
 				my $all_ok = 1;
 
 				# This may have multiple iterations only if there's an array
-				foreach my $path_value (@{$current_data->items}) {
+				foreach my $path_value (@$current_data) {
 					unless ($path_value->structure) {
 						$path_value->set_value($self->pre_mangle($validator, $path_value->value));
 						$all_ok = $self->_mangle_field($validator, $path_value) && $all_ok;
@@ -460,8 +461,6 @@ Each of the attributes can be accessed by calling its name as a function on Form
 =head3 field_defs
 
 Contains an array reference of L<Form::Tiny::FieldDefinition> instances. A coercion from a hash reference can be performed upon writing.
-
-B<writer:> I<set_field_defs>
 
 B<built by:> I<build_fields>
 

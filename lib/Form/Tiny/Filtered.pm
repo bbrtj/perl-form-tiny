@@ -9,7 +9,7 @@ use Moo::Role;
 
 our $VERSION = '1.13';
 
-requires qw(pre_mangle _clear_form);
+requires qw(pre_mangle);
 
 has "filters" => (
 	is => "ro",
@@ -21,8 +21,6 @@ has "filters" => (
 	default => sub {
 		[shift->build_filters]
 	},
-	trigger => sub { shift->_clear_form },
-	writer => "set_filters",
 );
 
 sub trim

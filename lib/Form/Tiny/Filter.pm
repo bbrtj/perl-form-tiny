@@ -20,7 +20,6 @@ has "code" => (
 	is => "ro",
 	isa => CodeRef,
 	required => 1,
-	writer => "set_code",
 );
 
 around "BUILDARGS" => sub {

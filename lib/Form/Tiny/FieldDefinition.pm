@@ -61,7 +61,6 @@ has "default" => (
 	is => "ro",
 	isa => CodeRef,
 	predicate => 1,
-	writer => "set_default",
 );
 
 has "message" => (

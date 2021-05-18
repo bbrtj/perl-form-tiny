@@ -2,7 +2,6 @@ package Form::Tiny::Strict;
 
 use v5.10;
 use warnings;
-use Types::Standard qw(Bool);
 
 use Form::Tiny::Utils;
 use Form::Tiny::Error;
@@ -19,17 +18,7 @@ use constant {
 	META_LEAF => "leaf",
 };
 
-requires qw(pre_validate _clear_form field_defs add_error);
-
-has "strict" => (
-	is => "ro",
-	isa => Bool,
-	builder => "build_strict",
-	trigger => sub { shift->_clear_form },
-	writer => "set_strict",
-);
-
-sub build_strict { 1 }
+requires qw(pre_validate field_defs add_error);
 
 sub _check_recursive
 {
@@ -103,9 +92,7 @@ sub _check_strict
 around "pre_validate" => sub {
 	my ($orig, $self, $input) = @_;
 
-	if ($self->strict) {
-		$self->_check_strict($input);
-	}
+	$self->_check_strict($input);
 	$input = $self->$orig($input);
 
 	return $input;
