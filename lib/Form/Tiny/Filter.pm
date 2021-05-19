@@ -8,7 +8,7 @@ use Carp qw(croak);
 
 use namespace::clean;
 
-our $VERSION = '1.13';
+our $VERSION = '1.14';
 
 has "type" => (
 	is => "ro",
