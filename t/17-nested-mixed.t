@@ -7,23 +7,15 @@ use Form::Tiny;
 {
 
 	package InnerForm;
-	use Moo;
+	use Form::Tiny -base;
 	use Types::Standard qw(Undef);
 	use Types::Common::String qw(SimpleStr);
 
-	with "Form::Tiny";
-
-	sub build_fields
-	{
-		(
-			{
-				name => "nested",
-				type => SimpleStr->plus_coercions(Undef, q{ '' }),
-				coerce => 1,
-				required => "soft",
-			},
-		);
-	}
+	form_field 'nested' => (
+		type => SimpleStr->plus_coercions(Undef, q{ '' }),
+		coerce => 1,
+		required => "soft",
+	);
 
 	1;
 }
@@ -31,15 +23,13 @@ use Form::Tiny;
 {
 
 	package OuterForm;
-	use Moo;
+	use Form::Tiny -base;
 
-	with "Form::Tiny";
+	form_field "form.inner" => (
+		type => InnerForm->new
+	);
 
-	sub build_fields
-	{
-		{name => "form.inner", type => InnerForm->new},
-			{name => "form.inner.something"},;
-	}
+	form_field "form.inner.something";
 }
 
 my @data = (

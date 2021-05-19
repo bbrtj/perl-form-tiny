@@ -6,18 +6,11 @@ use Form::Tiny;
 {
 
 	package TestForm;
-	use Moo;
+	use Form::Tiny -base;
 
-	with qw(
-		Form::Tiny
+	form_field 'with_data' => (
+		data => "data ok"
 	);
-
-	sub build_fields
-	{
-		(
-			{name => 'with_data', data => "data ok"},
-		)
-	}
 }
 
 my $form = TestForm->new;

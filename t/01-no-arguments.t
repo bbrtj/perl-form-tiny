@@ -7,17 +7,10 @@ BEGIN { use_ok('Form::Tiny') }
 {
 
 	package TestForm;
-	use Moo;
+	use Form::Tiny -base;
 
-	with "Form::Tiny";
-
-	sub build_fields
-	{
-		(
-			{name => "name"},
-			{name => "value"}
-		)
-	}
+	form_field 'name';
+	form_field 'value';
 
 	1;
 }
