@@ -162,7 +162,7 @@ sub _validate
 
 	if (ref $self->input eq 'HASH') {
 		my $fields = $meta->run_hooks_for('before_validate', $self, dclone($self->input));
-		foreach my $validator (@{$meta->resolved_fields}) {
+		foreach my $validator (@{$meta->resolved_fields($self)}) {
 			my $curr_f = $validator->name;
 
 			my $current_data = $self->_find_field($fields, $validator);

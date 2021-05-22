@@ -14,8 +14,8 @@ use Form::Tiny;
 }
 
 my $form = TestForm->new;
-is scalar @{$form->field_defs}, 1, "field defs ok";
-ok $form->field_defs->[0]->has_data, "data ok";
-is $form->field_defs->[0]->data, "data ok", "data ok";
+is scalar @{$form->form_meta->resolved_fields($form)}, 1, "field defs ok";
+ok $form->form_meta->resolved_fields($form)->[0]->has_data, "data ok";
+is $form->form_meta->resolved_fields($form)->[0]->data, "data ok", "data ok";
 
 done_testing();

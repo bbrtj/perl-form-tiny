@@ -23,8 +23,10 @@ sub build
 
 	my $data = $self->data;
 	my $dynamic = ref $data eq 'CODE';
-	if ($dynamic && defined blessed $context && $context->DOES('Form::Tiny::Form')) {
-		my $data = $data->($context);
+	if ($dynamic && defined blessed $context) {
+		croak 'building a dynamic field definition requires Form::Tiny::Form object'
+			unless $context->DOES('Form::Tiny::Form');
+		$data = $data->($context);
 		$dynamic = 0;
 	}
 

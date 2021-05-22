@@ -68,6 +68,9 @@ sub resolved_fields
 {
 	my ($self, $object) = @_;
 
+	croak 'resolved_fields requires form object'
+		unless defined blessed $object;
+
 	return [map {
 		$_->isa('Form::Tiny::FieldDefinitionBuilder')
 			? $_->build($object)
