@@ -2,25 +2,105 @@ package Form::Tiny::Inline;
 
 use v5.10;
 use warnings;
+use Types::Standard qw(ArrayRef InstanceOf);
 use Moo;
-use Types::Standard qw(RoleName Str);
+
+use Form::Tiny::Form;
+use Form::Tiny::Meta;
 
 use namespace::clean;
 
 our $VERSION = '1.13';
 
-with "Form::Tiny";
+with 'Form::Tiny::Form';
+
+has '_meta' => (
+	is => 'ro',
+	isa => InstanceOf ['Form::Tiny::Meta'],
+	builder => '_build_meta',
+	init_arg => undef,
+	default => sub {
+		my ($self) = @_;
+		my $meta = Form::Tiny::Form->_create_anon_meta(@{$self->_meta_roles});
+		$meta->setup;
+
+		return $meta;
+	},
+	lazy => 1,
+);
+
+has '_meta_roles' => (
+	is => 'ro',
+	isa => ArrayRef,
+	default => sub { [] },
+);
+
+sub BUILD
+{
+	my ($self, $args) = @_;
+
+	my $meta = $self->form_meta;
+	for my $field (@{$args->{field_defs} // []}) {
+		$meta->add_field($field);
+	}
+
+	if ($args->{cleaner}) {
+		$meta->add_hook(cleanup => $args->{cleaner});
+	}
+
+	for my $filter (@{$args->{filters} // []}) {
+		$meta->add_filter(@$filter);
+	}
+}
 
 sub is
 {
 	my ($class, @roles) = @_;
 
-	my $loader = q{ my $n = "Form::Tiny::$_"; eval "require $n"; $n; };
-	my $type = RoleName->plus_coercions(Str, $loader);
-	@roles = map { $type->assert_coerce($_) } @roles;
+	return Form::Tiny::Inline::Builder->create(@roles);
+}
 
-	require Moo::Role;
-	return Moo::Role->create_class_with_roles($class, @roles);
+sub form_meta
+{
+	my ($self) = @_;
+	return $self->_meta;
+}
+
+# builder package to allow adding meta roles with no package magic
+{
+	package Form::Tiny::Inline::Builder;
+
+	use Types::Standard qw(RoleName Str);
+
+	sub create
+	{
+		my ($self, @roles) = @_;
+
+		@roles = map { ucfirst lc $_ } @roles;
+		my $loader = q{ my $n = "Form::Tiny::$_"; eval "require $n"; $n; };
+		my $type = RoleName->plus_coercions(Str, $loader);
+		my @real_roles = map { $type->assert_coerce($_) } @roles;
+
+		return bless {
+			roles => \@real_roles
+		}, $self;
+	}
+
+	sub new
+	{
+		my $self = shift;
+		my %params;
+		if (@_ == 1 && ref $_[0] eq 'HASH') {
+			%params = %{$_[0]};
+		}
+		else {
+			%params = @_;
+		}
+
+		$params{_meta_roles} = $self->{roles};
+
+		return Form::Tiny::Inline->new(%params);
+	}
 }
 
 1;

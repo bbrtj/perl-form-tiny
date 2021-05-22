@@ -61,6 +61,7 @@ sub setup
 	# at this point, all roles should already be merged and all inheritance done
 	# we can make the meta definition complete
 	$self->_complete(1);
+	return;
 }
 
 sub resolved_fields

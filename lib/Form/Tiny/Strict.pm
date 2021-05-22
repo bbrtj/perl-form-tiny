@@ -3,7 +3,7 @@ package Form::Tiny::Strict;
 use v5.10;
 use warnings;
 
-use Form::Tiny::Utils;
+use Form::Tiny::Utils qw(try);
 use Form::Tiny::Error;
 use Form::Tiny::FieldDefinition;
 
@@ -87,12 +87,14 @@ sub _check_strict
 	if ($error) {
 		$obj->add_error(Form::Tiny::Error::IsntStrict->new);
 	}
+
+	return $input;
 }
 
 after 'setup' => sub {
 	my ($self) = @_;
 
-	$self->add_hook(before_validate => sub { $self->_check_strict(@_) });
+	$self->add_hook(before_validate => sub { $self->_check_strict(@_); });
 };
 
 1;

@@ -250,6 +250,19 @@ sub _clear_errors
 our $meta_class = 'Form::Tiny::Meta';
 my %meta;
 
+sub _create_anon_meta
+{
+	my ($self, @roles) = @_;
+	my $meta = $meta_class->new;
+
+	require Moo::Role;
+	Moo::Role->apply_roles_to_object(
+		$meta, @roles
+	) if scalar @roles;
+
+	return $meta;
+}
+
 sub _create_meta
 {
 	my ($self, $package, @roles) = @_;
@@ -257,12 +270,7 @@ sub _create_meta
 	croak "form meta for $package already exists"
 		if exists $meta{$package};
 
-	$meta{$package} = $meta_class->new;
-
-	require Moo::Role;
-	Moo::Role->apply_roles_to_object(
-		$meta{$package}, @roles
-	) if scalar @roles;
+	$meta{$package} = $self->_create_anon_meta(@roles);
 
 	return $meta{$package};
 }

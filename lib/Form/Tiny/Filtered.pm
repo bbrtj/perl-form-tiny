@@ -17,10 +17,8 @@ has "filters" => (
 	isa => ArrayRef [
 		InstanceOf ["Form::Tiny::Filter"]
 	],
-	coerce => 1,
 	default => sub {
-		my ($self) = @_;
-		[Str, sub { trim(@_) }],
+		[Form::Tiny::Filter->new(type => Str, code => sub { trim(@_) })];
 	},
 );
 
@@ -36,7 +34,7 @@ sub add_filter
 
 sub _apply_filters
 {
-	my ($self, $obj, $value) = @_;
+	my ($self, $obj, $def, $value) = @_;
 
 	for my $filter (@{$self->filters}) {
 		$value = $filter->filter($value);
