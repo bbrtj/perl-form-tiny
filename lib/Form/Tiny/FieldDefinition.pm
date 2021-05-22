@@ -103,7 +103,6 @@ sub is_subform
 {
 	my ($self) = @_;
 
-	# TODO form type
 	return $self->has_type && $self->type->DOES("Form::Tiny::Form");
 }
 

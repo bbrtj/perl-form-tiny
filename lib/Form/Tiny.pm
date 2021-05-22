@@ -23,8 +23,9 @@ sub import
 	my %subs = %{$package->_generate_helpers($caller)};
 	my %behaviors = %{$package->_get_behaviors};
 
-	# TODO make Moo optional?
-	Moo->import::into($caller);
+	unless (scalar grep { $_ eq -nomoo } @wanted) {
+		Moo->import::into($caller);
+	}
 
 	require Moo::Role;
 	Moo::Role->apply_roles_to_package(
@@ -75,12 +76,14 @@ sub _generate_helpers
 
 sub _get_behaviors
 {
+	my $empty = {
+		subs => [],
+		roles => [],
+	};
+
 	return {
-		# for backcompat
-		-base => {
-			subs => [],
-			roles => [],
-		},
+		-base => $empty,
+		-nomoo => $empty,
 		-strict => {
 			subs => [],
 			roles => [qw(Form::Tiny::Meta::Strict)],

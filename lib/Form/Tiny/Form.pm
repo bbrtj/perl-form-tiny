@@ -42,6 +42,7 @@ has "valid" => (
 has "errors" => (
 	is => "ro",
 	isa => ArrayRef [InstanceOf ["Form::Tiny::Error"]],
+	lazy => 1,
 	default => sub { [] },
 	init_arg => undef,
 );
