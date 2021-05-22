@@ -5,8 +5,10 @@ use warnings;
 use Exporter qw(import);
 
 our $VERSION = '1.13';
-our @EXPORT = qw(
+our @EXPORT;
+our @EXPORT_OK = qw(
 	try
+	trim
 );
 
 sub try
@@ -25,5 +27,15 @@ sub try
 
 	return $ret;
 }
+
+sub trim
+{
+	my ($value) = @_;
+	$value =~ s/\A\s+//;
+	$value =~ s/\s+\z//;
+
+	return $value;
+}
+
 
 1;

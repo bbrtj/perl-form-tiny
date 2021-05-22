@@ -2,140 +2,76 @@ package Form::Tiny;
 
 use v5.10;
 use warnings;
-use Types::Standard qw(Str Maybe ArrayRef InstanceOf HashRef Bool CodeRef);
 use Carp qw(croak);
-use Storable qw(dclone);
-use Scalar::Util qw(blessed);
 use Import::Into;
 
-use Form::Tiny::FieldDefinition;
-use Form::Tiny::PathValue;
-use Form::Tiny::Error;
-use Moo::Role;
+use Form::Tiny::Form;
+require Moo;
 
 our $VERSION = '1.13';
-
-with "Form::Tiny::Form";
-
-has "field_defs" => (
-	is => "ro",
-	isa => ArrayRef [
-		(InstanceOf ["Form::Tiny::FieldDefinition"])
-		->plus_coercions(HashRef, q{ Form::Tiny::FieldDefinition->new($_) })
-	],
-	coerce => 1,
-	lazy => 1,
-	default => sub {
-		my ($self) = @_;
-		my @data = $self->can('build_fields') ? $self->build_fields : ();
-		return \@data;
-	},
-);
-
-has "input" => (
-	is => "ro",
-	writer => "set_input",
-	trigger => \&_clear_form,
-);
-
-has "fields" => (
-	is => "ro",
-	isa => Maybe [HashRef],
-	writer => "_set_fields",
-	clearer => "_clear_fields",
-	init_arg => undef,
-);
-
-has "valid" => (
-	is => "ro",
-	isa => Bool,
-	lazy => 1,
-	builder => "_validate",
-	clearer => 1,
-	predicate => "is_validated",
-	init_arg => undef,
-);
-
-has "errors" => (
-	is => "ro",
-	isa => ArrayRef [InstanceOf ["Form::Tiny::Error"]],
-	default => sub { [] },
-	init_arg => undef,
-);
-
-has "cleaner" => (
-	is => "ro",
-	isa => Maybe [CodeRef],
-	default => sub {
-		my ($self) = @_;
-		return $self->can("build_cleaner") ? $self->build_cleaner : undef;
-	},
-);
-
-sub BUILD
-{
-	my ($self) = @_;
-	$self->field_defs;    # build fields
-}
 
 sub import
 {
 	my ($package, $caller) = (shift, scalar caller);
-	return unless @_;
 
 	my @wanted = @_;
-	my @wanted_subs = qw(form_field form_cleaner);
-	my @wanted_roles = qw(Form::Tiny);
+	my @wanted_subs = qw(form_field form_cleaner form_hook);
+	my @wanted_roles;
 
-	my %subs = (
-		form_field => sub {
-			my ($name, @params) = @_;
-			my $is_coderef = @params == 1 && ref $params[0] eq 'CODE';
+	my %subs = %{$package->_generate_helpers($caller)};
+	my %behaviors = %{$package->_get_behaviors};
 
-			my $previous = $caller->can('build_fields') // sub { () };
-			no strict 'refs';
-			no warnings 'redefine';
+	# TODO make Moo optional?
+	Moo->import::into($caller);
 
-			*{"${caller}::build_fields"} = sub {
-				my %real_params = (
-					(
-						$is_coderef
-						? %{$params[0]->(@_)}
-						: @params
-					),
-					name => $name,
-				);
-
-				return (
-					$previous->(@_),
-					\%real_params
-				);
-			};
-		},
-		form_cleaner => sub {
-			my ($sub) = @_;
-
-			no strict 'refs';
-			*{"${caller}::build_cleaner"} = sub {
-				return $sub;
-			};
-		},
-		form_filter => sub {
-			my ($type, $sub) = @_;
-			my $previous = $caller->can('build_filters') // sub { () };
-
-			no strict 'refs';
-			no warnings 'redefine';
-			*{"${caller}::build_filters"} = sub {
-				return (
-					$previous->(@_),
-					[$type, $sub],
-				);
-			};
-		},
+	require Moo::Role;
+	Moo::Role->apply_roles_to_package(
+		$caller, 'Form::Tiny::Form'
 	);
 
-	my %behaviors = (
+	foreach my $type (@wanted) {
+		croak "no Form::Tiny import behavior for: $type"
+			unless exists $behaviors{$type};
+		push @wanted_subs, @{$behaviors{$type}->{subs}};
+		push @wanted_roles, @{$behaviors{$type}->{roles}};
+	}
+
+	Form::Tiny::Form->_create_meta($caller, @wanted_roles);
+
+	{
+		no strict 'refs';
+		no warnings 'redefine';
+
+		*{"${caller}::$_"} = $subs{$_} foreach @wanted_subs;
+	}
+
+	return;
+}
+
+sub _generate_helpers
+{
+	my ($package, $caller) = @_;
+
+	return {
+		form_field => sub {
+			$caller->form_meta->add_field(@_);
+		},
+		form_cleaner => sub {
+			$caller->form_meta->add_hook(cleanup => @_);
+		},
+		form_hook => sub {
+			$caller->form_meta->add_hook(@_);
+		},
+		form_filter => sub {
+			$caller->form_meta->add_filter(@_);
+		},
+	};
+}
+
+sub _get_behaviors
+{
+	return {
+		# for backcompat
 		-base => {
 			subs => [],
 			roles => [],
@@ -148,229 +84,7 @@ sub import
 			subs => [qw(form_filter)],
 			roles => [qw(Form::Tiny::Filtered)],
 		},
-	);
-
-	require Moo;
-	Moo->import::into($caller);
-
-	foreach my $type (@wanted) {
-		croak "no Form::Tiny import behavior for: $type"
-			unless exists $behaviors{$type};
-		push @wanted_subs, @{$behaviors{$type}->{subs}};
-		push @wanted_roles, @{$behaviors{$type}->{roles}};
-	}
-
-	{
-		no strict 'refs';
-
-		Moo::Role->apply_roles_to_package(
-			$caller, @wanted_roles
-		);
-
-		*{"${caller}::$_"} = $subs{$_} foreach @wanted_subs;
-	}
-
-	return;
-}
-
-sub _clear_form
-{
-	my ($self) = @_;
-
-	$self->_clear_fields;
-	$self->clear_valid;
-	$self->_clear_errors;
-}
-
-sub pre_mangle { $_[2] }
-sub pre_validate { $_[1] }
-
-sub _mangle_field
-{
-	my ($self, $def, $path_value) = @_;
-
-	my $current = $path_value->value;
-
-	# if the parameter is required (hard), we only consider it if not empty
-	if (!$def->hard_required || ref $current || length($current // "")) {
-
-		# coerce, validate, adjust
-		$current = $def->get_coerced($self, $current);
-		if ($def->validate($self, $current)) {
-			$current = $def->get_adjusted($current);
-		}
-
-		$path_value->set_value($current);
-		return 1;
-	}
-
-	return;
-}
-
-sub _find_field
-{
-	my ($self, $fields, $field_def) = @_;
-
-	# the result goes here
-	my @found;
-	my $traverser;
-	$traverser = sub {
-		my ($curr_path, $path, $index, $value) = @_;
-		my $last = $index == @{$path->meta};
-
-		if ($last) {
-			push @found, [$curr_path, $value];
-		}
-		else {
-			my $next = $path->path->[$index];
-			my $meta = $path->meta->[$index];
-
-			if ($meta eq 'ARRAY' && ref $value eq 'ARRAY') {
-				for my $ind (0 .. $#$value) {
-					return    # may be an error, exit early
-						unless $traverser->([@$curr_path, $ind], $path, $index + 1, $value->[$ind]);
-				}
-
-				if (@$value == 0) {
-					# we wanted to have a deeper structure, but its not there, so clearly an error
-					return unless $index == $#{$path->meta};
-
-					# we had aref here, so we want it back in resulting hash
-					push @found, [$curr_path, [], 1];
-				}
-			}
-			elsif ($meta eq 'HASH' && ref $value eq 'HASH' && exists $value->{$next}) {
-				return $traverser->([@$curr_path, $next], $path, $index + 1, $value->{$next});
-			}
-			else {
-				# something's wrong with the input here - does not match the spec
-				return;
-			}
-		}
-
-		return 1;    # all ok
 	};
-
-	if ($traverser->([], $field_def->get_name_path, 0, $fields)) {
-		return [map {
-			Form::Tiny::PathValue->new(
-				path => $_->[0],
-				value => $_->[1],
-				structure => $_->[2]
-			)
-		} @found];
-	}
-	return;
-}
-
-sub _assign_field
-{
-	my ($self, $fields, $field_def, $path_value) = @_;
-
-	my @arrays = map { $_ eq 'ARRAY' } @{$field_def->get_name_path->meta};
-	my @parts = @{$path_value->path};
-	my $current = \$fields;
-	for my $i (0 .. $#parts) {
-
-		# array_path will contain array indexes for each array marker
-		if ($arrays[$i]) {
-			$current = \${$current}->[$parts[$i]];
-		}
-		else {
-			$current = \${$current}->{$parts[$i]};
-		}
-	}
-
-	$$current = $path_value->value;
-}
-
-sub _validate
-{
-	my ($self) = @_;
-	my $dirty = {};
-	$self->_clear_errors;
-
-	if (ref $self->input eq 'HASH') {
-		my $fields = $self->pre_validate(dclone($self->input));
-		foreach my $validator (@{$self->field_defs}) {
-			my $curr_f = $validator->name;
-
-			my $current_data = $self->_find_field($fields, $validator);
-			if (defined $current_data) {
-				my $all_ok = 1;
-
-				# This may have multiple iterations only if there's an array
-				foreach my $path_value (@$current_data) {
-					unless ($path_value->structure) {
-						$path_value->set_value($self->pre_mangle($validator, $path_value->value));
-						$all_ok = $self->_mangle_field($validator, $path_value) && $all_ok;
-					}
-					$self->_assign_field($dirty, $validator, $path_value);
-				}
-
-				# found and valid, go to the next field
-				next if $all_ok;
-			}
-
-			# for when it didn't pass the existence test
-			if ($validator->has_default) {
-				$self->_assign_field($dirty, $validator, $validator->get_default($self));
-			}
-			elsif ($validator->required) {
-				$self->add_error(Form::Tiny::Error::DoesNotExist->new(field => $curr_f));
-			}
-		}
-	}
-	else {
-		$self->add_error(Form::Tiny::Error::InvalidFormat->new);
-	}
-
-	$self->cleaner->($self, $dirty)
-		if defined $self->cleaner && !$self->has_errors;
-
-	my $form_valid = !$self->has_errors;
-	$self->_set_fields($form_valid ? $dirty : undef);
-
-	return $form_valid;
-}
-
-sub check
-{
-	my ($self, $input) = @_;
-
-	$self->set_input($input);
-	return $self->valid;
-}
-
-sub validate
-{
-	my ($self, $input) = @_;
-
-	return if $self->check($input);
-	return $self->errors;
-}
-
-sub add_error
-{
-	my ($self, $error) = @_;
-	croak "error has to be an instance of Form::Tiny::Error"
-		unless blessed $error && $error->isa("Form::Tiny::Error");
-
-	push @{$self->errors}, $error;
-	return;
-}
-
-sub has_errors
-{
-	my ($self) = @_;
-	return @{$self->errors} > 0;
-}
-
-sub _clear_errors
-{
-	my ($self) = @_;
-	@{$self->errors} = ();
-	return;
 }
 
 1;

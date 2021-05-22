@@ -5,45 +5,38 @@ use warnings;
 use Types::Standard qw(Str ArrayRef InstanceOf);
 
 use Form::Tiny::Filter;
+use Form::Tiny::Utils qw(trim);
 use Moo::Role;
 
 our $VERSION = '1.13';
 
-requires qw(pre_mangle);
+requires qw(setup);
 
 has "filters" => (
 	is => "ro",
 	isa => ArrayRef [
-		(InstanceOf ["Form::Tiny::Filter"])
-		->plus_coercions(ArrayRef, q{ Form::Tiny::Filter->new($_) })
+		InstanceOf ["Form::Tiny::Filter"]
 	],
 	coerce => 1,
 	default => sub {
-		[shift->build_filters]
+		my ($self) = @_;
+		[Str, sub { trim(@_) }],
 	},
 );
 
-sub trim
+sub add_filter
 {
-	my ($self, $value) = @_;
-	$value =~ s/\A\s+//;
-	$value =~ s/\s+\z//;
+	my ($self, $type, $code) = @_;
 
-	return $value;
-}
-
-sub build_filters
-{
-	my ($self) = @_;
-
-	return (
-		[Str, sub { $self->trim(@_) }],
+	push @{$self->filters}, Form::Tiny::Filter->new(
+		type => $type,
+		code => $code
 	);
 }
 
 sub _apply_filters
 {
-	my ($self, $value) = @_;
+	my ($self, $obj, $value) = @_;
 
 	for my $filter (@{$self->filters}) {
 		$value = $filter->filter($value);
@@ -52,11 +45,18 @@ sub _apply_filters
 	return $value;
 }
 
-around "pre_mangle" => sub {
-	my ($orig, $self, $def, $value) = @_;
+after 'inherit_from' => sub {
+	my ($self, $parent) = @_;
 
-	$value = $self->_apply_filters($value);
-	return $self->$orig($def, $value);
+	if ($parent->DOES('Form::Tiny::Filtered')) {
+		$self->filters([@{$parent->filters}, @{$self->filters}]);
+	}
+};
+
+after 'setup' => sub {
+	my ($self) = @_;
+
+	$self->add_hook(before_mangle => sub { $self->_apply_filters(@_) });
 };
 
 1;

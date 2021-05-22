@@ -8,7 +8,7 @@ use Types::Common::String qw(NonEmptySimpleStr);
 use Carp qw(croak);
 use Scalar::Util qw(blessed);
 
-use Form::Tiny::Utils;
+use Form::Tiny::Utils qw(try);
 use Form::Tiny::Error;
 use Form::Tiny::Path;
 use Form::Tiny::PathValue;
@@ -103,6 +103,7 @@ sub is_subform
 {
 	my ($self) = @_;
 
+	# TODO form type
 	return $self->has_type && $self->type->DOES("Form::Tiny::Form");
 }
 

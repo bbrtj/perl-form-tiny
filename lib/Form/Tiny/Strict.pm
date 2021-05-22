@@ -12,34 +12,34 @@ use Moo::Role;
 our $VERSION = '1.13';
 
 use constant {
-	META_NOMETA => "",
-	META_SKIP => "skip",
-	META_ARRAY => "array",
-	META_LEAF => "leaf",
+	MARKER_NONE => "",
+	MARKER_SKIP => "skip",
+	MARKER_ARRAY => "array",
+	MARKER_LEAF => "leaf",
 };
 
-requires qw(pre_validate field_defs add_error);
+requires qw(setup);
 
 sub _check_recursive
 {
-	my ($self, $data, $meta, $path) = @_;
+	my ($self, $obj, $data, $markers, $path) = @_;
 	$path //= Form::Tiny::Path->empty;
 
 	my $current_path = $path->join;
-	my $metadata = $meta->{$current_path} // META_NOMETA;
+	my $metadata = $markers->{$current_path} // MARKER_NONE;
 
-	return if $metadata eq META_SKIP;
+	return if $metadata eq MARKER_SKIP;
 
-	if ($metadata eq META_LEAF) {
+	if ($metadata eq MARKER_LEAF) {
 
 		# we're at leaf and no error occured - we're good.
 	}
 
-	elsif ($metadata eq META_ARRAY) {
+	elsif ($metadata eq MARKER_ARRAY) {
 		die $current_path unless ref $data eq 'ARRAY';
 		foreach my $value (@$data) {
 			$self->_check_recursive(
-				$value, $meta,
+				$obj, $value, $markers,
 				$path->clone->append('ARRAY')
 			);
 		}
@@ -51,7 +51,7 @@ sub _check_recursive
 		die $current_path unless ref $data eq 'HASH';
 		for my $key (keys %$data) {
 			$self->_check_recursive(
-				$data->{$key}, $meta,
+				$obj, $data->{$key}, $markers,
 				$path->clone->append(HASH => $key)
 			);
 		}
@@ -60,42 +60,39 @@ sub _check_recursive
 
 sub _check_strict
 {
-	my ($self, $input) = @_;
+	my ($self, $obj, $input) = @_;
 
-	my %meta;
-	foreach my $def (@{$self->field_defs}) {
+	my %markers;
+	foreach my $def (@{$obj->form_meta->resolved_fields}) {
 		if ($def->is_subform) {
-			$meta{$def->name} = META_SKIP;
+			$markers{$def->name} = MARKER_SKIP;
 		}
 		else {
-			$meta{$def->name} = META_LEAF;
+			$markers{$def->name} = MARKER_LEAF;
 		}
 
 		my $path = $def->get_name_path;
 		my @path_meta = @{$path->meta};
 		for my $ind (0 .. $#path_meta) {
 			if ($path_meta[$ind] eq 'ARRAY') {
-				$meta{$path->join($ind - 1)} = META_ARRAY;
+				$markers{$path->join($ind - 1)} = MARKER_ARRAY;
 			}
 		}
 	}
 
 	my $error = try sub {
-		$self->_check_recursive($input, \%meta);
+		$self->_check_recursive($obj, $input, \%markers);
 	};
 
 	if ($error) {
-		$self->add_error(Form::Tiny::Error::IsntStrict->new);
+		$obj->add_error(Form::Tiny::Error::IsntStrict->new);
 	}
 }
 
-around "pre_validate" => sub {
-	my ($orig, $self, $input) = @_;
+after 'setup' => sub {
+	my ($self) = @_;
 
-	$self->_check_strict($input);
-	$input = $self->$orig($input);
-
-	return $input;
+	$self->add_hook(before_validate => sub { $self->_check_strict(@_) });
 };
 
 1;
