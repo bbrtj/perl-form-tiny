@@ -17,7 +17,7 @@ our @EXPORT_OK = qw(
 );
 
 our %EXPORT_TAGS = (
-	'meta_handlers' => [qw(
+	meta_handlers => [qw(
 		create_anon_form_meta
 		create_form_meta
 		get_package_form_meta
@@ -58,6 +58,7 @@ my %meta;
 sub create_anon_form_meta
 {
 	my (@roles) = @_;
+	require Form::Tiny::Meta;
 	my $meta = $meta_class->new;
 
 	require Moo::Role;
@@ -116,7 +117,5 @@ sub set_form_meta_class
 	$meta_class = $class;
 	return;
 }
-
-
 
 1;

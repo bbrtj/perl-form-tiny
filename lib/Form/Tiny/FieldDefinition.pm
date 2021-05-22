@@ -3,7 +3,7 @@ package Form::Tiny::FieldDefinition;
 use v5.10;
 use warnings;
 use Moo;
-use Types::Standard qw(Enum Bool HasMethods CodeRef Maybe Str InstanceOf);
+use Types::Standard qw(Enum Bool HasMethods CodeRef Str InstanceOf);
 use Types::Common::String qw(NonEmptySimpleStr);
 use Carp qw(croak);
 use Scalar::Util qw(blessed);
@@ -94,6 +94,7 @@ sub BUILD
 			if scalar grep { $_ eq 'ARRAY' } @{$self->get_name_path->meta};
 	}
 
+	# special case for subforms - set automatic adjustments
 	if ($self->is_subform && !$self->is_adjusted) {
 		$self->set_adjustment(sub { $self->type->fields });
 	}

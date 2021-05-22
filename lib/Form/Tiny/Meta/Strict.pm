@@ -5,7 +5,6 @@ use warnings;
 
 use Form::Tiny::Utils qw(try);
 use Form::Tiny::Error;
-use Form::Tiny::FieldDefinition;
 
 use Moo::Role;
 

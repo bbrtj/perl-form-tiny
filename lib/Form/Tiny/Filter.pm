@@ -25,7 +25,6 @@ sub filter
 {
 	my ($self, $value) = @_;
 
-	# TODO pass form object to filter
 	if ($self->type->check($value)) {
 		return $self->code->($value);
 	}

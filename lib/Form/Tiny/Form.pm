@@ -7,7 +7,6 @@ use Carp qw(croak);
 use Storable qw(dclone);
 use Scalar::Util qw(blessed);
 
-use Form::Tiny::Meta;
 use Form::Tiny::PathValue;
 use Form::Tiny::Error;
 use Form::Tiny::Utils qw(get_package_form_meta);

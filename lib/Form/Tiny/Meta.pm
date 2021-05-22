@@ -3,11 +3,10 @@ package Form::Tiny::Meta;
 use v5.10;
 use warnings;
 use Moo;
-use Types::Standard qw(ArrayRef HashRef InstanceOf CodeRef Bool);
+use Types::Standard qw(ArrayRef HashRef InstanceOf Bool);
 use Scalar::Util qw(blessed);
 use Carp qw(croak);
 
-use Form::Tiny::FieldDefinition;
 use Form::Tiny::FieldDefinitionBuilder;
 use Form::Tiny::Hook;
 
