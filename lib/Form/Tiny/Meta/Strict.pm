@@ -1,4 +1,4 @@
-package Form::Tiny::Strict;
+package Form::Tiny::Meta::Strict;
 
 use v5.10;
 use warnings;

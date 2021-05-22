@@ -78,7 +78,7 @@ sub form_meta
 		my ($self, @roles) = @_;
 
 		@roles = map { ucfirst lc $_ } @roles;
-		my $loader = q{ my $n = "Form::Tiny::$_"; eval "require $n"; $n; };
+		my $loader = q{ my $n = "Form::Tiny::Meta::$_"; eval "require $n"; $n; };
 		my $type = RoleName->plus_coercions(Str, $loader);
 		my @real_roles = map { $type->assert_coerce($_) } @roles;
 

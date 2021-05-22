@@ -79,11 +79,11 @@ sub _get_behaviors
 		},
 		-strict => {
 			subs => [],
-			roles => [qw(Form::Tiny::Strict)],
+			roles => [qw(Form::Tiny::Meta::Strict)],
 		},
 		-filtered => {
 			subs => [qw(form_filter)],
-			roles => [qw(Form::Tiny::Filtered)],
+			roles => [qw(Form::Tiny::Meta::Filtered)],
 		},
 	};
 }

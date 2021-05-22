@@ -1,4 +1,4 @@
-package Form::Tiny::Filtered;
+package Form::Tiny::Meta::Filtered;
 
 use v5.10;
 use warnings;
@@ -46,7 +46,7 @@ sub _apply_filters
 after 'inherit_from' => sub {
 	my ($self, $parent) = @_;
 
-	if ($parent->DOES('Form::Tiny::Filtered')) {
+	if ($parent->DOES('Form::Tiny::Meta::Filtered')) {
 		$self->filters([@{$parent->filters}, @{$self->filters}]);
 	}
 };
