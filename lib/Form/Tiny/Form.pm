@@ -224,13 +224,31 @@ sub validate
 
 sub add_error
 {
-	my ($self, $error) = @_;
-	# TODO easier default error adding
-	croak "error has to be an instance of Form::Tiny::Error"
-		unless blessed $error && $error->isa("Form::Tiny::Error");
+	my ($self, @error) = @_;
+
+	my $error;
+	if (@error == 1) {
+		if (defined blessed $error[0]) {
+			$error = shift @error;
+			croak 'error passed to add_error must be an instance of Form::Tiny::Error'
+				unless $error->isa("Form::Tiny::Error");
+		}
+		else {
+			$error = Form::Tiny::Error->new(error => @error);
+		}
+	}
+	elsif (@error == 2) {
+		$error = Form::Tiny::Error->new(
+			field => $error[0],
+			error => $error[1],
+		);
+	}
+	else {
+		croak 'invalid arguments passed to $form->add_error';
+	}
 
 	push @{$self->errors}, $error;
-	return;
+	return $self;
 }
 
 sub has_errors

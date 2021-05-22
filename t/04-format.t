@@ -12,8 +12,7 @@ for my $input ([], 0, "", "a", \1, sub { }) {
 	ok !$form->valid, "non-hashref is not accepted";
 	my $errors = $form->errors;
 	is scalar @$errors, 1, "only one error reported";
-	isa_ok shift @$errors, "Form::Tiny::Error::InvalidFormat",
-		"error type matches";
+	isa_ok shift @$errors, "Form::Tiny::Error::InvalidFormat";
 }
 
 done_testing;

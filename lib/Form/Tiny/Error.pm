@@ -18,6 +18,7 @@ has "field" => (
 	is => "ro",
 	isa => Maybe [Str],
 	writer => "set_field",
+	default => sub { undef },
 );
 
 has "error" => (
