@@ -18,10 +18,11 @@ use Test::More;
 		required => 1,
 	);
 
-	form_field 'number' => sub {
+	form_field sub {
 		my ($self) = @_;
 
 		return {
+			name => 'number',
 			type => Int,
 			required => $self->number_required,
 		};
@@ -33,37 +34,26 @@ use Test::More;
 		$data->{name} .= ($data->{number} // '-');
 	};
 
+	form_hook cleanup => sub {
+		my ($self, $data) = @_;
+
+		$data->{name} .= '!';
+	};
+
 	form_filter Int, sub {
 		abs shift;
 	};
 }
 
-{
-
-	package BaseTestForm;
-	use Form::Tiny -base;
-
-	form_field 'test';
-
-}
-
-my $form_base = BaseTestForm->new;
-ok $form_base->DOES('Form::Tiny'), 'base role ok';
-ok !$form_base->DOES('Form::Tiny::Strict'), 'strict role ok';
-ok !$form_base->DOES('Form::Tiny::Filtered'), 'filtered role ok';
-
 my $form = TestForm->new;
-ok $form->DOES('Form::Tiny'), 'base role ok';
-ok $form->DOES('Form::Tiny::Strict'), 'strict role ok';
-ok $form->DOES('Form::Tiny::Filtered'), 'filtered role ok';
 
-is scalar @{$form->field_defs}, 2, 'field defs ok';
-is scalar @{$form->filters}, 2, 'field filters ok';
-isa_ok $form->cleaner, 'CODE';
+is scalar @{$form->form_meta->fields}, 2, 'field defs ok';
+is scalar @{$form->form_meta->filters}, 2, 'field filters ok';
+is scalar @{$form->form_meta->hooks->{cleanup}}, 2, 'form cleaners ok';
 
 my @data = (
-	[1, {name => ' test', number => -3}, {name => 'test3', number => 3}],
-	[0, {name => ' test', number => 'test-'}],
+	[1, {name => ' test', number => -3}, {name => 'test3!', number => 3}],
+	[0, {name => ' test', number => '-test-'}],
 );
 
 for my $aref (@data) {

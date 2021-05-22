@@ -2,9 +2,6 @@ use v5.10;
 use warnings;
 use Test::More;
 use Data::Dumper;
-use Form::Tiny;
-
-# TODO: overhaul hooks
 
 {
 
@@ -16,8 +13,7 @@ use Form::Tiny;
 		type => Int
 	);
 
-	sub pre_validate
-	{
+	form_hook 'before_validate' => sub {
 		my ($self, $input) = @_;
 
 		if (ref $input->{name} eq ref []) {
@@ -25,14 +21,13 @@ use Form::Tiny;
 		}
 
 		return $input;
-	}
+	};
 
-	sub pre_mangle
-	{
+	form_hook 'before_mangle' => sub {
 		my ($self, $definition, $value) = @_;
 
 		return $value . 1;
-	}
+	};
 }
 
 my @data = (
