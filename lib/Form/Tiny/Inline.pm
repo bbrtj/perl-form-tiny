@@ -7,6 +7,7 @@ use Moo;
 
 use Form::Tiny::Form;
 use Form::Tiny::Meta;
+use Form::Tiny::Utils qw(create_anon_form_meta);
 
 use namespace::clean;
 
@@ -21,7 +22,7 @@ has '_meta' => (
 	init_arg => undef,
 	default => sub {
 		my ($self) = @_;
-		my $meta = Form::Tiny::Form->_create_anon_meta(@{$self->_meta_roles});
+		my $meta = create_anon_form_meta(@{$self->_meta_roles});
 		$meta->setup;
 
 		return $meta;

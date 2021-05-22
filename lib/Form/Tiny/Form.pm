@@ -10,6 +10,7 @@ use Scalar::Util qw(blessed);
 use Form::Tiny::Meta;
 use Form::Tiny::PathValue;
 use Form::Tiny::Error;
+use Form::Tiny::Utils qw(get_package_form_meta);
 use Moo::Role;
 
 our $VERSION = '1.13';
@@ -246,60 +247,12 @@ sub _clear_errors
 	return;
 }
 
-# FORM METADATA
-our $meta_class = 'Form::Tiny::Meta';
-my %meta;
-
-sub _create_anon_meta
-{
-	my ($self, @roles) = @_;
-	my $meta = $meta_class->new;
-
-	require Moo::Role;
-	Moo::Role->apply_roles_to_object(
-		$meta, @roles
-	) if scalar @roles;
-
-	return $meta;
-}
-
-sub _create_meta
-{
-	my ($self, $package, @roles) = @_;
-
-	croak "form meta for $package already exists"
-		if exists $meta{$package};
-
-	$meta{$package} = $self->_create_anon_meta(@roles);
-
-	return $meta{$package};
-}
-
 sub form_meta
 {
 	my ($self) = @_;
 	my $package = defined blessed $self ? blessed $self : $self;
 
-	croak "no form meta declared for $package"
-		unless exists $meta{$package};
-
-	my $form_meta = $meta{$package};
-
-	if (!$form_meta->complete) {
-		# when this breaks, mst gets to point and laugh at me
-		my @parents = do {
-			no strict 'refs';
-			@{"${package}::ISA"};
-		};
-
-		foreach my $parent (@parents) {
-			$form_meta->inherit_from($parent->form_meta)
-				if $parent->DOES('Form::Tiny::Form');
-		}
-		$form_meta->setup;
-	}
-
-	return $form_meta;
+	return get_package_form_meta($package);
 }
 
 1;

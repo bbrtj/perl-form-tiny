@@ -6,6 +6,7 @@ use Carp qw(croak);
 use Import::Into;
 
 use Form::Tiny::Form;
+use Form::Tiny::Utils qw(:meta_handlers);
 require Moo;
 
 our $VERSION = '1.13';
@@ -36,7 +37,7 @@ sub import
 		push @wanted_roles, @{$behaviors{$type}->{roles}};
 	}
 
-	Form::Tiny::Form->_create_meta($caller, @wanted_roles);
+	create_form_meta($caller, @wanted_roles);
 
 	{
 		no strict 'refs';
