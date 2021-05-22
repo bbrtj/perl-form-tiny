@@ -94,7 +94,11 @@ sub _check_strict
 after 'setup' => sub {
 	my ($self) = @_;
 
-	$self->add_hook(before_validate => sub { $self->_check_strict(@_); });
+	$self->add_hook(Form::Tiny::Hook->new(
+		hook => 'before_validate',
+		code => sub { $self->_check_strict(@_) },
+		inherited => 0,
+	));
 };
 
 1;

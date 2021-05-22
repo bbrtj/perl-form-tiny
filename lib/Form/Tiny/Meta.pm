@@ -17,6 +17,7 @@ our $VERSION = '1.13';
 
 has 'fields' => (
 	is => 'ro',
+	writer => 'set_fields',
 	isa => ArrayRef [
 		InstanceOf ['Form::Tiny::FieldDefinitionBuilder'] | InstanceOf ['Form::Tiny::FieldDefinition']
 	],
@@ -25,6 +26,7 @@ has 'fields' => (
 
 has 'hooks' => (
 	is => 'ro',
+	writer => 'set_hooks',
 	isa => HashRef [
 		ArrayRef [InstanceOf['Form::Tiny::Hook']]
 	],
@@ -99,10 +101,15 @@ sub add_hook
 {
 	my ($self, $hook, $code) = @_;
 
-	push @{$self->hooks->{$hook}}, Form::Tiny::Hook->new(
-		hook => $hook,
-		code => $code
-	);
+	if (defined blessed $hook && $hook->isa('Form::Tiny::Hook')) {
+		push @{$self->hooks->{$hook->hook}}, $hook;
+	}
+	else {
+		push @{$self->hooks->{$hook}}, Form::Tiny::Hook->new(
+			hook => $hook,
+			code => $code
+		);
+	}
 	return $self;
 }
 
@@ -113,8 +120,24 @@ sub inherit_from
 	croak 'can only inherit from objects of Form::Tiny::Meta'
 		unless defined blessed $parent && $parent->isa('Form::Tiny::Meta');
 
-	$self->fields([@{$parent->fields}, @{$self->fields}]);
-	$self->hooks([@{$parent->hooks}, @{$self->hooks}]);
+	# TODO validate for fields with same names
+	$self->set_fields([@{$parent->fields}, @{$self->fields}]);
+
+	# hooks inheritance - need to filter out hooks that are not
+	# meant to be inherited
+	my %hooks = %{$self->hooks};
+	my %parent_hooks = %{$parent->hooks};
+	for my $key (keys %parent_hooks) {
+		$parent_hooks{$key} = [
+			grep { $_->inherited } @{$parent_hooks{$key}}
+		];
+	}
+
+	# actual hooks inheritance
+	$self->set_hooks({ map {
+		$_ => [@{$parent_hooks{$_} // []}, @{$hooks{$_} // []}]
+	} keys %parent_hooks, keys %hooks });
+
 	return $self;
 }
 

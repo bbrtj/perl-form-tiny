@@ -48,11 +48,11 @@ use Test::More;
 my $form = TestForm->new;
 
 is scalar @{$form->form_meta->fields}, 2, 'field defs ok';
-is scalar @{$form->form_meta->filters}, 2, 'field filters ok';
+is scalar @{$form->form_meta->filters}, 1, 'field filters ok';
 is scalar @{$form->form_meta->hooks->{cleanup}}, 2, 'form cleaners ok';
 
 my @data = (
-	[1, {name => ' test', number => -3}, {name => 'test3!', number => 3}],
+	[1, {name => ' test', number => -3}, {name => ' test3!', number => 3}],
 	[0, {name => ' test', number => '-test-'}],
 );
 

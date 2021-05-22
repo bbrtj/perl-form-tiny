@@ -3,10 +3,11 @@ package Form::Tiny;
 use v5.10;
 use warnings;
 use Carp qw(croak);
+use Types::Standard qw(Str);
 use Import::Into;
 
 use Form::Tiny::Form;
-use Form::Tiny::Utils qw(:meta_handlers);
+use Form::Tiny::Utils qw(trim :meta_handlers);
 require Moo;
 
 our $VERSION = '1.13';
@@ -66,6 +67,9 @@ sub _generate_helpers
 		form_filter => sub {
 			$caller->form_meta->add_filter(@_);
 		},
+		form_trim_strings => sub {
+			$caller->form_meta->add_filter(Str, \&trim);
+		},
 	};
 }
 
@@ -82,7 +86,7 @@ sub _get_behaviors
 			roles => [qw(Form::Tiny::Meta::Strict)],
 		},
 		-filtered => {
-			subs => [qw(form_filter)],
+			subs => [qw(form_filter form_trim_strings)],
 			roles => [qw(Form::Tiny::Meta::Filtered)],
 		},
 	};

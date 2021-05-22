@@ -3,7 +3,7 @@ package Form::Tiny::Hook;
 use v5.10;
 use warnings;
 use Moo;
-use Types::Standard qw(Enum CodeRef);
+use Types::Standard qw(Enum CodeRef Bool);
 
 use namespace::clean;
 
@@ -31,6 +31,12 @@ has "code" => (
 	is => "ro",
 	isa => CodeRef,
 	required => 1,
+);
+
+has 'inherited' => (
+	is => 'ro',
+	isa => Bool,
+	default => sub { 1 },
 );
 
 sub is_modifying

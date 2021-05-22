@@ -2,12 +2,12 @@ package Form::Tiny::Inline;
 
 use v5.10;
 use warnings;
-use Types::Standard qw(ArrayRef InstanceOf);
+use Types::Standard qw(Str ArrayRef InstanceOf);
 use Moo;
 
 use Form::Tiny::Form;
 use Form::Tiny::Meta;
-use Form::Tiny::Utils qw(create_anon_form_meta);
+use Form::Tiny::Utils qw(trim create_anon_form_meta);
 
 use namespace::clean;
 
@@ -49,8 +49,11 @@ sub BUILD
 		$meta->add_hook(cleanup => $args->{cleaner});
 	}
 
-	for my $filter (@{$args->{filters} // []}) {
-		$meta->add_filter(@$filter);
+	if ($meta->can('add_filter')) {
+		$meta->add_filter(Str, \&trim);
+		for my $filter (@{$args->{filters} // []}) {
+			$meta->add_filter(@$filter);
+		}
 	}
 }
 
