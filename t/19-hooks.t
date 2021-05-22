@@ -9,6 +9,8 @@ use Data::Dumper;
 	use Form::Tiny -filtered;
 	use Types::Standard qw(Int);
 
+	form_trim_strings;
+
 	form_field 'name.*' => (
 		type => Int
 	);
@@ -34,7 +36,7 @@ my @data = (
 	[1, {}, {}],
 	[1, {name => [2, 3]}, {name => [21, 31]}],
 	[1, {name => [0, undef, 3]}, {name => ["01", 31]}],
-	# [1, {name => [" 2 "]}, {name => ["21"]}], # TODO does not work with syntactic sugar
+	[1, {name => [" 2 "]}, {name => ["21"]}],
 	[1, {name => [undef, undef, undef]}, {name => []}],
 );
 
