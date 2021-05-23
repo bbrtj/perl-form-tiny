@@ -110,11 +110,11 @@ Form::Tiny::Error - form error wrapper
 
 =head1 DESCRIPTION
 
-Form errors feature field name which caused validation error, error message and automatic stringification.
+The form errors class features field name which caused validation error, error message and automatic stringification.
 
 The C<< $error->error >> can return a nested error object in case of nested forms.
 
-A couple of in-place subclasses are provided to differentiate the type of error which occured. There are:
+A couple of in-place subclasses are provided to differentiate the type of error which occured. These are:
 
 =over
 
