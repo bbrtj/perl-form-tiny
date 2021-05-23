@@ -91,7 +91,7 @@ sub add_field
 
 	my $scalar_param = shift @parameters;
 	if (@parameters > 0 || ref $scalar_param eq '') {
-		$scalar_param = {'name', $scalar_param, @parameters};
+		$scalar_param = {@parameters, 'name', $scalar_param};
 	}
 
 	push @{$fields}, Form::Tiny::FieldDefinitionBuilder->new(data => $scalar_param)->build;

@@ -14,7 +14,7 @@ This documentation page is listing all non-backward compatible changes in usage 
 
 I<Changed in 2.00>
 
-In the past, declaring a form as filtered caused it to trim strings by default before validation.
+In the past, declaring a form as filtered caused it to trim strings before validation by default.
 
 This behavior was removed due to difficulty in designing a sane interface that would allow opting out of it. An exception of inline forms (L<Form::Tiny::Inline>) was introduced, which still trim by default when declared to be capable of filtering.
 
@@ -88,6 +88,14 @@ It has been changed so that backslash escapes every special character in field n
 	form_field '\\.'; # a literal dot
 	form_field '\\\\.'; # syntax error - a literal backslash followed by a nesting separator
 	form_field '\\\\\\.'; # a literal backslash followed by a literal dot
+
+=head2 Old builder syntax is no longer supported
+
+I<Changed in 2.00>
+
+In the past, it was possible to define a form by defining three methods in the package: C<build_fields>, C<build_cleaner> and C<build_filters>. This was a part of the initial implementation and was later scraped when form metaobject was introduced.
+
+If you happened to use the module during its early days, you must adjust your code to the new DSL style. It should not require drastic changes, but rather moving declarations out from class methods to DSL keywords. Refer to L<Form::Tiny/"Form domain-specific language"> for details.
 
 =head1 SEE ALSO
 

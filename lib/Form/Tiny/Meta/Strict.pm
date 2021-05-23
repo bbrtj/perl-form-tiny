@@ -62,7 +62,7 @@ sub _check_strict
 	my ($self, $obj, $input) = @_;
 
 	my %markers;
-	foreach my $def (@{$obj->form_meta->resolved_fields($obj)}) {
+	foreach my $def (@{$obj->field_defs}) {
 		if ($def->is_subform) {
 			$markers{$def->name} = MARKER_SKIP;
 		}

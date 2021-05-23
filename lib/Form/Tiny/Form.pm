@@ -166,7 +166,7 @@ sub _validate
 
 	if (ref $self->input eq 'HASH') {
 		my $fields = $meta->run_hooks_for('before_validate', $self, dclone($self->input));
-		foreach my $validator (@{$meta->resolved_fields($self)}) {
+		foreach my $validator (@{$self->field_defs}) {
 			my $curr_f = $validator->name;
 
 			my $current_data = $self->_find_field($fields, $validator);
@@ -268,6 +268,16 @@ sub _clear_errors
 	return;
 }
 
+sub field_defs
+{
+	my ($self) = @_;
+
+	croak 'field_defs can only be called in object context'
+		unless defined blessed $self;
+
+	return $self->form_meta->resolved_fields($self);
+}
+
 sub form_meta
 {
 	my ($self) = @_;
@@ -277,3 +287,68 @@ sub form_meta
 }
 
 1;
+
+__END__
+
+
+=head1 ADDED INTERFACE
+
+This section describes the interface added to your class after mixing in the Form::Tiny role.
+
+=head2 ATTRIBUTES
+
+Each of the attributes can be accessed by calling its name as a function on Form::Tiny object.
+
+=head3 field_defs
+
+Contains an array reference of L<Form::Tiny::FieldDefinition> instances. A coercion from a hash reference can be performed upon writing.
+
+B<built by:> I<build_fields>
+
+=head3 input
+
+Contains the input data passed to the form.
+
+B<writer:> I<set_input>
+
+=head3 fields
+
+Contains the validated and cleaned fields set after the validation is complete. Cannot be specified in the constructor.
+
+=head3 valid
+
+Contains the result of the validation - a boolean value. Gets produced lazily upon accessing it, so calling C<< $form->valid; >> validates the form automatically.
+
+B<clearer:> I<clear_valid>
+
+B<predicate:> I<is_validated>
+
+=head3 errors
+
+Contains an array reference of form errors which were detected by the last performed validation. Each error is an instance of L<Form::Tiny::Error>.
+
+B<predicate:> I<has_errors>
+
+=head2 METHODS
+
+This section describes standalone methods available in the module - they are not directly connected to any of the attributes.
+
+=head3 new
+
+This is a Moose-flavored constructor for the class. It accepts a hash or hash reference of parameters, which are the attributes specified above.
+
+=head3 check
+
+=head3 validate
+
+These methods are here to ensure that a Form::Tiny instance can be used as a type validator itself by other form classes.
+
+I<check> returns a boolean value that indicates whether the validation of input data was successful.
+
+I<validate> does the same thing, but instead of returning a boolean it returns a list of errors that were detected, or undef if none.
+
+Both methods take input data as the only argument.
+
+=head3 add_error
+
+Adds an error to form - should be called with an instance of L<Form::Tiny::Error> as its only argument. This should only be done during validation with customization methods listed below.

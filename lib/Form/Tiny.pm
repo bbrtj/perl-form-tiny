@@ -108,40 +108,20 @@ Form::Tiny - Input validator implementation centered around Type::Tiny
 	package MyForm;
 
 	use Form::Tiny -base;
+	use Types::Standard qw(Int);
 
 	form_filed 'my_field' => (
 		required => 1,
 	);
 
 	form_filed 'another_field' => (
-		required => 1,
+		type => Int,
+		default => sub { 0 },
 	);
 
 =head1 DESCRIPTION
 
-Main package of the Form::Tiny system - this is a role that provides most of the module's functionality.
-
-=head1 REWRITE ALERT
-
-B<NOTICE> Form::Tiny is undergoing a major rewrite to introduce a form metamodel, reduce the clutter in packages and improve speed. The upcoming version 2.00 will not be backwards-compatible, it will however be largely compatible with the new syntax introduced in versions 1.10 and above. The goal is to correct some design mistakes with only a couple of changes in existing code for the users of versions 1.10 and above. You can expect your code to be working largely unchanged if you're already using the I<form_field> helpers to define your form.
-
-Things that will change:
-
-=over
-
-=item * old syntax with builders will be completely replaced by form metadata, speeding up form object construction
-
-=item * form field names will now be handled by a complete implementation with same syntax but more capabilities
-
-=item * form hook system will be completely overhauled
-
-=item * form filters system will be changed slightly to allow form object access in filter sub
-
-=item * many redundant methods will be removed
-
-=back
-
-The rewrite is expected to be available late May / early June. You can track the progress on the module's repository, I<master> branch.
+Form::Tiny is a customizable hashref validator with DSL for form building.
 
 =head1 DOCUMENTATION INDEX
 
@@ -149,7 +129,9 @@ The rewrite is expected to be available late May / early June. You can track the
 
 =item * L<Form::Tiny::Manual> - main reference
 
-=item * L<Form::Tiny::Manual::Internals> - Form::Tiny without syntactic sugar
+=item * L<Form::Tiny::Manual::Compatibility> - See backwards compatibility notice
+
+=item * L<Form::Tiny::Manual::Internals> - How to mess with Form::Tiny internals
 
 =item * Most regular packages contains information on symbols they contain.
 
@@ -157,132 +139,89 @@ The rewrite is expected to be available late May / early June. You can track the
 
 =head1 IMPORTING
 
-Starting with version 1.10 you can enable syntax helpers by using import flags:
+When imported with any C<-flag>, Form::Tiny will turn a package it is imported into a Moo class that does the L<Form::Tiny::Form> role. It will also install helper functions in your package that act as a domain-specific language (DSL) for building your form.
 
 	package MyForm;
 
-	# imports form_field and form_cleaner helpers
+	# imports only basic helpers
 	use Form::Tiny -base;
-
-	# imports form_field, form_filter and form_cleaner helpers
-	use Form::Tiny -filtered;
 
 	# fully-featured form:
 	use Form::Tiny -filtered, -strict;
 
+After C<use Form::Tiny -flags> statement, your package gains all the Moo keywords, some Form::Tiny keywords (see L</"Available import flags">) and all L<Form::Tiny::Form> methods.
 
-=head2 IMPORTED FUNCTIONS
+=head2 Available import flags
+
+=over
+
+=item * C<-base>
+
+This flag is only requried if you want to turn your package into a form, but don't want any specific extra features.
+
+Installed functions: C<form_field form_cleaner form_hook>
+
+=item * C<-nomoo>
+
+This flag stops Form::Tiny from importing Moo into your namespace. Unless you use a different class system (like L<Moose>) will have to declare your own constructor, which will need to call C<< $form->BUILD >>.
+
+Installed functions: same as C<-base>
+
+=item * C<-filtered>
+
+This flag enables filters in your form.
+
+Installed functions: all of C<-base> plus C<form_filter form_trim_strings>
+
+=item * C<-strict>
+
+This flag makes your form check for strictness before the validation.
+
+Installed functions: same as C<-base>
+
+=back
+
+=head2 Form domain-specific language
 
 =head3 form_field
 
 	form_field $name => %arguments;
-	form_field $name => $coderef;
+	form_field $coderef;
+	form_field $object;
 
-Imported when any flag is present. $coderef gets passed the form instance and should return a hashref. Neither %arguments nor $coderef return data should include the name in the hash, it will be copied from the first argument.
+This helper declares a new field for your form. Each style of calling this function should contain keys that meet the specification of L<Form::Tiny::FieldDefinition>, or an object of this class directly.
 
-Note that this field definition method is not capable of returning a subclass of L<Form::Tiny::FieldDefinition>. If you need a subclass, you will need to use bare-bones method of form construction. Refer to L<Form::Tiny::Manual::Internals> for details.
+In the first (hash) version, C<%arguments> need to be a plain hash (not a hashref) and should B<not> include the name in the hash, as it will be overriden by the first argument C<$name>.
+
+In the second (coderef) version, C<$coderef> gets passed the form instance as its only argument and should return a hashref or a constructed object of L<Form::Tiny::FieldDefinition>. A hashref must contain a C<name>. Note that this creates I<dynamic field>, which will be resolved repeatedly during form validation. As such, it should not contain any randomness.
+
+If you need a subclass of the default implementation, and you don't need a dynamic field, you can use the third style of the call, which takes a constructed object of L<Form::Tiny::FieldDefinition> or its subclass.
+
+=head3 form_hook
+
+	form_hook $stage => $coderef;
+
+This creates a new hook for C<$stage>. Each stage may have multiple hooks and each will pass different arguments to the C<$coderef>. Refer to L<Form::Tiny::Manual/Hooks> for details.
 
 =head3 form_cleaner
 
-	form_cleaner $sub;
+	form_cleaner $coderef;
 
-Imported when any flag is present. C<$sub> will be ran as the very last step of form validation. There can't be more than one cleaner in a form. See L</build_cleaner>.
+A shortcut for C<< form_hook cleanup => $coderef; >>.
 
 =head3 form_filter
 
-	form_filter $type, $sub;
+	form_filter $type, $coderef;
 
-Imported when the -filtered flag is present. $type should be a Type::Tiny (or compatible) type check. For each input field that passes that check, $sub will be ran. See L<Form::Tiny::Filtered> for details on filters.
+C<$type> should be a Type::Tiny (or compatible) type check. For each input field that passes that check, C<$coderef> will be ran. See L<Form::Tiny::Manual/"Filters"> for details on filters.
 
-=head1 ADDED INTERFACE
+=head3 form_trim_strings
 
-This section describes the interface added to your class after mixing in the Form::Tiny role.
+	form_trim_strings;
 
-=head2 ATTRIBUTES
+This helper takes no arguments, but causes your form to filter string values by calling L<Form::Tiny::Utils::trim> on them.
 
-Each of the attributes can be accessed by calling its name as a function on Form::Tiny object.
-
-=head3 field_defs
-
-Contains an array reference of L<Form::Tiny::FieldDefinition> instances. A coercion from a hash reference can be performed upon writing.
-
-B<built by:> I<build_fields>
-
-=head3 input
-
-Contains the input data passed to the form.
-
-B<writer:> I<set_input>
-
-=head3 fields
-
-Contains the validated and cleaned fields set after the validation is complete. Cannot be specified in the constructor.
-
-=head3 valid
-
-Contains the result of the validation - a boolean value. Gets produced lazily upon accessing it, so calling C<< $form->valid; >> validates the form automatically.
-
-B<clearer:> I<clear_valid>
-
-B<predicate:> I<is_validated>
-
-=head3 errors
-
-Contains an array reference of form errors which were detected by the last performed validation. Each error is an instance of L<Form::Tiny::Error>.
-
-B<predicate:> I<has_errors>
-
-=head2 METHODS
-
-This section describes standalone methods available in the module - they are not directly connected to any of the attributes.
-
-=head3 new
-
-This is a Moose-flavored constructor for the class. It accepts a hash or hash reference of parameters, which are the attributes specified above.
-
-=head3 check
-
-=head3 validate
-
-These methods are here to ensure that a Form::Tiny instance can be used as a type validator itself by other form classes.
-
-I<check> returns a boolean value that indicates whether the validation of input data was successful.
-
-I<validate> does the same thing, but instead of returning a boolean it returns a list of errors that were detected, or undef if none.
-
-Both methods take input data as the only argument.
-
-=head3 add_error
-
-Adds an error to form - should be called with an instance of L<Form::Tiny::Error> as its only argument. This should only be done during validation with customization methods listed below.
-
-=head1 CUSTOMIZATION
-
-A form instance can be customized by overriding any of the following methods:
-
-=head2 build_fields
-
-This method should return an array or array reference of field definitions: either L<Form::Tiny::FieldDefinition> instances or hashrefs which can be used to construct these instances.
-
-It is passed a single argument, which is the class instance. It can be used to add errors in coderefs or to use class fields in form building.
-
-=head2 build_cleaner
-
-An optional cleaner is a function that will be called as the very last step of the validation process. It can be used to have a broad look on all of the validated form fields at once and introduce any synchronization errors, like a field requiring other field to be set.
-
-Using I<add_error> inside this function will cause the form to fail the validation process.
-
-In I<build_cleaner> method you're required to return a subroutine reference that will be called with two arguments: a form being validated and a set of "dirty" fields - validated and ready to be cleaned. This subroutine should not return the data - its return value will be discarded.
-
-=head2 pre_mangle
-
-This method is called every time an input field value is about to be changed by coercing and adjusting. It gets passed two arguments: an instance of L<Form::Tiny::FieldDefinition> and a value obtained from input data.
-
-This method should return a new value for the field, which will replace the old one.
-
-=head2 pre_validate
-
-This method is called once before the validation process has started. It gets passed a deep copy of input data and is expected to return a value that will be used to obtain every field value during validation.
+This was enabled by default once. Refer to L<Form::Tiny::Manual::Compatibility/"Filtered forms no longer trim strings by default"> for details.
 
 =head1 AUTHOR
 
