@@ -46,13 +46,14 @@ sub run_hooks_for
 	my @hooks = @{$self->hooks->{$stage} // []};
 
 	# running hooks always returns the last element they're passed
+	# (unless they are not modifying, then they don't return anything)
 	for my $hook (@hooks) {
 		my $ret = $hook->code->(@data);
 		splice @data, -1, 1, $ret
 			if $hook->is_modifying;
 	}
 
-	return pop @data;
+	return $data[-1];
 }
 
 sub setup

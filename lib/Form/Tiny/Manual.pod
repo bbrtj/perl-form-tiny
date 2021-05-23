@@ -263,7 +263,7 @@ B<before_mangle> is fired for every field, just before it is changed ("mangled")
 
 =head3 before_validate
 
-B<before_validate> is fired just once for the form, before any field is validated. It is passed a single hashref - a copy of the input data. This method is free to do anything with the input, and its return value will become the real input to the validation.
+B<before_validate> is fired just once for the form, before any field is validated. It is passed a single hashref - a copy of the input data. This method is free to do anything with the input, but its return value is discarded.
 
 	form_hook before_validate => sub {
 		my ($self, $input_data) = @_;
@@ -288,6 +288,21 @@ Same as C<cleanup>, but differs in two aspects:
 =back
 
 This hook does not require you to return anything and is passed the same data as C<cleanup>.
+
+=head3 reformat
+
+Same as C<before_validate>, but differs in two aspects:
+
+=over
+
+=item * it is ran before data is rejected due to not being a hash reference
+
+=item * its return value is used for the rest of the validation process as input
+
+=back
+
+This hook does require you to return a new input value to the validation. It is passed the same data as C<before_validate>.
+
 
 =head2 Optional behavior
 

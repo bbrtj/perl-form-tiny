@@ -168,6 +168,7 @@ sub _validate
 	my $err = try sub {
 		$fields = dclone($fields)
 			if ref $fields ne '';
+		$fields = $meta->run_hooks_for('reformat', $self, $fields);
 	};
 
 	if (!$err && ref $fields eq 'HASH') {

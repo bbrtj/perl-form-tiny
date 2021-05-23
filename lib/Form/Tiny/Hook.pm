@@ -10,6 +10,7 @@ use namespace::clean;
 our $VERSION = '2.00';
 
 use constant {
+	HOOK_REFORMAT => 'reformat',
 	HOOK_BEFORE_MANGLE => 'before_mangle',
 	HOOK_BEFORE_VALIDATE => 'before_validate',
 	HOOK_AFTER_VALIDATE => 'after_validate',
@@ -17,6 +18,7 @@ use constant {
 };
 
 my @hooks = (
+	HOOK_REFORMAT,
 	HOOK_BEFORE_MANGLE,
 	HOOK_BEFORE_VALIDATE,
 	HOOK_AFTER_VALIDATE,
@@ -47,7 +49,11 @@ sub is_modifying
 
 	# whether a hook type will modify the input data
 	# with return statements
-	return $self->hook eq HOOK_BEFORE_MANGLE;
+	my %modifying = map { $_ => 1 } (
+		HOOK_BEFORE_MANGLE,
+		HOOK_REFORMAT
+	);
+	return exists $modifying{$self->hook};
 
 }
 
@@ -74,7 +80,7 @@ This is a simple class which stores a hook type together with a code reference w
 
 =head2 hook
 
-A hook type. Currently available types are: C<before_mangle before_validate after_validate cleanup>.
+A hook type. Currently available types are: C<reformat before_mangle before_validate after_validate cleanup>.
 
 Required.
 

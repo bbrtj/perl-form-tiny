@@ -26,10 +26,10 @@ use Data::Dumper;
 	};
 
 	form_hook 'after_validate' => sub {
-		my ($self, $input) = @_;
+		my ($self, $fields) = @_;
 
-		$input->{no_data} = 1
-			if !$input->{name} || !scalar @{$input->{name}};
+		$fields->{no_data} = 1
+			if !$fields->{name} || !scalar @{$fields->{name}};
 	};
 
 	form_hook 'before_mangle' => sub {
@@ -37,10 +37,17 @@ use Data::Dumper;
 
 		return $value . 1;
 	};
+
+	form_hook reformat => sub {
+		my ($self, $input) = @_;
+
+		return ref $input eq '' ? {} : $input;
+	};
 }
 
 my @data = (
 	[1, {}, {no_data => 1}],
+	[1, '', {no_data => 1}],
 	[1, {name => [2, 3]}, {name => [21, 31]}],
 	[1, {name => [0, undef, 3]}, {name => ["01", 31]}],
 	[1, {name => [" 2 "]}, {name => ["21"]}],
