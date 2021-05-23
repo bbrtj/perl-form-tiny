@@ -290,6 +290,17 @@ sub form_meta
 
 __END__
 
+=head1 NAME
+
+Form::Tiny::Form - main role of the Form::Tiny system
+
+=head1 SYNOPSIS
+
+See L<Form::Tiny::Manual>
+
+=head1 DESCRIPTION
+
+This role gets automatically mixed in by importing L<Form::Tiny> into your namespace.
 
 =head1 ADDED INTERFACE
 
@@ -298,12 +309,6 @@ This section describes the interface added to your class after mixing in the For
 =head2 ATTRIBUTES
 
 Each of the attributes can be accessed by calling its name as a function on Form::Tiny object.
-
-=head3 field_defs
-
-Contains an array reference of L<Form::Tiny::FieldDefinition> instances. A coercion from a hash reference can be performed upon writing.
-
-B<built by:> I<build_fields>
 
 =head3 input
 
@@ -333,9 +338,19 @@ B<predicate:> I<has_errors>
 
 This section describes standalone methods available in the module - they are not directly connected to any of the attributes.
 
+=head3 form_meta
+
+Returns the form metaobject, an instance of L<Form::Tiny::Meta>.
+
 =head3 new
 
 This is a Moose-flavored constructor for the class. It accepts a hash or hash reference of parameters, which are the attributes specified above.
+
+=head3 field_defs
+
+Returns an array reference of L<Form::Tiny::FieldDefinition> instances. Can only be called in object context.
+
+No arguments.
 
 =head3 check
 
@@ -351,4 +366,10 @@ Both methods take input data as the only argument.
 
 =head3 add_error
 
-Adds an error to form - should be called with an instance of L<Form::Tiny::Error> as its only argument. This should only be done during validation with customization methods listed below.
+	$form->add_error($error_string);
+	$form->add_error($field_name => $error_string);
+	$form->add_error($error_object);
+
+Adds an error to the form. This should only be done during validation with customization methods listed below.
+
+If C<$error_object> style is used, it must be an instance of L<Form::Tiny::Error>.

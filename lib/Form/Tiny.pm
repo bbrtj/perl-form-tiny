@@ -107,7 +107,7 @@ Form::Tiny - Input validator implementation centered around Type::Tiny
 
 	package MyForm;
 
-	use Form::Tiny;
+	use Form::Tiny -base;
 	use Types::Standard qw(Int);
 
 	form_filed 'my_field' => (
@@ -222,6 +222,14 @@ C<$type> should be a Type::Tiny (or compatible) type check. For each input field
 This helper takes no arguments, but causes your form to filter string values by calling L<Form::Tiny::Utils::trim> on them.
 
 This was enabled by default once. Refer to L<Form::Tiny::Manual::Compatibility/"Filtered forms no longer trim strings by default"> for details.
+
+=head1 TODO
+
+=over
+
+=item * Document meta classes
+
+=back
 
 =head1 AUTHOR
 
