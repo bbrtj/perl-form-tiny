@@ -49,3 +49,44 @@ sub is_modifying
 }
 
 1;
+
+__END__
+
+=head1 NAME
+
+Form::Tiny::Hook - a representation of a hook
+
+=head1 SYNOPSIS
+
+	# in your form class
+
+	# the following will be coerced into Form::Tiny::Filter
+	form_hook before_validation => $coderef;
+
+=head1 DESCRIPTION
+
+This is a simple class which stores a hook type together with a code reference which will be fired on that stage.
+
+=head1 ATTRIBUTES
+
+=head2 hook
+
+A hook type. Currently available types are: C<before_mangle before_validate cleanup>.
+
+Required.
+
+=head2 code
+
+A code reference accepting varying arguments depending on hook type.
+
+Required.
+
+=head2 inherited
+
+A boolean - whether the hook should be inherited to child forms. True by default.
+
+=head1 METHODS
+
+=head2 is_modifying
+
+Given a hook object, this method will return a boolean value which indicates whether the hook is meant to be modifying the passed in value. If false, we should discard the return value of that hook's code reference.
