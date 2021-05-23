@@ -43,6 +43,8 @@ sub is_modifying
 {
 	my ($self) = @_;
 
+	# whether a hook type will modify the input data
+	# with return statements
 	return $self->hook ne HOOK_CLEANUP;
 }
 

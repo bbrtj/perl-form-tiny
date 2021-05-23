@@ -3,6 +3,7 @@ package Form::Tiny::Path;
 use v5.10;
 use warnings;
 use Moo;
+use Carp qw(croak);
 use Types::Standard qw(ArrayRef);
 
 use namespace::clean;
@@ -29,16 +30,47 @@ has "meta" => (
 	required => 1,
 );
 
+sub BUILD
+{
+	my ($self) = @_;
+
+	my @parts = @{$self->path};
+
+	# we allow empty paths here due to ->empty and ->clone methods
+	# we disallow them in ->from_name instead
+	if (scalar @parts) {
+		croak 'path specified contained an empty part: ' . $self->dump
+			if scalar grep { length $_ eq 0 } @parts;
+
+		croak 'path specified started with an array: ' . $self->dump
+			if $self->meta->[0] eq 'ARRAY';
+	}
+}
+
+sub dump
+{
+	my ($self) = @_;
+	my @parts = @{$self->path};
+	my @meta = @{$self->meta};
+
+	return join ' -> ',
+		map { "`$parts[$_]` ($meta[$_])" }
+		0 .. $#parts;
+}
+
 sub from_name
 {
 	my ($self, $name) = @_;
+
+	croak 'path specified was empty'
+		unless length $name;
 
 	my $escape = "\x00";
 	$name =~ s/(\Q$escape_character\E{1,2})/length $1 == 2 ? $escape_character : $escape/ge;
 
 	my $arr = quotemeta $array_marker;
 	my $sep = quotemeta $nesting_separator;
-	my @parts = split /(?<!$escape)$sep/, $name;
+	my @parts = split /(?<!$escape)$sep/, $name, -1;
 	my @meta;
 
 	for my $part (@parts) {
@@ -76,7 +108,7 @@ sub append
 	return $self;
 }
 
-sub make_real_path
+sub make_name_path
 {
 	my ($self, $prefix) = @_;
 
@@ -102,7 +134,7 @@ sub make_real_path
 sub join
 {
 	my ($self, $prefix) = @_;
-	return join $nesting_separator, $self->make_real_path($prefix);
+	return join $nesting_separator, $self->make_name_path($prefix);
 }
 
 1;
