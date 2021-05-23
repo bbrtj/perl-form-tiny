@@ -127,13 +127,21 @@ Form::Tiny is a customizable hashref validator with DSL for form building.
 
 =over
 
-=item * L<Form::Tiny::Manual> - main reference
+=item * L<Form::Tiny::Manual> - Main reference
 
 =item * L<Form::Tiny::Manual::Compatibility> - See backwards compatibility notice
 
 =item * L<Form::Tiny::Manual::Internals> - How to mess with Form::Tiny internals
 
-=item * Most regular packages contains information on symbols they contain.
+=item * L<Form::Tiny::Form> - Form class added interface specification
+
+=item * L<Form::Tiny::Error> - Form error class specification
+
+=item * L<Form::Tiny::FieldDefinition> - Field definition class specification
+
+=item * L<Form::Tiny::Hook> - Hook class specification
+
+=item * L<Form::Tiny::Filter> - Filter class specification
 
 =back
 
@@ -227,7 +235,11 @@ This was enabled by default once. Refer to L<Form::Tiny::Manual::Compatibility/"
 
 =over
 
-=item * Document meta classes
+=item * Document and test meta classes
+
+=item * More tests for form inheritance
+
+=item * More examples
 
 =back
 

@@ -4,7 +4,7 @@ use Test::More;
 use Form::Tiny::Inline;
 
 # test for invalid format rejection
-for my $input ([], 0, "", "a", \1, sub { }, [sub {}]) {
+for my $input ([], 0, "", "a", \1, sub { }, [sub { }]) {
 	my $form = Form::Tiny::Inline->new(
 		field_defs => [],
 		input => $input,

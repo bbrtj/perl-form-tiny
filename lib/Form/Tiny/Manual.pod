@@ -57,13 +57,13 @@ L<Form::Tiny> is a form validation engine that can use all the type constraints 
 
 L<Form::Tiny> is designed to be a comprehensive data validation and filtering system based on existing validation solutions. Type::Tiny libraries cover most of the validation and coercion needs in models, and now with Form::Tiny they can be empowered to do the same with input data.
 
-The module itself isn't much more than a hashref filter - it accepts one as input and returns the transformed one as output. The pipeline is as follows:
+The module itself isn't much more than a hashref filter - it accepts one as input and returns the transformed one as output. The pipeline for a single field is as follows:
 
 	input
 	  |
-	  |--> filtering -- coercion -- validation -- adjustment -- cleanup --|
-	                                                                      v
-	                                                                    output
+	  |--> filtering -- coercion -- validation -- adjustment --|
+	                                                           v
+	                                                        output
 
 I<(Note that not every step on that pipeline is ran every time - it depends on form configuration)>
 
@@ -96,6 +96,8 @@ Form::Tiny allows you to define forms much like you would define a Moose class. 
 Adding a C<use Form::Tiny> line will cause your current package to be turned into a form by composing L<Form::Tiny::Form> into it (and as a result, merging all of its symbols with your package). It also imports Moo into your namespace for convenience (unless you specify C<-nomoo> flag). Refer to L<Form::Tiny/"Available import flags"> for a full list of available flags.
 
 This syntax is designed to resemble and mix in nicely with Moo/se syntax. Form fields and class properties are completely separate and can be freely intermixed with each other.
+
+A full list of DSL keywords is available in L<Form::Tiny/"Form domain-specific language">.
 
 =head2 Basic usage
 
@@ -468,5 +470,7 @@ For best results, class parents should be specified before any calls to Form::Ti
 =item * L<Type::Tiny>, the awesome type system
 
 =item * L<Form::Tiny>, the importer and base class for this distribution
+
+=item * L<Form::Tiny::Manual::Internals>, the Form::Tiny metamodel
 
 =back
