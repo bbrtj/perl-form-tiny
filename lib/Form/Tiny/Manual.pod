@@ -284,7 +284,9 @@ Turned on with the C<-strict> flag in L<Form::Tiny>.
 
 Enables strict mode for the form. Validation will fail if form input contains any data not specified in the field definitions. This additional check is added to the form as a C<before_validate> hook.
 
-Strict mode is helpful when you want to make sure you're not getting any extra data in your input. It does not affect the output of forms, only the validation result. Form::Tiny does not copy fields that are not declared explicitly to output regardless of the Strict mode being turned on.
+Strict mode is helpful when you want to make sure you're not getting any extra data in your input. It does not affect the output of forms, only the validation result. Form::Tiny does not copy fields that are not declared explicitly to output regardless of the strict mode being turned on.
+
+For example, if your form contains many optional fields which change often, you may want to ensure that your users are not sending anything you're not going to handle. This can help debugging and prevent errors.
 
 =head3 Filters
 
