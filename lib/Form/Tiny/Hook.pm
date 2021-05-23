@@ -12,12 +12,14 @@ our $VERSION = '2.00';
 use constant {
 	HOOK_BEFORE_MANGLE => 'before_mangle',
 	HOOK_BEFORE_VALIDATE => 'before_validate',
+	HOOK_AFTER_VALIDATE => 'after_validate',
 	HOOK_CLEANUP => 'cleanup',
 };
 
 my @hooks = (
 	HOOK_BEFORE_MANGLE,
 	HOOK_BEFORE_VALIDATE,
+	HOOK_AFTER_VALIDATE,
 	HOOK_CLEANUP
 );
 
@@ -65,13 +67,13 @@ Form::Tiny::Hook - a representation of a hook
 
 =head1 DESCRIPTION
 
-This is a simple class which stores a hook type together with a code reference which will be fired on that stage.
+This is a simple class which stores a hook type together with a code reference which will be fired on that stage. See L<Form::Tiny::Manual/"Hooks"> for details.
 
 =head1 ATTRIBUTES
 
 =head2 hook
 
-A hook type. Currently available types are: C<before_mangle before_validate cleanup>.
+A hook type. Currently available types are: C<before_mangle before_validate after_validate cleanup>.
 
 Required.
 

@@ -25,6 +25,13 @@ use Data::Dumper;
 		return $input;
 	};
 
+	form_hook 'after_validate' => sub {
+		my ($self, $input) = @_;
+
+		$input->{no_data} = 1
+			if !$input->{name} || !scalar @{$input->{name}};
+	};
+
 	form_hook 'before_mangle' => sub {
 		my ($self, $definition, $value) = @_;
 
@@ -33,11 +40,11 @@ use Data::Dumper;
 }
 
 my @data = (
-	[1, {}, {}],
+	[1, {}, {no_data => 1}],
 	[1, {name => [2, 3]}, {name => [21, 31]}],
 	[1, {name => [0, undef, 3]}, {name => ["01", 31]}],
 	[1, {name => [" 2 "]}, {name => ["21"]}],
-	[1, {name => [undef, undef, undef]}, {name => []}],
+	[1, {name => [undef, undef, undef]}, {name => [], no_data => 1}],
 );
 
 for my $aref (@data) {

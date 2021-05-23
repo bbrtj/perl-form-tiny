@@ -200,6 +200,8 @@ sub _validate
 		$self->add_error(Form::Tiny::Error::InvalidFormat->new);
 	}
 
+	$meta->run_hooks_for('after_validate', $self, $dirty);
+
 	$meta->run_hooks_for('cleanup', $self, $dirty)
 		if !$self->has_errors;
 

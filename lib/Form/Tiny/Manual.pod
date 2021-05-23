@@ -274,6 +274,20 @@ B<before_validate> is fired just once for the form, before any field is validate
 		return $input_data;
 	};
 
+=head3 after_validate
+
+Same as C<cleanup>, but differs in two aspects:
+
+=over
+
+=item * it is ran before C<cleanup>
+
+=item * it is ran regardless of previous validation being successful or not
+
+=back
+
+This hook does not require you to return anything and is passed the same data as C<cleanup>.
+
 =head2 Optional behavior
 
 The module provides optional predefined behaviors which can be enabled with an import flag.
