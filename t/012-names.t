@@ -13,6 +13,7 @@ my @data = (
 	[1, 'array.\\\\*.path', ['array', '\\*', 'path'], {1 => 'HASH'}],
 	[1, 'array*.path', ['array*', 'path']],
 	[1, '\\\\\\\\', ['\\\\']],
+	[1, '\\*.thats.legal', ['*', 'thats', 'legal'], {0 => 'HASH'}],
 	[0, ''],
 	[0, 'error.'],
 	[0, '.error'],
