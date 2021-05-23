@@ -394,16 +394,40 @@ It is possible and often very helpful to have both form and class fields inside 
 			$self->user($user);
 		}
 		else {
-			$self->add_error(
-				Form::Tiny::Error::DoesNotValidate->new(
-					field => 'password',
-					error => 'invalid password'
-				)
-			);
+			$self->add_error(password => 'invalid password');
 		}
 	};
 
 While doing so, make sure not to override any of the Form::Tiny::Form symbols (Moo / Moose should complain about it when it happens).
+
+=head3 Form inheritance
+
+It is possible form Form::Tiny forms to inherit from one another, but the feature is experimental (meaning it does work, but is not tested enough and may not work properly for certain configurations).
+
+	# ParentForm.pm
+	package ParentForm;
+
+	use Form::Tiny -base;
+
+	form_field 'inherited_field';
+
+	1;
+
+	# ChildForm.pm
+	package ChildForm;
+
+	use Form::Tiny -base;
+
+	# regular 'extends' from Moo
+	extends 'ParentForm';
+
+	# should now have 'inherited_field' and any fields defined below:
+
+	...
+
+	1;
+
+For best results, class parents should be specified before any calls to Form::Tiny DSL have been made.
 
 =head1 SEE ALSO
 
