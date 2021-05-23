@@ -107,7 +107,7 @@ Form::Tiny - Input validator implementation centered around Type::Tiny
 
 	package MyForm;
 
-	use Form::Tiny -base;
+	use Form::Tiny;
 	use Types::Standard qw(Int);
 
 	form_filed 'my_field' => (
@@ -139,17 +139,17 @@ Form::Tiny is a customizable hashref validator with DSL for form building.
 
 =head1 IMPORTING
 
-When imported with any C<-flag>, Form::Tiny will turn a package it is imported into a Moo class that does the L<Form::Tiny::Form> role. It will also install helper functions in your package that act as a domain-specific language (DSL) for building your form.
+When imported, Form::Tiny will turn a package it is imported into a Moo class that does the L<Form::Tiny::Form> role. It will also install helper functions in your package that act as a domain-specific language (DSL) for building your form.
 
 	package MyForm;
 
 	# imports only basic helpers
-	use Form::Tiny -base;
+	use Form::Tiny;
 
 	# fully-featured form:
 	use Form::Tiny -filtered, -strict;
 
-After C<use Form::Tiny -flags> statement, your package gains all the Moo keywords, some Form::Tiny keywords (see L</"Available import flags">) and all L<Form::Tiny::Form> methods.
+After C<use Form::Tiny> statement, your package gains all the Moo keywords, some Form::Tiny keywords (see L</"Available import flags">) and all L<Form::Tiny::Form> methods.
 
 =head2 Available import flags
 
@@ -157,7 +157,7 @@ After C<use Form::Tiny -flags> statement, your package gains all the Moo keyword
 
 =item * C<-base>
 
-This flag is only requried if you want to turn your package into a form, but don't want any specific extra features.
+This flag is here only for backwards compatibility. It does not do anything particular on its own.
 
 Installed functions: C<form_field form_cleaner form_hook>
 

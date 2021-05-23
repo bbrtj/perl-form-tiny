@@ -7,7 +7,7 @@ BEGIN { use_ok('Form::Tiny') }
 {
 
 	package TestForm;
-	use Form::Tiny -base;
+	use Form::Tiny;
 
 	form_field 'name';
 	form_field 'value';

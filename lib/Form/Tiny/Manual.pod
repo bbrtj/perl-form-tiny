@@ -9,7 +9,7 @@ Form::Tiny::Manual - reference for working with Form::Tiny
 	# first ...
 	package SomeForm;
 
-	use Form::Tiny -base;
+	use Form::Tiny;
 	use Types::Common::String qw(SimpleStr);
 	use Types::Common::Numeric qw(PositiveInt);
 
@@ -73,7 +73,7 @@ The module always tries to get as much data from input as possible and copy that
 
 Form::Tiny allows you to define forms much like you would define a Moose class. The syntax is showcased below:
 
-	use Form::Tiny -base, -filtered;
+	use Form::Tiny -filtered;
 	use Types::Standard qw(Enum Str);
 
 	form_trim_strings;
@@ -93,7 +93,7 @@ Form::Tiny allows you to define forms much like you would define a Moose class. 
 		... # perform cleaning
 	};
 
-Adding any flag to C<use Form::Tiny> line will cause your current package to be turned into a form by composing L<Form::Tiny::Form> into it (and as a result, merging all of its symbols with your package). It also imports Moo into your namespace for convenience (unless you specify C<-nomoo> flag). Refer to L<Form::Tiny/"Available import flags"> for a full list of available flags.
+Adding a C<use Form::Tiny> line will cause your current package to be turned into a form by composing L<Form::Tiny::Form> into it (and as a result, merging all of its symbols with your package). It also imports Moo into your namespace for convenience (unless you specify C<-nomoo> flag). Refer to L<Form::Tiny/"Available import flags"> for a full list of available flags.
 
 This syntax is designed to resemble and mix in nicely with Moo/se syntax. Form fields and class properties are completely separate and can be freely intermixed with each other.
 
@@ -369,7 +369,7 @@ this will make sure that any coercions and adjustments made in the nested form w
 
 It is possible and often very helpful to have both form and class fields inside the same form class:
 
-	use Form::Tiny -base;
+	use Form::Tiny;
 	use Types::Standard qw(Str);
 
 	has 'user' => (
@@ -409,7 +409,7 @@ It is possible form Form::Tiny forms to inherit from one another, but the featur
 	# ParentForm.pm
 	package ParentForm;
 
-	use Form::Tiny -base;
+	use Form::Tiny;
 
 	form_field 'inherited_field';
 
@@ -418,7 +418,7 @@ It is possible form Form::Tiny forms to inherit from one another, but the featur
 	# ChildForm.pm
 	package ChildForm;
 
-	use Form::Tiny -base;
+	use Form::Tiny;
 
 	# regular 'extends' from Moo
 	extends 'ParentForm';
