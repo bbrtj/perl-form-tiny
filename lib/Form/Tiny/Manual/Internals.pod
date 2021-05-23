@@ -38,7 +38,7 @@ It is entirely possible, although a bit tedious, to use the module without impor
 	use Form::Tiny::Utils qw(:meta_handlers);
 
 	# we need this role mixed in
-	with qw(Form::Tiny:::Form);
+	with qw(Form::Tiny::Form);
 
 	# meta roles go into the qw()
 	create_form_meta(__PACKAGE__, qw());
