@@ -270,9 +270,10 @@ B<before_validate> is fired just once for the form, before any field is validate
 
 		# do something with $input_data
 
-		# don't forget to return!
-		return $input_data;
+		# no need to return
 	};
+
+This hook does not require you to return anything and is passed the same data as C<cleanup>.
 
 =head3 after_validate
 

@@ -9,7 +9,7 @@ use Scalar::Util qw(blessed);
 
 use Form::Tiny::PathValue;
 use Form::Tiny::Error;
-use Form::Tiny::Utils qw(get_package_form_meta);
+use Form::Tiny::Utils qw(try get_package_form_meta);
 use Moo::Role;
 
 our $VERSION = '2.00';
@@ -164,8 +164,14 @@ sub _validate
 	my $meta = $self->form_meta;
 	$self->_clear_errors;
 
-	if (ref $self->input eq 'HASH') {
-		my $fields = $meta->run_hooks_for('before_validate', $self, dclone($self->input));
+	my $fields = $self->input;
+	my $err = try sub {
+		$fields = dclone($fields)
+			if ref $fields ne '';
+	};
+
+	if (!$err && ref $fields eq 'HASH') {
+		$meta->run_hooks_for('before_validate', $self, $fields);
 		foreach my $validator (@{$self->field_defs}) {
 			my $curr_f = $validator->name;
 

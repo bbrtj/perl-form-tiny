@@ -47,7 +47,8 @@ sub is_modifying
 
 	# whether a hook type will modify the input data
 	# with return statements
-	return $self->hook ne HOOK_CLEANUP;
+	return $self->hook eq HOOK_BEFORE_MANGLE;
+
 }
 
 1;
