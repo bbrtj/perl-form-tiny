@@ -6,11 +6,10 @@ use Data::Dumper;
 {
 
 	package PrettyRegistationForm;
-	use Form::Tiny -base;
+	use Form::Tiny;
 	use Types::Standard qw(Enum);
 	use Types::Common::Numeric qw(IntRange);
 	use Types::Common::String qw(SimpleStr StrongPassword StrLength);
-	use Form::Tiny::Error;
 
 	my %password = (
 		type => StrongPassword,
@@ -45,11 +44,8 @@ use Data::Dumper;
 	form_cleaner sub {
 		my ($self, $data) = @_;
 
-		$self->add_error(
-			Form::Tiny::Error::DoesNotValidate->new(
-				error => "passwords are not identical"
-			)
-		) if $data->{password} ne $data->{repeat_password};
+		$self->add_error("passwords are not identical")
+			if $data->{password} ne $data->{repeat_password};
 	};
 
 	1;
