@@ -127,12 +127,12 @@ Form::Tiny::Inline - Form::Tiny without hassle
 
 =head1 DESCRIPTION
 
-Inline forms are designed to cover all the base use cases, but they are not as customizable. Currently, they lack the ability to specify your own I<pre_mangle> and I<pre_validate> methods.
+Inline forms are designed to cover all the basic use cases, but they are not as customizable. Currently, they lack the ability to specify custom hooks.
 
 =head1 METHODS
 
 =head2 is
 
-When ran on a Form::Tiny::Inline class, it produces a new class that will have all the given roles mixed in. Given role names will be prepended with I<Form::Tiny::>
+When ran on a Form::Tiny::Inline class, it produces a new object that you can call C<< ->new >> on.
 
-	$class_with_roles = Form::Tiny::Inline->is("Filtered", "Strict");
+	$inline_form_builder = Form::Tiny::Inline->is("Filtered", "Strict");
