@@ -1,5 +1,9 @@
 Revision history for Perl extension Form::Tiny.
 
+2.00  Sun May 23 23:00:00 2021
+	- module rewrite to form metaobject model
+	- see Form::Tiny::Manual::Compatibility for a list of incompatible changes
+
 1.14  Wed May 19 21:00:00 2021
 	- add module rewrite alert: see Form::Tiny documentation
 
