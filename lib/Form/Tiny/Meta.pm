@@ -12,7 +12,7 @@ use Form::Tiny::Hook;
 
 use namespace::clean;
 
-our $VERSION = '1.13';
+our $VERSION = '2.00';
 
 has 'fields' => (
 	is => 'ro',

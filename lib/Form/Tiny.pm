@@ -10,7 +10,7 @@ use Form::Tiny::Form;
 use Form::Tiny::Utils qw(trim :meta_handlers);
 require Moo;
 
-our $VERSION = '1.14';
+our $VERSION = '2.00';
 
 sub import
 {

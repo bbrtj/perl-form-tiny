@@ -5,7 +5,7 @@ use warnings;
 use Exporter qw(import);
 use Carp qw(croak);
 
-our $VERSION = '1.14';
+our $VERSION = '2.00';
 our @EXPORT;
 our @EXPORT_OK = qw(
 	try

@@ -7,7 +7,7 @@ use Types::Standard qw(Enum CodeRef Bool);
 
 use namespace::clean;
 
-our $VERSION = '1.13';
+our $VERSION = '2.00';
 
 use constant {
 	HOOK_BEFORE_MANGLE => 'before_mangle',
