@@ -12,7 +12,7 @@ use Form::Tiny::Error;
 use Form::Tiny::Utils qw(get_package_form_meta);
 use Moo::Role;
 
-our $VERSION = '1.13';
+our $VERSION = '1.14';
 
 has "input" => (
 	is => "ro",

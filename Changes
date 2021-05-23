@@ -1,5 +1,8 @@
 Revision history for Perl extension Form::Tiny.
 
+1.14  Wed May 19 21:00:00 2021
+	- add module rewrite alert: see Form::Tiny documentation
+
 1.13  Sat May 15 23:00:00 2021
 	- improve documentation
 	- move documentation on bare-bones to Manual::Internals

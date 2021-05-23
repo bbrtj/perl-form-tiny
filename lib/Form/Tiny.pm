@@ -10,7 +10,7 @@ use Form::Tiny::Form;
 use Form::Tiny::Utils qw(trim :meta_handlers);
 require Moo;
 
-our $VERSION = '1.13';
+our $VERSION = '1.14';
 
 sub import
 {
@@ -120,6 +120,28 @@ Form::Tiny - Input validator implementation centered around Type::Tiny
 =head1 DESCRIPTION
 
 Main package of the Form::Tiny system - this is a role that provides most of the module's functionality.
+
+=head1 REWRITE ALERT
+
+B<NOTICE> Form::Tiny is undergoing a major rewrite to introduce a form metamodel, reduce the clutter in packages and improve speed. The upcoming version 2.00 will not be backwards-compatible, it will however be largely compatible with the new syntax introduced in versions 1.10 and above. The goal is to correct some design mistakes with only a couple of changes in existing code for the users of versions 1.10 and above. You can expect your code to be working largely unchanged if you're already using the I<form_field> helpers to define your form.
+
+Things that will change:
+
+=over
+
+=item * old syntax with builders will be completely replaced by form metadata, speeding up form object construction
+
+=item * form field names will now be handled by a complete implementation with same syntax but more capabilities
+
+=item * form hook system will be completely overhauled
+
+=item * form filters system will be changed slightly to allow form object access in filter sub
+
+=item * many redundant methods will be removed
+
+=back
+
+The rewrite is expected to be available late May / early June. You can track the progress on the module's repository, I<master> branch.
 
 =head1 DOCUMENTATION INDEX
 
