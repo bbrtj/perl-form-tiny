@@ -38,19 +38,14 @@ __END__
 
 =head1 NAME
 
-Form::Tiny::Filter - a representation of filtering condition
+Form::Tiny::Filter - a representation of a filter
 
 =head1 SYNOPSIS
 
 	# in your form class
-	sub build_filters
-	{
-		return (
-			# the following will be coerced into Form::Tiny::Filter
-			# [ type, filtering sub ]
-			[Str, sub { uc shift() }],
-		);
-	}
+
+	# the following will be coerced into Form::Tiny::Filter
+	form_filer Str, sub { uc shift() };
 
 =head1 DESCRIPTION
 

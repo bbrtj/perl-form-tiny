@@ -257,6 +257,8 @@ Each of the attributes can be accessed by calling its name as a function on Form
 
 =head2 name
 
+The only required attribute for the constructor.
+
 A string which should specify the hash structure path of the field.
 
 Special characters are:
