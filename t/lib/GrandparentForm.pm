@@ -6,6 +6,6 @@ use Form::Tiny -base;
 
 form_field 'field1';
 
-form_hook cleanup => sub {};
+form_hook cleanup => sub { };
 
 1;

@@ -60,11 +60,13 @@ after 'inherit_from' => sub {
 after 'setup' => sub {
 	my ($self) = @_;
 
-	$self->add_hook(Form::Tiny::Hook->new(
-		hook => 'before_mangle',
-		code => sub { $self->_apply_filters(@_) },
-		inherited => 0,
-	));
+	$self->add_hook(
+		Form::Tiny::Hook->new(
+			hook => 'before_mangle',
+			code => sub { $self->_apply_filters(@_) },
+			inherited => 0,
+		)
+	);
 };
 
 1;

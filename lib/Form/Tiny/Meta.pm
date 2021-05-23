@@ -27,7 +27,7 @@ has 'hooks' => (
 	is => 'ro',
 	writer => 'set_hooks',
 	isa => HashRef [
-		ArrayRef [InstanceOf['Form::Tiny::Hook']]
+		ArrayRef [InstanceOf ['Form::Tiny::Hook']]
 	],
 	default => sub { {} },
 );
@@ -72,11 +72,13 @@ sub resolved_fields
 	croak 'resolved_fields requires form object'
 		unless defined blessed $object;
 
-	return [map {
-		$_->isa('Form::Tiny::FieldDefinitionBuilder')
-			? $_->build($object)
-			: $_
-	} @{$self->fields}];
+	return [
+		map {
+			$_->isa('Form::Tiny::FieldDefinitionBuilder')
+				? $_->build($object)
+				: $_
+		} @{$self->fields}
+	];
 }
 
 sub add_field
@@ -89,7 +91,7 @@ sub add_field
 
 	my $scalar_param = shift @parameters;
 	if (@parameters > 0 || ref $scalar_param eq '') {
-		$scalar_param = { 'name', $scalar_param, @parameters };
+		$scalar_param = {'name', $scalar_param, @parameters};
 	}
 
 	push @{$fields}, Form::Tiny::FieldDefinitionBuilder->new(data => $scalar_param)->build;
@@ -133,9 +135,14 @@ sub inherit_from
 	}
 
 	# actual hooks inheritance
-	$self->set_hooks({ map {
-		$_ => [@{$parent_hooks{$_} // []}, @{$hooks{$_} // []}]
-	} keys %parent_hooks, keys %hooks });
+	$self->set_hooks(
+		{
+			map {
+				$_ => [@{$parent_hooks{$_} // []}, @{$hooks{$_} // []}]
+			} keys %parent_hooks,
+			keys %hooks
+		}
+	);
 
 	return $self;
 }

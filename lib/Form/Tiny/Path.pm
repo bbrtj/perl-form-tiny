@@ -76,7 +76,8 @@ sub from_name
 	for my $part (@parts) {
 		if ($part eq $array_marker) {
 			push @meta, 'ARRAY';
-		} else {
+		}
+		else {
 			push @meta, 'HASH';
 		}
 	}

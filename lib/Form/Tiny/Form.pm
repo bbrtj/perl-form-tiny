@@ -102,6 +102,7 @@ sub _find_field
 				}
 
 				if (@$value == 0) {
+
 					# we wanted to have a deeper structure, but its not there, so clearly an error
 					return unless $index == $#{$path->meta};
 
@@ -122,13 +123,15 @@ sub _find_field
 	};
 
 	if ($traverser->([], $field_def->get_name_path, 0, $fields)) {
-		return [map {
-			Form::Tiny::PathValue->new(
-				path => $_->[0],
-				value => $_->[1],
-				structure => $_->[2]
-			)
-		} @found];
+		return [
+			map {
+				Form::Tiny::PathValue->new(
+					path => $_->[0],
+					value => $_->[1],
+					structure => $_->[2]
+				)
+			} @found
+		];
 	}
 	return;
 }

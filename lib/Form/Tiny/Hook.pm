@@ -23,7 +23,7 @@ my @hooks = (
 
 has "hook" => (
 	is => "ro",
-	isa => Enum[@hooks],
+	isa => Enum [@hooks],
 	required => 1,
 );
 

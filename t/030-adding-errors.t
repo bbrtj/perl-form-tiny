@@ -3,6 +3,7 @@ use warnings;
 use Test::More;
 
 {
+
 	package TestForm;
 	use Form::Tiny -base;
 

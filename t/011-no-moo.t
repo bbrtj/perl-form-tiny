@@ -3,13 +3,15 @@ use warnings;
 use Test::More;
 
 {
+
 	package TestForm;
 
 	use Form::Tiny -nomoo;
 
 	form_field 'test';
 
-	sub new {
+	sub new
+	{
 		my ($self) = @_;
 		return bless {}, $self;
 	}

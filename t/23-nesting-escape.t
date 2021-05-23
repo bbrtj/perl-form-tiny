@@ -9,7 +9,7 @@ my @data = (
 	[1, {"not.nested" => 1}, {"not.nested" => 1}],
 	[1, {"is\\" => {nested => 1}}, {"is\\" => {nested => 1}}],
 	[1, {"not\\.nested" => 1}, {"not\\.nested" => 1}],
-	[1, {not => { '*' => { nested_array => 5 }}}, {not => { '*' => { nested_array => 5 }}}],
+	[1, {not => {'*' => {nested_array => 5}}}, {not => {'*' => {nested_array => 5}}}],
 );
 
 for my $aref (@data) {

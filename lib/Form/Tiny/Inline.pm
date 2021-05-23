@@ -72,6 +72,7 @@ sub form_meta
 
 # builder package to allow adding meta roles with no package magic
 {
+
 	package Form::Tiny::Inline::Builder;
 
 	use Types::Standard qw(RoleName Str);

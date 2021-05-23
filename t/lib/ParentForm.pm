@@ -9,8 +9,8 @@ extends 'GrandparentForm';
 
 form_field 'field2';
 
-form_hook cleanup => sub {};
+form_hook cleanup => sub { };
 form_trim_strings;
-form_filter Int, sub {};
+form_filter Int, sub { };
 
 1;

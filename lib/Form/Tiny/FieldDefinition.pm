@@ -25,7 +25,7 @@ has "name" => (
 
 has "name_path" => (
 	is => "ro",
-	isa => InstanceOf["Form::Tiny::Path"],
+	isa => InstanceOf ["Form::Tiny::Path"],
 	reader => "get_name_path",
 	init_arg => undef,
 	lazy => 1,

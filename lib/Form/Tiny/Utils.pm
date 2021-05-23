@@ -17,12 +17,14 @@ our @EXPORT_OK = qw(
 );
 
 our %EXPORT_TAGS = (
-	meta_handlers => [qw(
-		create_anon_form_meta
-		create_form_meta
-		get_package_form_meta
-		set_form_meta_class
-	)],
+	meta_handlers => [
+		qw(
+			create_anon_form_meta
+			create_form_meta
+			get_package_form_meta
+			set_form_meta_class
+		)
+	],
 );
 
 sub try
@@ -91,6 +93,7 @@ sub get_package_form_meta
 	my $form_meta = $meta{$package_name};
 
 	if (!$form_meta->complete) {
+
 		# when this breaks, mst gets to point and laugh at me
 		my @parents = do {
 			no strict 'refs';
