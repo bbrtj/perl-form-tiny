@@ -185,7 +185,7 @@ Installed functions: C<form_field form_cleaner form_hook>
 
 =item * C<-nomoo>
 
-This flag stops Form::Tiny from importing Moo into your namespace. Unless you use a different class system (like L<Moose>) will have to declare your own constructor, which will need to call C<< $form->BUILD >>.
+This flag stops Form::Tiny from importing Moo into your namespace. Unless you use a different class system (like L<Moose>) will have to declare your own constructor.
 
 Installed functions: same as C<-base>
 
