@@ -1,6 +1,5 @@
 use v5.10;
 use warnings;
-use Test::More;
 
 {
 	package MetaForm;
@@ -31,6 +30,5 @@ my $form = MetaForm->new(
 	}
 );
 
-ok($form->valid, "no DSL form works");
-
-done_testing();
+# just for testing
+$form;

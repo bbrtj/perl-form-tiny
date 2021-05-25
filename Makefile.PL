@@ -35,6 +35,10 @@ WriteMakefile(
 		},
 	},
 
+	test => {
+		TESTS => "t/*.t t/**/*.t"
+	},
+
 	ABSTRACT_FROM => 'lib/Form/Tiny.pm',
 	AUTHOR => 'Bartosz Jarzyna <brtastic@gmail.com>',
 	LICENSE => 'perl',
