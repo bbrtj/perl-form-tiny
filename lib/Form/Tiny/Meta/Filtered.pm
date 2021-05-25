@@ -3,6 +3,7 @@ package Form::Tiny::Meta::Filtered;
 use v5.10;
 use warnings;
 use Types::Standard qw(ArrayRef InstanceOf);
+use Scalar::Util qw(blessed);
 
 use Form::Tiny::Hook;
 use Form::Tiny::Filter;
