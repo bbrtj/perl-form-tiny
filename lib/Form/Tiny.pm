@@ -110,11 +110,11 @@ Form::Tiny - Input validator implementation centered around Type::Tiny
 	use Form::Tiny -base;
 	use Types::Standard qw(Int);
 
-	form_filed 'my_field' => (
+	form_field 'my_field' => (
 		required => 1,
 	);
 
-	form_filed 'another_field' => (
+	form_field 'another_field' => (
 		type => Int,
 		default => sub { 0 },
 	);
