@@ -5,9 +5,7 @@ use Form::Tiny::Inline;
 use Types::Common::String qw(SimpleStr);
 use Form::Tiny::Error;
 
-my $form = Form::Tiny::Inline->new(
-	is => [qw(Strict)],
-
+my $form = Form::Tiny::Inline->is(qw/strict/)->new(
 	field_defs => [
 		{
 			name => "input_file",
