@@ -38,12 +38,32 @@ sub add_filter
 	return $self;
 }
 
+sub add_field_filter
+{
+	my ($self, $field, $filter, $code) = @_;
+
+	if (defined blessed $field && $field->isa('Form::Tiny::Filter')) {
+		push @{$self->filters}, $field;
+	}
+	else {
+		push @{$self->filters}, Form::Tiny::Filter->new(
+			field => $field,
+			type => $filter,
+			code => $code
+		);
+	}
+
+	return $self;
+}
+
 sub _apply_filters
 {
 	my ($self, $obj, $def, $value) = @_;
 
+	my $name = $def->name;
 	for my $filter (@{$self->filters}) {
-		$value = $filter->filter($value);
+		$value = $filter->filter($value)
+			if $filter->check_field($name);
 	}
 
 	return $value;

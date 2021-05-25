@@ -55,20 +55,34 @@ sub _generate_helpers
 {
 	my ($package, $caller) = @_;
 
+	my $field_context;
 	return {
 		form_field => sub {
+			$field_context = ref $_[0] eq '' ? $_[0] : undef;
 			$caller->form_meta->add_field(@_);
 		},
 		form_cleaner => sub {
+			$field_context = undef;
 			$caller->form_meta->add_hook(cleanup => @_);
 		},
 		form_hook => sub {
+			$field_context = undef;
 			$caller->form_meta->add_hook(@_);
 		},
 		form_filter => sub {
+			$field_context = undef;
 			$caller->form_meta->add_filter(@_);
 		},
+		field_filter => sub {
+			if (@_ == 2) {
+				croak 'field_filter called in invalid context'
+					unless defined $field_context;
+				unshift @_, $field_context;
+			}
+			$caller->form_meta->add_field_filter(@_);
+		},
 		form_trim_strings => sub {
+			$field_context = undef;
 			$caller->form_meta->add_filter(Str, \&trim);
 		},
 	};
@@ -89,7 +103,7 @@ sub _get_behaviors
 			roles => [qw(Form::Tiny::Meta::Strict)],
 		},
 		-filtered => {
-			subs => [qw(form_filter form_trim_strings)],
+			subs => [qw(form_filter field_filter form_trim_strings)],
 			roles => [qw(Form::Tiny::Meta::Filtered)],
 		},
 	};

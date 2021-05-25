@@ -3,7 +3,7 @@ package Form::Tiny::Filter;
 use v5.10;
 use warnings;
 use Moo;
-use Types::Standard qw(HasMethods CodeRef);
+use Types::Standard qw(HasMethods CodeRef Maybe Str);
 
 use namespace::clean;
 
@@ -15,11 +15,24 @@ has "type" => (
 	required => 1,
 );
 
+has 'field' => (
+	is => 'ro',
+	isa => Maybe[Str],
+	default => sub { undef },
+);
+
 has "code" => (
 	is => "ro",
 	isa => CodeRef,
 	required => 1,
 );
+
+sub check_field
+{
+	my ($self, $field) = @_;
+
+	return ($self->field // $field) eq $field;
+}
 
 sub filter
 {
