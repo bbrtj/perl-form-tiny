@@ -193,7 +193,7 @@ Installed functions: same as C<-base>
 
 This flag enables filters in your form.
 
-Installed functions: all of C<-base> plus C<form_filter form_trim_strings>
+Installed functions: all of C<-base> plus C<form_filter field_filter form_trim_strings>
 
 =item * C<-strict>
 
@@ -213,7 +213,7 @@ Installed functions: same as C<-base>
 
 This helper declares a new field for your form. Each style of calling this function should contain keys that meet the specification of L<Form::Tiny::FieldDefinition>, or an object of this class directly.
 
-In the first (hash) version, C<%arguments> need to be a plain hash (not a hashref) and should B<not> include the name in the hash, as it will be overriden by the first argument C<$name>.
+In the first (hash) version, C<%arguments> need to be a plain hash (not a hashref) and should B<not> include the name in the hash, as it will be overriden by the first argument C<$name>. This form also sets the context for the form being built: see L<Form::Tiny::Manual/"Context"> for details.
 
 In the second (coderef) version, C<$coderef> gets passed the form instance as its only argument and should return a hashref or a constructed object of L<Form::Tiny::FieldDefinition>. A hashref must contain a C<name>. Note that this creates I<dynamic field>, which will be resolved repeatedly during form validation. As such, it should not contain any randomness.
 
@@ -236,6 +236,13 @@ A shortcut for C<< form_hook cleanup => $coderef; >>.
 	form_filter $type, $coderef;
 
 C<$type> should be a Type::Tiny (or compatible) type check. For each input field that passes that check, C<$coderef> will be ran. See L<Form::Tiny::Manual/"Filters"> for details on filters.
+
+=head3 field_filter
+
+	field_filter $type, $coderef; # uses current context
+	field_filter $name => $type, $coderef;
+
+Same as C<form_filter>, but is narrowed down to a single form field identified by its name. Name can be omitted and the current context will be used. See L<Form::Tiny::Manual/"Context"> for details on context.
 
 =head3 form_trim_strings
 

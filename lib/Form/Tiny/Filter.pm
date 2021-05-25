@@ -72,6 +72,10 @@ A Type::Tiny type that will be checked against.
 
 Required.
 
+=head2 field
+
+A string name of a field that should be filtered, or undef if this filter should execute for every field in the form.
+
 =head2 code
 
 A code reference accepting a single scalar and performing the filtering. The scalar will already be checked against the type.
@@ -79,6 +83,10 @@ A code reference accepting a single scalar and performing the filtering. The sca
 Required.
 
 =head1 METHODS
+
+=head2 check_field
+
+Accepts a single string, which is a name of a field. Returns a boolean value, which determines whether this filter should be used for that field.
 
 =head2 filter
 

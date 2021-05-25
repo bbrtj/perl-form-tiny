@@ -135,11 +135,13 @@ You can use I<form_field> function to declare form fields, just like you would u
 
 Each of field definitions will be coerced into an object of the L<Form::Tiny::FieldDefinition> class.
 
+	# this are static fields
 	form_field 'some_name';
 	form_field 'another_name' => (
 		required => 'soft',
 	);
 
+	# this is a dynamic field
 	form_field sub {
 		my ($self) = @_;
 
@@ -216,6 +218,39 @@ The data field can hold any value you want and later retrieved with an instantia
 		say "field: " . $definition->name;
 		say "data: " . Dumper($definition->data);
 	}
+
+=back
+
+=head2 Context
+
+While defining your form, the module keeps track of the context in which you're using certain keywords. After each C<form_field> which is not dynamic, the context is set to that field until the next DSL keyword. Other keywords can either use that context or reset it.
+
+	use Form::Tiny;
+
+	# no context yet
+
+	form_field 'my_field';
+
+	# 'my_field' context
+
+	form_hook cleanup => sub { ... };
+
+	# no context since it has been reset
+
+Keywords that are using the context are:
+
+=over
+
+=item * C<field_filter>
+
+This keyword will use the context if it is called with two arguments:
+
+	form_filed 'my_field';
+	field_filter Str, \&Form::Tiny::Utils::trim;
+
+It will completely ignore the context (and not reset it) if used with three arguments:
+
+	field_filter my_field => Str, \&Form::Tiny::Utils::trim;
 
 =back
 
@@ -327,9 +362,20 @@ Turned on with the C<-filtered> flag in L<Form::Tiny>.
 
 Enables initial filtering for the input fields. This behavior is added to the form as a C<before_mangle> hook.
 
-The filtering system performs a type check on field values and only apply a filtering subroutine when the type matches. This is done before the validation, and so can affect the validation result. An example filter that turns integers into their absolute values:
+The filtering system performs a type check on field values and only apply a filtering subroutine when the type matches. This is done before the validation, and so can affect the validation result. Filters behave much like type coercion, but they are more flexible and can be stacked by having multiple filters for the same field, each using value returned by the previous one.
+
+An example filter that turns integers into their absolute values:
 
 	form_filter Int, sub { abs shift() };
+
+A filter can be also narrowed down to a single form field with C<field_filter> keyword:
+
+	field_filter my_field => Int, sub { abs shift() };
+
+You can also omit the field name, and in this case the current form context will be used:
+
+	form_field 'my_field';
+	field_filter Int, sub { abs shift() };
 
 One special keyword exists for string trimming using the filters system:
 
