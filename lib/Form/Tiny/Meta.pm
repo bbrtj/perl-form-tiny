@@ -91,7 +91,7 @@ sub add_field
 		unless scalar @parameters;
 
 	my $scalar_param = shift @parameters;
-	if (@parameters > 0 || ref $scalar_param eq '') {
+	if (ref $scalar_param eq '') {
 		$scalar_param = {@parameters, name => $scalar_param};
 	}
 
