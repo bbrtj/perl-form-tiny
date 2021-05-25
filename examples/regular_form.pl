@@ -22,13 +22,8 @@ use Data::Dumper;
 		adjust => sub { ucfirst shift },
 	);
 
-	form_field "password" => (
-		%password,
-	);
-
-	form_field "repeat_password" => (
-		%password,
-	);
+	form_field "password" => %password;
+	form_field "repeat_password" => %password;
 
 	# can be a full date with Types::DateTime
 	form_field "year_of_birth" => (
@@ -37,7 +32,7 @@ use Data::Dumper;
 	);
 
 	form_field "sex" => (
-		type => Enum ["male", "female", "other"],
+		type => Enum [qw(male female other)],
 		required => 1,
 	);
 
