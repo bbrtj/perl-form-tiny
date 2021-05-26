@@ -260,6 +260,7 @@ sub add_error
 	}
 
 	push @{$self->errors}, $error;
+	$self->form_meta->run_hooks_for('after_error', $self, $error);
 	return $self;
 }
 

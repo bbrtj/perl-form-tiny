@@ -15,6 +15,7 @@ use constant {
 	HOOK_BEFORE_VALIDATE => 'before_validate',
 	HOOK_AFTER_VALIDATE => 'after_validate',
 	HOOK_CLEANUP => 'cleanup',
+	HOOK_AFTER_ERROR => 'after_error',
 };
 
 my @hooks = (
@@ -22,7 +23,8 @@ my @hooks = (
 	HOOK_BEFORE_MANGLE,
 	HOOK_BEFORE_VALIDATE,
 	HOOK_AFTER_VALIDATE,
-	HOOK_CLEANUP
+	HOOK_CLEANUP,
+	HOOK_AFTER_ERROR,
 );
 
 has "hook" => (

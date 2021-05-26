@@ -25,6 +25,7 @@ has "field" => (
 has "error" => (
 	is => "ro",
 	isa => StringLike,
+	writer => 'set_error',
 	builder => "_default_error",
 );
 

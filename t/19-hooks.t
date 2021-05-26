@@ -43,6 +43,12 @@ use Data::Dumper;
 
 		return ref $input eq '' ? {} : $input;
 	};
+
+	form_hook after_error => sub {
+		my ($self, $error) = @_;
+
+		$error->set_error('error got overwritten');
+	};
 }
 
 my @data = (
@@ -52,6 +58,7 @@ my @data = (
 	[1, {name => [0, undef, 3]}, {name => ["01", 31]}],
 	[1, {name => [" 2 "]}, {name => ["21"]}],
 	[1, {name => [undef, undef, undef]}, {name => [], no_data => 1}],
+	[0, {name => ['that is not an integer']}],
 );
 
 for my $aref (@data) {
@@ -64,6 +71,7 @@ for my $aref (@data) {
 	}
 	for my $error (@{$form->errors}) {
 		is($error->field, "name.*", "error namespace valid");
+		is($error->error, "error got overwritten", "error message ok");
 	}
 
 	note Dumper($input);
