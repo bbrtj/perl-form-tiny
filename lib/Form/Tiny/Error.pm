@@ -3,7 +3,8 @@ package Form::Tiny::Error;
 use v5.10;
 use warnings;
 use Moo;
-use Types::Standard qw(Maybe Str Object);
+use Types::Standard qw(Maybe Str);
+use Types::TypeTiny qw(StringLike);
 use Carp qw(confess);
 
 use namespace::clean;
@@ -23,7 +24,7 @@ has "field" => (
 
 has "error" => (
 	is => "ro",
-	isa => Str | Object,
+	isa => StringLike,
 	builder => "_default_error",
 );
 

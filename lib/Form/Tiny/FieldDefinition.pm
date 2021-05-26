@@ -3,8 +3,9 @@ package Form::Tiny::FieldDefinition;
 use v5.10;
 use warnings;
 use Moo;
-use Types::Standard qw(Enum Bool HasMethods CodeRef Str InstanceOf);
+use Types::Standard qw(Enum Bool HasMethods CodeRef InstanceOf);
 use Types::Common::String qw(NonEmptySimpleStr);
+use Types::TypeTiny qw(StringLike);
 use Carp qw(croak);
 use Scalar::Util qw(blessed);
 
@@ -65,7 +66,7 @@ has "default" => (
 
 has "message" => (
 	is => "ro",
-	isa => Str,
+	isa => StringLike,
 	predicate => 1,
 );
 
