@@ -82,7 +82,7 @@ This is a simple class which stores a hook type together with a code reference w
 
 =head2 hook
 
-A hook type. Currently available types are: C<reformat before_mangle before_validate after_validate cleanup>.
+A hook type. Currently available types are: C<reformat before_mangle before_validate after_validate cleanup after_error>.
 
 Required.
 

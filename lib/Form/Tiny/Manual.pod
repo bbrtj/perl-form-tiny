@@ -342,6 +342,21 @@ This hook does require you to return a new input value to the validation. It is 
 
 B<Note>: This hook is ran inside a try/catch block, so it can throw an exception in order to stop form validation if the input is malformed. This will add I<Form::Tiny::Error::InvalidFormat> error to the form.
 
+=head3 after_error
+
+	form_hook after_error => sub {
+		my $form_instance = shift;
+		my $error_instance = shift;
+
+		if ($error_instance->field eq 'some_field') {
+			$error_instance->set_error('new error message');
+		}
+	};
+
+Called after an error has been added to the form. Gets passed two arguments: form instance and a newly created error instance. Can be used to log/debug or transform error messages in any way, like internationalize them.
+
+This hook does not require you to return anything.
+
 =head2 Optional behavior
 
 The module provides optional predefined behaviors which can be enabled with an import flag.

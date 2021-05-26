@@ -108,7 +108,11 @@ Form::Tiny::Error - form error wrapper
 	my $field = $error->field; # field name or undef
 	my $data = $error->error; # error message or nested error object
 
+	# concatenated error message: "$field - $data"
 	my $message = $error->as_string;
+
+	# change error message
+	$error->set_error('new_message');
 
 =head1 DESCRIPTION
 
