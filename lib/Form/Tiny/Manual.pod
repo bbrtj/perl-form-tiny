@@ -300,7 +300,7 @@ B<before_mangle> is fired for every field, just before it is changed ("mangled")
 
 =head3 before_validate
 
-B<before_validate> is fired just once for the form, before any field is validated. It is passed a single hashref - a copy of the input data. This method is free to do anything with the input, but its return value is discarded.
+B<before_validate> is fired just once for the form, before any field is validated. It is passed a single hashref - the input data. This method is free to do anything with the input, but its return value is discarded.
 
 	form_hook before_validate => sub {
 		my ($self, $input_data) = @_;

@@ -4,7 +4,6 @@ use v5.10;
 use warnings;
 use Types::Standard qw(Maybe ArrayRef InstanceOf HashRef Bool);
 use Carp qw(croak);
-use Storable qw(dclone);
 use Scalar::Util qw(blessed);
 
 use Form::Tiny::PathValue;
@@ -166,8 +165,6 @@ sub _validate
 
 	my $fields = $self->input;
 	my $err = try sub {
-		$fields = dclone($fields)
-			if ref $fields ne '';
 		$fields = $meta->run_hooks_for('reformat', $self, $fields);
 	};
 

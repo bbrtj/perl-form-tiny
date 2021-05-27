@@ -97,6 +97,16 @@ In the past, it was possible to define a form by defining three methods in the p
 
 If you happened to use the module during its early days, you must adjust your code to the new DSL style. It should not require drastic changes, but rather moving declarations out from class methods to DSL keywords. Refer to L<Form::Tiny/"Form domain-specific language"> for details.
 
+=head2 Input data is no longer deep cloned before validation
+
+I<Changed in 2.01 - considered bugfix>
+
+In previous versions, the validation process started off by deep cloning the input by calling C<Storable::dclone> on it. It was unnecessary and had the potential to lead to subtle bugs.
+
+The validation process is cloning most of the input by itself by mangling fields and then putting them back in the result hashref, much alike the input one, but completely separate. However, if you specify that a field should be an object of certain type, that should not get cloned. Same for explicit array and hash references (not those specified as a path, like C<key1.key2>). Removing deep cloning fixes just that.
+
+If you still want to deep clone your input data you can use the C<reformat> hook for that. See L<Form::Tiny::Manual/"Hooks">.
+
 =head1 FUTURE COMPATIBILITY
 
 Starting from version I<2.00>, any backward incompatible changes will only be introduced to the module after a 3 month deprecation period. This does not cover bug fixes and changes to internal methods not meant to be used or depended on.
