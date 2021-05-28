@@ -103,7 +103,9 @@ I<Changed in 2.01 - considered bugfix>
 
 In previous versions, the validation process started off by deep cloning the input by calling C<Storable::dclone> on it. It was unnecessary and had the potential to lead to subtle bugs.
 
-The validation process is cloning most of the input by itself by mangling fields and then putting them back in the result hashref, much alike the input one, but completely separate. However, if you specify that a field should be an object of certain type, that should not get cloned. Same for explicit array and hash references (not those specified as a path, like C<key1.key2>). Removing deep cloning fixes just that.
+The validation process is cloning most of the input by itself by mangling fields and then putting them back in the result hashref, much alike the input one, but completely separate. However, if you specify that a field should be an object of certain type, that will not get cloned. Same for explicit array and hash references (not those specified as a path, like C<key1.key2>). Removing deep cloning fixed that, as those would get cloned anyway.
+
+So now, if you specify your field to contain something that is not a reference, it will get cloned. If you specify something that is a reference, it will not get cloned, and changing it will also change that single key in the input hash. You have all the power to decide.
 
 If you still want to deep clone your input data you can use the C<reformat> hook for that. See L<Form::Tiny::Manual/"Hooks">.
 
