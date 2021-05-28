@@ -486,6 +486,32 @@ Be aware of a special case, an adjustment will be inserted here automatically li
 
 this will make sure that any coercions and adjustments made in the nested form will be added to the outer form as well. If you want to specify your own adjustment here, make sure to use the data provided by the C<fields> method of the nested form.
 
+=head3 I18N
+
+I<Form::Tiny> has no system for internationalization. That being said, it makes any custom error messages for fields possible with the C<message> argument to C<form_field>. You can translate your messages there:
+
+	form_field 'translated' => (
+		type => SomeType,
+		message => do_translate('That value is no good'),
+	);
+
+For a bit more roboust solution, you can include untranslated strings in C<message> and translate errors in C<after_error> hook:
+
+	form_field 'translated_later' => (
+		type => SomeType,
+		message => 'That value is no good',
+	);
+
+	form_hook after_error => (
+		my ($self, $error) = @_;
+
+		$error->set_error(
+			do_translate($error->error)
+		);
+	);
+
+This will also translate any error you add manually in other hooks.
+
 =head3 Mixing form fields with class fields
 
 It is possible and often very helpful to have both form and class fields inside the same form class:
