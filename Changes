@@ -1,5 +1,12 @@
 Revision history for Perl extension Form::Tiny.
 
+2.01 Fri May 28 18:00:00 2021
+	- new feature: field filters
+	- new feature: after_error hook
+	- bugfix: remove dclone on input - see Form::Tiny::Manual::Compatibility
+	- minor bugfixes
+	- improved documentation, examples and test cases
+
 2.00  Sun May 23 23:00:00 2021
 	- module rewrite to form metaobject model
 	- see Form::Tiny::Manual::Compatibility for a list of incompatible changes

@@ -9,7 +9,7 @@ use Form::Tiny::Hook;
 use Form::Tiny::Filter;
 use Moo::Role;
 
-our $VERSION = '2.00';
+our $VERSION = '2.01';
 
 requires qw(setup);
 
