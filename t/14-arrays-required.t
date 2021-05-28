@@ -6,7 +6,7 @@ use Data::Dumper;
 {
 
 	package TestForm;
-	use Form::Tiny -base;
+	use Form::Tiny;
 
 	form_field 'a.*.*' => (
 		required => 1

@@ -2,7 +2,7 @@ use v5.10;
 use warnings;
 use Test::More;
 
-BEGIN { use_ok('Form::Tiny') }
+BEGIN { require_ok('Form::Tiny') }
 
 {
 

@@ -1,7 +1,6 @@
 use v5.10;
 use warnings;
 use Test::More;
-use Form::Tiny;
 use Form::Tiny::Inline;
 use Test::Exception;
 use Types::Standard qw(CodeRef);
