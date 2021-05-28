@@ -101,7 +101,7 @@ A full list of DSL keywords is available in L<Form::Tiny/"Form domain-specific l
 
 =head2 Basic usage
 
-Input can be passed as a scalar to the constructor or with the I<set_input> method. Every call to that method will cause the form instance to be cleared of old errors and fields, so that it can be used again for different data.
+Input can be passed as a scalar to the constructor or with the C<set_input> method. Every call to that method will cause the form instance to be cleared of old errors and fields, so that it can be used again for different data.
 
 	use MyForm;
 
@@ -112,7 +112,7 @@ Input can be passed as a scalar to the constructor or with the I<set_input> meth
 	my $form = MyForm->new;
 	$form->set_input($data);
 
-With input in place, a I<valid> method can be called, which will return a validation result and fill in the I<errors> and I<fields> properties. These properties are mutually exclusive: errors are only present if the validation is unsuccessful, otherwise the fields are present.
+With input in place, a C<valid> method can be called, which will return a validation result and fill in the C<errors> and C<fields> properties. These properties are mutually exclusive: errors are only present if the validation is unsuccessful, otherwise the fields are present.
 
 The example below illustrates how a form class could be used to validate data.
 
@@ -131,7 +131,7 @@ The example below illustrates how a form class could be used to validate data.
 
 =head2 Form building
 
-You can use I<form_field> function to declare form fields, just like you would use I<has> to declare class properties in Moo/se.
+You can use C<form_field> function to declare form fields, just like you would use C<has> to declare class properties in Moo/se.
 
 Each of field definitions will be coerced into an object of the L<Form::Tiny::FieldDefinition> class.
 
@@ -152,25 +152,39 @@ Each of field definitions will be coerced into an object of the L<Form::Tiny::Fi
 		};
 	};
 
-The only required element in hashes defining the fields is the key I<name>, which contains the string with name of the field in the form input. In the most basic style of I<form_field>, the name B<should not> be given explicitly, as it will be automatically overwritten by the first argument to that function. Other possible elements are:
+The only required element in hashes defining the fields is the key C<name>, which contains the string with name of the field in the form input. In the most basic style of C<form_field>, the name B<should not> be given explicitly, as it will be automatically overwritten by the first argument to that function. Other possible elements are:
 
 =over
 
 =item type
 
+	form_field 'with_type' => (
+		type => SomeType,
+	);
+
 The type that the field will be validated against. Effectively, this needs to be an object with C<validate> and C<check> methods implemented. All types from Type::Tiny type libraries, as well as all Form::Tiny forms meet this criteria.
 
 =item coerce
 
+	form_field 'coerced' => (
+		type => Int->plus_coercions(Num, q{ int($_) }),
+		coerce => 1, # uses coerce from the type
+	);
+
 A coercion that will be made B<before> the type is validated and will change the value of the field. This can be a coderef or a boolean:
 
-Value of I<1> means that coercion will be applied from the specified I<type>. This requires the type to also provide I<coerce> and I<has_coercion> method, and the return value of the second one must be true.
+Value of C<1> means that coercion will be applied from the specified C<type>. This requires the type to also provide C<coerce> and C<has_coercion> method, and the return value of the second one must be true.
 
-Value of I<0> means no coercion will be made. This is the default behavior.
+Value of C<0> means no coercion will be made. This is the default behavior.
 
 Value that is a coderef will be passed a single scalar, which is the value of the field. It is required to make its own checks and return a scalar which will replace the old value.
 
 =item adjust
+
+	form_field 'adjusted' => (
+		type => Str,
+		adjust => sub { lc shift() },
+	);
 
 An adjustment that will be made B<after> the type is validated and the validation is successful. This must be a coderef that gets passed the validated value and returns the new value for the field (just like the coderef version of coercion).
 
@@ -178,29 +192,42 @@ At the point of adjustment, you can be sure that the value passed to the coderef
 
 =item required
 
+	form_field 'soft_required' => (
+		required => 'soft',
+	);
+
 Controls if the field should be skipped silently if it has no value or the value is empty. Possible values are:
 
-I<0> - The field can be non-existent in the input, empty or undefined. This is the default behavior
+C<0> - The field can be non-existent in the input, empty or undefined. This is the default behavior
 
-I<"soft"> - The field has to exist in the input, but can be empty or undefined
+C<"soft"> - The field has to exist in the input, but can be empty or undefined
 
-I<1> or I<"hard"> - The field has to exist in the input, must be defined and non-empty (a value I<0> is allowed, but an empty string is disallowed)
+C<1> or C<"hard"> - The field has to exist in the input, must be defined and non-empty (a value C<0> is allowed, but an empty string is disallowed)
 
 =item default
 
+	form_field 'has_default' => (
+		default => sub { 'this is a default value' },
+	);
+
 A coderef, which should return a scalar value that will be used in place of a non-existent input value. If the field is marked as hard-required as well, the default value will also replace undefined or empty values.
 
-The default value needs to be in line with the type check for the field, if it is specified. It also does not support nested arrays, like I<array.*>. An exception will be thrown if these conditions are not met.
+The default value needs to be in line with the type check for the field, if it is specified. It also does not support nested arrays, like C<array.*>. An exception will be thrown if these conditions are not met.
 
 =item message
 
-A static string that should be output instead of an error message returned by the I<type> when the validation fails.
+	form_field 'custom_message' => (
+		type => Int,
+		message => 'should be an integer',
+	);
+
+A static string that should be used instead of an error message returned by the C<type> when the validation fails. Can also be an object that overloads stringification.
+
+It can be useful since not all Type::Tiny error messages are meant to be readable for end users. It can also come in handy when the error messages need to be localized.
 
 =item data
 
 While building your form fields, it's possible to save some extra data along with each field. This data can be used to prompt the user what to input, insert some HTML generation objects or store hints on how to fill the field properly.
-
-	use Types::Common::String qw(NonEmptySimpleStr);
 
 	form_field "first name" => (
 		type => NonEmptySimpleStr,
@@ -275,7 +302,7 @@ While regular properties allow for single-field validation, sometimes a need ari
 		# call $self->add_error if necessary
 	};
 
-A subroutine like the one above should either be specified in a I<form_hook> or in a I<form_cleaner> shortcut.
+A subroutine like the one above should either be specified in a C<form_hook> or in a C<form_cleaner> shortcut.
 
 	# either ...
 	form_hook cleanup => sub { ... };
@@ -283,7 +310,7 @@ A subroutine like the one above should either be specified in a I<form_hook> or 
 	# or ...
 	form_cleaner sub { ... };
 
-Cleaning sub is also allowed to change C<$data>, which is a hash reference to the running copy of the input. Note that this is the final step in the validation process, so anything that is in $data after the cleanup will be available in the form's I<fields> after validation. The hook coderef need not to return the C<$data>, as it is a hash reference and will be updated just by changing it.
+Cleaning sub is also allowed to change C<$data>, which is a hash reference to the running copy of the input. Note that this is the final step in the validation process, so anything that is in $data after the cleanup will be available in the form's C<fields> after validation. The hook coderef need not to return the C<$data>, as it is a hash reference and will be updated just by changing it.
 
 =head3 before_mangle
 
@@ -415,15 +442,15 @@ There's no way to define custom hooks (other than a single C<cleaner>) in inline
 
 =head3 Nesting
 
-A dot (I<.>) can be used in the name of a field to express hashref nesting. A field with C<< name => "a.b.c" >> will be expected to be found under the key "c", in the hashref under the key "b", in the hashref under the key "a", in the root input hashref.
+A dot (C<.>) can be used in the name of a field to express hashref nesting. A field with C<< name => "a.b.c" >> will be expected to be found under the key "c", in the hashref under the key "b", in the hashref under the key "a", in the root input hashref.
 
-This is the default behavior of a dot in a field name, so if what you want is the actual dot it has to be preceded with a literal backslash (I<\.>, which is C<'\\.'> in a string). Additionally, having a literal backslash in field name requires you to escape it as well (I<\\>, which is C<'\\\\'> in a string).
+This is the default behavior of a dot in a field name, so if what you want is the actual dot it has to be preceded with a literal backslash (C<\.>, which is C<'\\.'> in a string). Additionally, having a literal backslash in field name requires you to escape it as well (C<\\>, which is C<'\\\\'> in a string).
 
 =head3 Nested arrays
 
-Nesting adds many new options, but in the example above we're only talking about hashes. Regular arrays can of course be handled by I<ArrayRef> type from Type::Tiny, but that's a hassle and makes it impossible to have any deeper structure defined in a name. Instead, you can use a star (I<*>) as the only element inside the nesting segment to expect an array there. Adding named fields can be resumed after that, but needn't.
+Nesting adds many new options, but in the example above we're only talking about hashes. Regular arrays can of course be handled by I<ArrayRef> type from Type::Tiny, but that's a hassle and makes it impossible to have any deeper structure defined in a name. Instead, you can use a star (C<*>) as the only element inside the nesting segment to expect an array there. Adding named fields can be resumed after that, but needn't.
 
-For example, C<< name => "arr.*.some_key" >> expects I<arr> to be an array reference, with each element being a hash reference containing a key I<some_key>. Note that any array element that fails to contain wanted hash elements B<will cause the field to be ignored in the output> (since input does not meet the specification entirely). If you want the validation to fail instead, you need to make the nested element required.
+For example, C<< name => "arr.*.some_key" >> expects C<arr> to be an array reference, with each element being a hash reference containing a key C<some_key>. Note that any array element that fails to contain wanted hash elements B<will cause the field to be ignored in the output> (since input does not meet the specification entirely). If you want the validation to fail instead, you need to make the nested element required.
 
 	# This input data ...
 	{
@@ -440,7 +467,7 @@ For example, C<< name => "arr.*.some_key" >> expects I<arr> to be an array refer
 
 Other example is two nested arrays that not necessarily contain a hash at the end: C<< name => "arr.*.*" >>. The leaf values here can be simple scalars.
 
-If you want a hash name consisted of star character C<*> alone, you can prepend it with a literal backslash, much like the nesting operator: I<\*>, which in perl string must be written as C<'\\*'>
+If you want a hash name consisted of star character C<*> alone, you can prepend it with a literal backslash, much like the nesting operator: C<\*>, which in perl string must be written as C<'\\*'>
 
 =head3 Nested forms
 
@@ -457,7 +484,7 @@ Be aware of a special case, an adjustment will be inserted here automatically li
 
 	adjust => sub { $instance->fields }
 
-this will make sure that any coercions and adjustments made in the nested form will be added to the outer form as well. If you want to specify your own adjustment here, make sure to use the data provided by the I<fields> method of the nested form.
+this will make sure that any coercions and adjustments made in the nested form will be added to the outer form as well. If you want to specify your own adjustment here, make sure to use the data provided by the C<fields> method of the nested form.
 
 =head3 Mixing form fields with class fields
 
@@ -498,7 +525,7 @@ While doing so, make sure not to override any of the Form::Tiny::Form symbols (M
 
 =head3 Form inheritance
 
-It is possible form Form::Tiny forms to inherit from one another, but the feature is experimental (meaning it does work, but is not tested enough and may not work properly for certain configurations).
+It is possible for Form::Tiny forms to inherit from one another, but the feature is experimental (meaning it does work, but is not tested enough and may not work properly for certain configurations).
 
 	# ParentForm.pm
 	package ParentForm;
@@ -515,6 +542,7 @@ It is possible form Form::Tiny forms to inherit from one another, but the featur
 	use Form::Tiny;
 
 	# regular 'extends' from Moo
+	# must be specified before any DSL call
 	extends 'ParentForm';
 
 	# should now have 'inherited_field' and any fields defined below:
@@ -523,7 +551,7 @@ It is possible form Form::Tiny forms to inherit from one another, but the featur
 
 	1;
 
-For best results, class parents should be specified before any calls to Form::Tiny DSL have been made.
+It is required that class parents are specified before any calls to Form::Tiny DSL have been made.
 
 =head1 SEE ALSO
 
