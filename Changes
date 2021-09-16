@@ -1,5 +1,6 @@
 Revision history for Perl extension Form::Tiny.
 
+	- deprecate three parameter field filter
 2.01 Fri May 28 18:00:00 2021
 	- new feature: field filters
 	- new feature: after_error hook

@@ -3,7 +3,7 @@ package Form::Tiny::FieldDefinition;
 use v5.10;
 use warnings;
 use Moo;
-use Types::Standard qw(Enum Bool HasMethods CodeRef InstanceOf);
+use Types::Standard qw(Enum Bool HasMethods CodeRef InstanceOf HashRef);
 use Types::Common::String qw(NonEmptySimpleStr);
 use Types::TypeTiny qw(StringLike);
 use Carp qw(croak);
@@ -43,6 +43,12 @@ has "type" => (
 	is => "ro",
 	isa => HasMethods ["validate", "check"],
 	predicate => 1,
+);
+
+has 'addons' => (
+	is => 'rw',
+	isa => HashRef,
+	default => sub { {} },
 );
 
 has "coerce" => (
@@ -178,22 +184,33 @@ sub validate
 {
 	my ($self, $form, $value) = @_;
 
-	# no validation if no type specified
-	return 1
-		if !$self->has_type;
+	my @errors;
 
-	my $valid;
-	my $error;
-	if ($self->has_message) {
-		$valid = $self->type->check($value);
-		$error = $self->message;
-	}
-	else {
-		$error = $self->type->validate($value);
-		$valid = !defined $error;
+	if ($self->has_type) {
+		if ($self->has_message) {
+			push @errors, $self->message
+				if !$self->type->check($value)
+		}
+		else {
+			my $error = $self->type->validate($value);
+			if (defined $error) {
+				push @errors, $error;
+			}
+		}
 	}
 
-	if (!$valid) {
+	if (@errors == 0) {
+		my $validators = $self->addons->{validators} // [];
+		for my $validator (@{$validators}) {
+			my ($message, $code) = @{$validator};
+
+			if (!$code->($value)) {
+				push @errors, $message;
+			}
+		}
+	}
+
+	for my $error (@errors) {
 		if ($self->is_subform && ref $error eq 'ARRAY') {
 			foreach my $exception (@$error) {
 				if (defined blessed $exception && $exception->isa("Form::Tiny::Error")) {
@@ -227,7 +244,7 @@ sub validate
 		}
 	}
 
-	return $valid;
+	return @errors == 0;
 }
 
 1;

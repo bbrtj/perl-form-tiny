@@ -18,17 +18,10 @@ use Test::More;
 		field_filter Int, sub {};
 	};
 
-	lives_and {
-		# TODO: verify if a field exists?
-		field_filter test => Int, sub {};
-		is @{$meta->filters}, 1, 'filter added ok';
-		is $meta->filters->[-1]->field, 'test', 'filter field ok';
-	};
-
 	form_field 'context1';
 	lives_and {
 		field_filter Int, sub {};
-		is @{$meta->filters}, 2, 'filter added ok';
+		is @{$meta->filters}, 1, 'filter added ok';
 		is $meta->filters->[-1]->field, 'context1', 'filter field ok';
 	};
 
@@ -41,11 +34,11 @@ use Test::More;
 	form_field 'context2';
 	lives_and {
 		field_filter Int, sub {};
-		is @{$meta->filters}, 4, 'filter added ok';
+		is @{$meta->filters}, 3, 'filter added ok';
 		is $meta->filters->[-1]->field, 'context2', 'filter field ok';
 
 		field_filter Int, sub {};
-		is @{$meta->filters}, 5, 'filter added ok';
+		is @{$meta->filters}, 4, 'filter added ok';
 		is $meta->filters->[-1]->field, 'context2', 'filter field ok';
 	};
 

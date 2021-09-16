@@ -2,7 +2,7 @@ package Form::Tiny;
 
 use v5.10;
 use warnings;
-use Carp qw(croak);
+use Carp qw(croak carp);
 use Types::Standard qw(Str);
 use Import::Into;
 
@@ -17,7 +17,7 @@ sub import
 	my ($package, $caller) = (shift, scalar caller);
 
 	my @wanted = @_;
-	my @wanted_subs = qw(form_field form_cleaner form_hook);
+	my @wanted_subs = qw(form_field form_cleaner form_hook field_validator);
 	my @wanted_roles;
 
 	my %subs = %{$package->_generate_helpers($caller)};
@@ -55,34 +55,51 @@ sub _generate_helpers
 {
 	my ($package, $caller) = @_;
 
+	my $field_context_name;
 	my $field_context;
+
 	return {
 		form_field => sub {
-			$field_context = ref $_[0] eq '' ? $_[0] : undef;
-			$caller->form_meta->add_field(@_);
+			$field_context_name = ref $_[0] eq '' ? $_[0] : undef;
+			$field_context = $caller->form_meta->add_field(@_);
 		},
 		form_cleaner => sub {
 			$field_context = undef;
+			$field_context_name = undef;
 			$caller->form_meta->add_hook(cleanup => @_);
 		},
 		form_hook => sub {
 			$field_context = undef;
+			$field_context_name = undef;
 			$caller->form_meta->add_hook(@_);
 		},
 		form_filter => sub {
 			$field_context = undef;
+			$field_context_name = undef;
 			$caller->form_meta->add_filter(@_);
 		},
 		field_filter => sub {
 			if (@_ == 2) {
 				croak 'field_filter called in invalid context'
-					unless defined $field_context;
-				unshift @_, $field_context;
+					unless defined $field_context_name;
+				unshift @_, $field_context_name;
+			}
+			elsif (@_ == 3) {
+				carp 'passing field name in context-using field bulding call is deprecated';
 			}
 			$caller->form_meta->add_field_filter(@_);
 		},
+		field_validator => sub {
+			if (@_ == 2) {
+				croak 'field_validator called in invalid context'
+					unless defined $field_context;
+				unshift @_, $field_context;
+			}
+			$caller->form_meta->add_field_validator(@_);
+		},
 		form_trim_strings => sub {
 			$field_context = undef;
+			$field_context_name = undef;
 			$caller->form_meta->add_filter(Str, \&trim);
 		},
 	};
