@@ -293,6 +293,14 @@ sub form_meta
 	return get_package_form_meta($package);
 }
 
+# This fixes form inheritance for other role systems than Moose
+around DOES => sub {
+	my ($orig, $self, @args) = @_;
+
+	return Moo::Role::does_role($self, @args)
+		|| $self->$orig(@args);
+};
+
 1;
 
 __END__
