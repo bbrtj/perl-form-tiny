@@ -5,10 +5,10 @@ use Test::More;
 {
 	package TestForm;
 	use Form::Tiny -filtered;
-	use Types::Standard qw(Int Str);
+	use Types::Standard qw(Str);
 
 	form_field 'f1';
-	field_filter Int, sub { shift() + 1};
+	field_filter Str, sub { shift() . '+'};
 
 	form_field 'f2';
 
@@ -16,8 +16,8 @@ use Test::More;
 }
 
 my @data = (
-	[{f1 => 5}, {f1 => '6!'}],
-	[{f1 => 'aa'}, {f1 => 'aa!'}],
+	[{f1 => 5}, {f1 => '5!+'}],
+	[{f1 => 'aa'}, {f1 => 'aa!+'}],
 	[{f2 => 5}, {f2 => '5!'}],
 );
 
