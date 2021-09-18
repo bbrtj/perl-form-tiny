@@ -13,11 +13,14 @@ use Test::More;
 	form_field 'f2';
 
 	form_filter Str, sub { shift() . '!' };
+
+	# deprecated
+	field_filter 'f1', Str, sub { shift() . '-' };
 }
 
 my @data = (
-	[{f1 => 5}, {f1 => '5!+'}],
-	[{f1 => 'aa'}, {f1 => 'aa!+'}],
+	[{f1 => 5}, {f1 => '5!-+'}],
+	[{f1 => 'aa'}, {f1 => 'aa!-+'}],
 	[{f2 => 5}, {f2 => '5!'}],
 );
 
