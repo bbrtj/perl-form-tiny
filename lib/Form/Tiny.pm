@@ -237,11 +237,17 @@ This creates a new hook for C<$stage>. Each stage may have multiple hooks and ea
 
 A shortcut for C<< form_hook cleanup => $coderef; >>.
 
+=head3 field_validator
+
+	field_validator $message => $coderef; # uses current context
+
+Adds an additional custom validator, ran after the type of the field is validated. C<$message> should be something that can present itself as a string. If for a given input parameter C<$coderef> returns false, that message will be added to form errors for that field. See L<Form::Tiny::Manual/"Additional validators"> for details.
+
 =head3 form_filter
 
 	form_filter $type, $coderef;
 
-C<$type> should be a Type::Tiny (or compatible) type check. For each input field that passes that check, C<$coderef> will be ran. See L<Form::Tiny::Manual/"Filters"> for details on filters.
+Filters the input value before the validation. C<$type> should be a Type::Tiny (or compatible) type check. For each input field that passes that check, C<$coderef> will be ran. See L<Form::Tiny::Manual/"Filters"> for details on filters.
 
 =head3 field_filter
 

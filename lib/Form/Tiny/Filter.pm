@@ -74,6 +74,8 @@ Required.
 
 =head2 field
 
+B<DEPRECATED>
+
 A string name of a field that should be filtered, or undef if this filter should execute for every field in the form.
 
 =head2 code

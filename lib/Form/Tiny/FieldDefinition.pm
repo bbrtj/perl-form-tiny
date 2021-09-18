@@ -307,6 +307,10 @@ The type attribute is where you can plug in a Type::Tiny type object. It has to 
 
 B<predicate:> I<has_type>
 
+=head2 addons
+
+Hash reference for internal use only - readable and writable under the C<addons> method. If you need additional data for a field definition that will be used in metaclasses (while extending Form::Tiny), put it here.
+
 =head2 coerce
 
 Coercions take place just before the validation. By default, values are not coerced. Specifying value I<1> will cause the field to use coercions from the type object.
