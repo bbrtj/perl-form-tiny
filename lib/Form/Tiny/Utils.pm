@@ -1,6 +1,7 @@
 package Form::Tiny::Utils;
 
 use v5.10;
+use strict;
 use warnings;
 use Exporter qw(import);
 use Carp qw(croak);

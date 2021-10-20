@@ -1,6 +1,7 @@
 package Form::Tiny::Path;
 
 use v5.10;
+use strict;
 use warnings;
 use Moo;
 use Carp qw(croak);

@@ -1,4 +1,5 @@
 use v5.10;
+use strict;
 use warnings;
 use Test::More;
 
@@ -19,7 +20,7 @@ package ChildForm
 {
 	use Form::Tiny -nomoo;
 
-	use parent -norequire, ParentForm;
+	use parent -norequire, 'ParentForm';
 
 	form_field 'f2';
 }

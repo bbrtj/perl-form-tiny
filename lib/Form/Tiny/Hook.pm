@@ -1,6 +1,7 @@
 package Form::Tiny::Hook;
 
 use v5.10;
+use strict;
 use warnings;
 use Moo;
 use Types::Standard qw(Enum CodeRef Bool);

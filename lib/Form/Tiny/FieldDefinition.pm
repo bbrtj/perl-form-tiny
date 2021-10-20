@@ -1,6 +1,7 @@
 package Form::Tiny::FieldDefinition;
 
 use v5.10;
+use strict;
 use warnings;
 use Moo;
 use Types::Standard qw(Enum Bool HasMethods CodeRef InstanceOf HashRef);

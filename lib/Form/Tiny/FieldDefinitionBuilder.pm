@@ -1,6 +1,7 @@
 package Form::Tiny::FieldDefinitionBuilder;
 
 use v5.10;
+use strict;
 use warnings;
 use Moo;
 use Carp qw(croak);

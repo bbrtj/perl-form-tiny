@@ -1,6 +1,7 @@
 package Form::Tiny::Form;
 
 use v5.10;
+use strict;
 use warnings;
 use Types::Standard qw(Maybe ArrayRef InstanceOf HashRef Bool);
 use Carp qw(croak);

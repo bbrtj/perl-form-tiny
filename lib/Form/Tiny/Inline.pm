@@ -1,6 +1,7 @@
 package Form::Tiny::Inline;
 
 use v5.10;
+use strict;
 use warnings;
 use Types::Standard qw(Str ArrayRef InstanceOf);
 use Moo;

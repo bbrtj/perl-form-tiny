@@ -1,6 +1,7 @@
 package Form::Tiny::Meta::Strict;
 
 use v5.10;
+use strict;
 use warnings;
 
 use Form::Tiny::Utils qw(try);

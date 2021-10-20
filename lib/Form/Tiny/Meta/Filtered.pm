@@ -1,6 +1,7 @@
 package Form::Tiny::Meta::Filtered;
 
 use v5.10;
+use strict;
 use warnings;
 use Types::Standard qw(ArrayRef InstanceOf);
 use Scalar::Util qw(blessed);

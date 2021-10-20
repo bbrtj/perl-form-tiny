@@ -1,6 +1,7 @@
 package Form::Tiny::PathValue;
 
 use v5.10;
+use strict;
 use warnings;
 use Moo;
 use Types::Standard qw(ArrayRef);

@@ -1,6 +1,7 @@
 package Form::Tiny;
 
 use v5.10;
+use strict;
 use warnings;
 use Carp qw(croak carp);
 use Types::Standard qw(Str);
