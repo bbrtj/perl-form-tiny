@@ -50,7 +50,7 @@ sub as_string
 {
 
 	package Form::Tiny::Error::InvalidFormat;
-	use parent "Form::Tiny::Error";
+	use parent -norequire, "Form::Tiny::Error";
 
 	sub default_error
 	{
@@ -61,7 +61,7 @@ sub as_string
 {
 
 	package Form::Tiny::Error::DoesNotExist;
-	use parent "Form::Tiny::Error";
+	use parent -norequire, "Form::Tiny::Error";
 
 	sub default_error
 	{
@@ -72,7 +72,7 @@ sub as_string
 {
 
 	package Form::Tiny::Error::IsntStrict;
-	use parent "Form::Tiny::Error";
+	use parent -norequire, "Form::Tiny::Error";
 
 	sub default_error
 	{
@@ -83,7 +83,7 @@ sub as_string
 {
 
 	package Form::Tiny::Error::DoesNotValidate;
-	use parent "Form::Tiny::Error";
+	use parent -norequire, "Form::Tiny::Error";
 
 	sub default_error
 	{
