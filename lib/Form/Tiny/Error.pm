@@ -26,10 +26,10 @@ has "error" => (
 	is => "ro",
 	isa => StringLike,
 	writer => 'set_error',
-	builder => "_default_error",
+	builder => "default_error",
 );
 
-sub _default_error
+sub default_error
 {
 	confess "no error message supplied";
 	return "Unknown error";
@@ -51,9 +51,9 @@ sub as_string
 	package Form::Tiny::Error::InvalidFormat;
 	use parent "Form::Tiny::Error";
 
-	sub _default_error
+	sub default_error
 	{
-		return "input data has invalid format";
+		return "input data format is invalid";
 	}
 }
 
@@ -62,9 +62,9 @@ sub as_string
 	package Form::Tiny::Error::DoesNotExist;
 	use parent "Form::Tiny::Error";
 
-	sub _default_error
+	sub default_error
 	{
-		return "does not exist";
+		return "field does not exist in input";
 	}
 }
 
@@ -73,9 +73,9 @@ sub as_string
 	package Form::Tiny::Error::IsntStrict;
 	use parent "Form::Tiny::Error";
 
-	sub _default_error
+	sub default_error
 	{
-		return "does not meet the strictness criteria";
+		return "input data has unexpected fields";
 	}
 }
 
@@ -84,9 +84,9 @@ sub as_string
 	package Form::Tiny::Error::DoesNotValidate;
 	use parent "Form::Tiny::Error";
 
-	sub _default_error
+	sub default_error
 	{
-		return "validation fails";
+		return "data validation failed";
 	}
 }
 
