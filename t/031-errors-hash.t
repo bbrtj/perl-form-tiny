@@ -30,6 +30,7 @@ is_deeply $form->errors_hash, {
 		'error 2',
 		'error 3'
 	]
-}, 'errors hash ok';
+	},
+	'errors hash ok';
 
 done_testing;

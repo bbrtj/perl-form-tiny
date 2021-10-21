@@ -26,10 +26,12 @@ package ChildForm
 }
 
 my $form = ChildForm->new;
-$form->set_input({
-	f1 => 'field f1',
-	f2 => 'field f2',
-});
+$form->set_input(
+	{
+		f1 => 'field f1',
+		f2 => 'field f2',
+	}
+);
 
 ok $form->valid;
 ok $form->DOES('Form::Tiny::Form');

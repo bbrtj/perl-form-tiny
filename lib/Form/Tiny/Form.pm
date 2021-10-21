@@ -31,7 +31,7 @@ has '_ft_field_cache' => (
 	isa => HashRef [InstanceOf ['Form::Tiny::FieldDefinition']],
 	clearer => '_ft_clear_field_cache',
 	default => sub {
-		return { map { $_->name => $_ } @{shift()->field_defs} }
+		return {map { $_->name => $_ } @{shift()->field_defs}};
 	},
 	lazy => 1,
 	init_arg => undef,

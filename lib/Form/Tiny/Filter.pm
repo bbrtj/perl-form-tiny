@@ -18,7 +18,7 @@ has "type" => (
 
 has 'field' => (
 	is => 'ro',
-	isa => Maybe[Str],
+	isa => Maybe [Str],
 	default => sub { undef },
 );
 

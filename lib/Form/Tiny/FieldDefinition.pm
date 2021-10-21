@@ -190,7 +190,7 @@ sub validate
 	if ($self->has_type) {
 		if ($self->has_message) {
 			push @errors, $self->message
-				if !$self->type->check($value)
+				if !$self->type->check($value);
 		}
 		else {
 			my $error = $self->type->validate($value);
