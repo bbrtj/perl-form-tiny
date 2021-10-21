@@ -26,6 +26,17 @@ has 'field_defs' => (
 	init_arg => undef,
 );
 
+has '_field_cache' => (
+	is => 'ro',
+	isa => HashRef [InstanceOf ['Form::Tiny::FieldDefinition']],
+	clearer => '_clear_field_cache',
+	default => sub {
+		return { map { $_->name => $_ } @{shift()->field_defs} }
+	},
+	lazy => 1,
+	init_arg => undef,
+);
+
 has "input" => (
 	is => "ro",
 	writer => "set_input",
@@ -63,6 +74,7 @@ sub _clear_form
 	my ($self) = @_;
 
 	$self->_clear_field_defs;
+	$self->_clear_field_cache;
 	$self->_clear_fields;
 	$self->clear_valid;
 	$self->_clear_errors;
@@ -269,6 +281,16 @@ sub add_error
 	else {
 		croak 'invalid arguments passed to $form->add_error';
 	}
+
+	# check if the field exists
+	for ($error->field) {
+		croak "form does not contain a field definition for $_"
+			if defined $_ && !exists $self->_field_cache->{$_};
+	}
+
+	# unwrap nested form errors
+	$error = $error->error
+		if $error->isa('Form::Tiny::Error::NestedFormError');
 
 	push @{$self->errors}, $error;
 	$self->form_meta->run_hooks_for('after_error', $self, $error);

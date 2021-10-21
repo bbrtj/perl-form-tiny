@@ -46,6 +46,13 @@ sub as_string
 }
 
 # in-place subclasses
+{
+
+	# Internal use only
+	package Form::Tiny::Error::NestedFormError;
+	use parent -norequire, "Form::Tiny::Error";
+
+}
 
 {
 

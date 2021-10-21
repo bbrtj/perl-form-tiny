@@ -8,6 +8,8 @@ use Test::More;
 	package TestForm;
 	use Form::Tiny -base;
 
+	form_field 'field';
+
 	form_hook cleanup => sub {
 		my ($self, $data) = @_;
 

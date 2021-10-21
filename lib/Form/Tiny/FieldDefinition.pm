@@ -220,13 +220,15 @@ sub validate
 						if defined $exception->field;
 
 					$exception->set_field($path->join);
+					$exception = Form::Tiny::Error::NestedFormError->new(
+						field => $self->name,
+						error => $exception,
+					);
 				}
 				else {
 					$exception = Form::Tiny::Error::DoesNotValidate->new(
-						{
-							field => $self->name,
-							error => $exception,
-						}
+						field => $self->name,
+						error => $exception,
 					);
 				}
 
