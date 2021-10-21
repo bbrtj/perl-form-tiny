@@ -297,6 +297,18 @@ sub add_error
 	return $self;
 }
 
+sub errors_hash
+{
+	my ($self) = @_;
+
+	my %ret;
+	for my $error (@{$self->errors}) {
+		push @{$ret{$error->field // ''}}, $error->error;
+	}
+
+	return \%ret;
+}
+
 sub has_errors
 {
 	my ($self) = @_;
@@ -402,6 +414,25 @@ I<check> returns a boolean value that indicates whether the validation of input 
 I<validate> does the same thing, but instead of returning a boolean it returns a list of errors that were detected, or undef if none.
 
 Both methods take input data as the only argument.
+
+=head3 errors_hash
+
+Helper method which returns errors much like the C<errors> form attribute, but in a hash reference with form field names as keys. Errors not assigned to any specific field end up in empty string key. The values are array references of error messages (strings).
+
+Each field will only be present in the hash if it has an error assigned to it. If no errors are present, the hash will be empty.
+
+It allows you to get errors in format which is easier to navigate:
+
+	{
+		'' => [
+			# global form errors
+		],
+		# specific field errors
+		'field1' => [
+			'something went wrong'
+		],
+
+	}
 
 =head3 add_error
 
