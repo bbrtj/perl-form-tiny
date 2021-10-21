@@ -17,7 +17,7 @@ our $VERSION = '2.02';
 has 'field_defs' => (
 	is => 'ro',
 	isa => ArrayRef [InstanceOf ['Form::Tiny::FieldDefinition']],
-	clearer => '_clear_field_defs',
+	clearer => '_ft_clear_field_defs',
 	default => sub {
 		my ($self) = shift;
 		return $self->form_meta->resolved_fields($self);
@@ -26,10 +26,10 @@ has 'field_defs' => (
 	init_arg => undef,
 );
 
-has '_field_cache' => (
+has '_ft_field_cache' => (
 	is => 'ro',
 	isa => HashRef [InstanceOf ['Form::Tiny::FieldDefinition']],
-	clearer => '_clear_field_cache',
+	clearer => '_ft_clear_field_cache',
 	default => sub {
 		return { map { $_->name => $_ } @{shift()->field_defs} }
 	},
@@ -40,14 +40,14 @@ has '_field_cache' => (
 has "input" => (
 	is => "ro",
 	writer => "set_input",
-	trigger => \&_clear_form,
+	trigger => \&_ft_clear_form,
 );
 
 has "fields" => (
 	is => "ro",
 	isa => Maybe [HashRef],
-	writer => "_set_fields",
-	clearer => "_clear_fields",
+	writer => "_ft_set_fields",
+	clearer => "_ft_clear_fields",
 	init_arg => undef,
 );
 
@@ -55,7 +55,7 @@ has "valid" => (
 	is => "ro",
 	isa => Bool,
 	lazy => 1,
-	builder => "_validate",
+	builder => "_ft_validate",
 	clearer => 1,
 	predicate => "is_validated",
 	init_arg => undef,
@@ -69,18 +69,18 @@ has "errors" => (
 	init_arg => undef,
 );
 
-sub _clear_form
+sub _ft_clear_form
 {
 	my ($self) = @_;
 
-	$self->_clear_field_defs;
-	$self->_clear_field_cache;
-	$self->_clear_fields;
+	$self->_ft_clear_field_defs;
+	$self->_ft_clear_field_cache;
+	$self->_ft_clear_fields;
 	$self->clear_valid;
-	$self->_clear_errors;
+	$self->_ft_clear_errors;
 }
 
-sub _mangle_field
+sub _ft_mangle_field
 {
 	my ($self, $def, $path_value) = @_;
 
@@ -102,7 +102,7 @@ sub _mangle_field
 	return;
 }
 
-sub _find_field
+sub _ft_find_field
 {
 	my ($self, $fields, $field_def) = @_;
 
@@ -161,7 +161,7 @@ sub _find_field
 	return;
 }
 
-sub _assign_field
+sub _ft_assign_field
 {
 	my ($self, $fields, $field_def, $path_value) = @_;
 
@@ -182,12 +182,12 @@ sub _assign_field
 	$$current = $path_value->value;
 }
 
-sub _validate
+sub _ft_validate
 {
 	my ($self) = @_;
 	my $dirty = {};
 	my $meta = $self->form_meta;
-	$self->_clear_errors;
+	$self->_ft_clear_errors;
 
 	my $fields = $self->input;
 	my $err = try sub {
@@ -199,7 +199,7 @@ sub _validate
 		foreach my $validator (@{$self->field_defs}) {
 			my $curr_f = $validator->name;
 
-			my $current_data = $self->_find_field($fields, $validator);
+			my $current_data = $self->_ft_find_field($fields, $validator);
 			if (defined $current_data) {
 				my $all_ok = 1;
 
@@ -208,9 +208,9 @@ sub _validate
 					unless ($path_value->structure) {
 						my $value = $meta->run_hooks_for('before_mangle', $self, $validator, $path_value->value);
 						$path_value->set_value($value);
-						$all_ok = $self->_mangle_field($validator, $path_value) && $all_ok;
+						$all_ok = $self->_ft_mangle_field($validator, $path_value) && $all_ok;
 					}
-					$self->_assign_field($dirty, $validator, $path_value);
+					$self->_ft_assign_field($dirty, $validator, $path_value);
 				}
 
 				# found and valid, go to the next field
@@ -219,7 +219,7 @@ sub _validate
 
 			# for when it didn't pass the existence test
 			if ($validator->has_default) {
-				$self->_assign_field($dirty, $validator, $validator->get_default($self));
+				$self->_ft_assign_field($dirty, $validator, $validator->get_default($self));
 			}
 			elsif ($validator->required) {
 				$self->add_error(Form::Tiny::Error::DoesNotExist->new(field => $curr_f));
@@ -236,7 +236,7 @@ sub _validate
 		if !$self->has_errors;
 
 	my $form_valid = !$self->has_errors;
-	$self->_set_fields($form_valid ? $dirty : undef);
+	$self->_ft_set_fields($form_valid ? $dirty : undef);
 
 	return $form_valid;
 }
@@ -285,7 +285,7 @@ sub add_error
 	# check if the field exists
 	for ($error->field) {
 		croak "form does not contain a field definition for $_"
-			if defined $_ && !exists $self->_field_cache->{$_};
+			if defined $_ && !exists $self->_ft_field_cache->{$_};
 	}
 
 	# unwrap nested form errors
@@ -315,7 +315,7 @@ sub has_errors
 	return @{$self->errors} > 0;
 }
 
-sub _clear_errors
+sub _ft_clear_errors
 {
 	my ($self) = @_;
 
