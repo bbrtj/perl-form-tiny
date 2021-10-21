@@ -14,6 +14,18 @@ use Moo::Role;
 
 our $VERSION = '2.02';
 
+has 'field_defs' => (
+	is => 'ro',
+	isa => ArrayRef [InstanceOf ['Form::Tiny::FieldDefinition']],
+	clearer => '_clear_field_defs',
+	default => sub {
+		my ($self) = shift;
+		return $self->form_meta->resolved_fields($self);
+	},
+	lazy => 1,
+	init_arg => undef,
+);
+
 has "input" => (
 	is => "ro",
 	writer => "set_input",
@@ -50,6 +62,7 @@ sub _clear_form
 {
 	my ($self) = @_;
 
+	$self->_clear_field_defs;
 	$self->_clear_fields;
 	$self->clear_valid;
 	$self->_clear_errors;
@@ -276,16 +289,6 @@ sub _clear_errors
 	return;
 }
 
-sub field_defs
-{
-	my ($self) = @_;
-
-	croak 'field_defs can only be called in object context'
-		unless defined blessed $self;
-
-	return $self->form_meta->resolved_fields($self);
-}
-
 sub form_meta
 {
 	my ($self) = @_;
@@ -336,6 +339,10 @@ B<writer:> I<set_input>
 
 Contains the validated and cleaned fields set after the validation is complete. Cannot be specified in the constructor.
 
+=head3 field_defs
+
+Contains an array reference of L<Form::Tiny::FieldDefinition> instances fetched from the metaclass with context of current instance. Rebuilds everytime new input data is set.
+
 =head3 valid
 
 Contains the result of the validation - a boolean value. Gets produced lazily upon accessing it, so calling C<< $form->valid; >> validates the form automatically.
@@ -361,12 +368,6 @@ Returns the form metaobject, an instance of L<Form::Tiny::Meta>.
 =head3 new
 
 This is a Moose-flavored constructor for the class. It accepts a hash or hash reference of parameters, which are the attributes specified above.
-
-=head3 field_defs
-
-Returns an array reference of L<Form::Tiny::FieldDefinition> instances. Can only be called in object context.
-
-No arguments.
 
 =head3 check
 
