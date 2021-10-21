@@ -128,7 +128,7 @@ Form::Tiny::Inline - Form::Tiny without hassle
 
 =head1 DESCRIPTION
 
-Inline forms are designed to cover all the basic use cases, but they are not as customizable. Currently, they lack the ability to specify custom hooks.
+Inline forms are designed to cover all the basic use cases, but they are not as customizable and performant. Currently, they lack the ability to specify custom hooks.
 
 =head1 METHODS
 

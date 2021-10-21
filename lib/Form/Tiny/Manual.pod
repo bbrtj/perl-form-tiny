@@ -47,6 +47,7 @@ Form::Tiny::Manual - reference for working with Form::Tiny
 	}
 	else {
 		print Dumper $form->errors;
+		print Dumper $form->errors_hash;
 	}
 
 =head1 DESCRIPTION
@@ -126,6 +127,7 @@ The example below illustrates how a form class could be used to validate data.
 		...
 	} else {
 		my $errors = $form->errors; # an array reference
+		my $errors_hash = $form->errors_hash; # a hash reference
 		...
 	}
 

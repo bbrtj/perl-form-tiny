@@ -155,6 +155,10 @@ Starting from version I<2.00>, any backward incompatible changes will only be in
 		code => sub { ... },
 	);
 
+=head3 Form::Tiny::Error::DoesNotExist is deprecated
+
+Use Form::Tiny::Error::Required instead.
+
 =head1 SEE ALSO
 
 =over

@@ -440,6 +440,4 @@ It allows you to get errors in format which is easier to navigate:
 	$form->add_error($field_name => $error_string);
 	$form->add_error($error_object);
 
-Adds an error to the form. This should only be done during validation with customization methods listed below.
-
-If C<$error_object> style is used, it must be an instance of L<Form::Tiny::Error>.
+Adds an error to the form. If C<$error_object> style is used, it must be an instance of L<Form::Tiny::Error>.
