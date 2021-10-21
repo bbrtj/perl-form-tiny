@@ -222,7 +222,7 @@ sub _ft_validate
 				$self->_ft_assign_field($dirty, $validator, $validator->get_default($self));
 			}
 			elsif ($validator->required) {
-				$self->add_error(Form::Tiny::Error::DoesNotExist->new(field => $curr_f));
+				$self->add_error(Form::Tiny::Error::Required->new(field => $curr_f));
 			}
 		}
 	}
