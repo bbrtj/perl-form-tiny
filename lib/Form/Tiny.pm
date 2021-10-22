@@ -162,6 +162,10 @@ Form::Tiny is a customizable hashref validator with DSL for form building.
 
 =item * L<Form::Tiny::Manual> - Main reference
 
+=item * L<Form::Tiny::Manual::Cookbook> - Common tasks performed with Form::Tiny
+
+=item * L<Form::Tiny::Manual::Performance> - How to get the most speed out of the module
+
 =item * L<Form::Tiny::Manual::Compatibility> - See backwards compatibility notice
 
 =item * L<Form::Tiny::Manual::Internals> - How to mess with Form::Tiny internals
