@@ -92,7 +92,7 @@ sub _ft_mangle_field
 		# coerce, validate, adjust
 		$current = $def->get_coerced($self, $current);
 		if ($def->validate($self, $current)) {
-			$current = $def->get_adjusted($current);
+			$current = $def->get_adjusted($self, $current);
 		}
 
 		$path_value->set_value($current);

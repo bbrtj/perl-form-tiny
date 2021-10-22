@@ -131,7 +131,11 @@ sub get_coerced
 
 	my $error = try sub {
 		if (ref $coerce eq "CODE") {
-			$coerced = $coerce->($value);
+			my @params = ($value);
+			unshift @params, $form
+				if $form->form_meta->consistent_api;
+
+			$coerced = $coerce->(@params);
 		}
 		elsif ($coerce) {
 			$coerced = $self->type->coerce($value);
@@ -154,10 +158,14 @@ sub get_coerced
 
 sub get_adjusted
 {
-	my ($self, $value) = @_;
+	my ($self, $form, $value) = @_;
 
 	if ($self->is_adjusted) {
-		return $self->adjust->($value);
+		my @params = ($value);
+		unshift @params, $form
+			if $form->form_meta->consistent_api;
+
+		return $self->adjust->(@params);
 	}
 	return $value;
 }
@@ -202,10 +210,14 @@ sub validate
 
 	if (@errors == 0) {
 		my $validators = $self->addons->{validators} // [];
+		my @params = ($value);
+		unshift @params, $form
+			if $form->form_meta->consistent_api;
+
 		for my $validator (@{$validators}) {
 			my ($message, $code) = @{$validator};
 
-			if (!$code->($value)) {
+			if (!$code->(@params)) {
 				push @errors, $message;
 			}
 		}

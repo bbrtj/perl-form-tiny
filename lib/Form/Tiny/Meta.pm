@@ -40,6 +40,8 @@ has 'complete' => (
 	default => sub { 0 },
 );
 
+sub consistent_api { 0 }
+
 sub run_hooks_for
 {
 	my ($self, $stage, @data) = @_;

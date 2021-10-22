@@ -181,6 +181,8 @@ Value of C<0> means no coercion will be made. This is the default behavior.
 
 Value that is a coderef will be passed a single scalar, which is the value of the field. It is required to make its own checks and return a scalar which will replace the old value.
 
+B<Upcoming change notice>: This attribute is a subject to an upcoming change in subroutine parameters. See L<Form::Tiny::Manual::Compatibility/Current deprecations> for details.
+
 =item adjust
 
 	form_field 'adjusted' => (
@@ -191,6 +193,8 @@ Value that is a coderef will be passed a single scalar, which is the value of th
 An adjustment that will be made B<after> the type is validated and the validation is successful. This must be a coderef that gets passed the validated value and returns the new value for the field (just like the coderef version of coercion).
 
 At the point of adjustment, you can be sure that the value passed to the coderef meets the type constraint specified. It's probably a good idea to provide a type along with the adjustment to avoid unnecessary checks in the subroutine - if no type is specified, then any value from the input data will end up in the coderef.
+
+B<Upcoming change notice>: This attribute is a subject to an upcoming change in subroutine parameters. See L<Form::Tiny::Manual::Compatibility/Current deprecations> for details.
 
 =item required
 
@@ -209,10 +213,13 @@ C<1> or C<"hard"> - The field has to exist in the input, must be defined and non
 =item default
 
 	form_field 'has_default' => (
-		default => sub { 'this is a default value' },
+		default => sub {
+			my $form = shift;
+			return 'this is a default value'
+		},
 	);
 
-A coderef, which should return a scalar value that will be used in place of a non-existent input value. If the field is marked as hard-required as well, the default value will also replace undefined or empty values.
+A coderef, which should return a scalar value that will be used in place of a non-existent input value. If the field is marked as hard-required as well, the default value will also replace undefined or empty values. It gets passed a single parameter, which is the form instance.
 
 The default value needs to be in line with the type check for the field, if it is specified. It also does not support nested arrays, like C<array.*>. An exception will be thrown if these conditions are not met.
 
@@ -310,6 +317,8 @@ Additional validations will take place after the type is validated, and only if 
 =item * you do not have to manually validate the value passed to the subroutines
 
 =back
+
+B<Upcoming change notice>: This keyword is a subject to an upcoming change in subroutine parameters. See L<Form::Tiny::Manual::Compatibility/Current deprecations> for details.
 
 =head2 Hooks
 
@@ -450,6 +459,8 @@ One special keyword exists for string trimming using the filters system:
 	form_trim_strings;
 
 When the field is filtered, the form filters are applied before field filters. Each type of filter is applied in the order they were defined.
+
+B<Upcoming change notice>: These keywords are subjects to an upcoming change in subroutine parameters. See L<Form::Tiny::Manual::Compatibility/Current deprecations> for details.
 
 =head2 Inline forms
 

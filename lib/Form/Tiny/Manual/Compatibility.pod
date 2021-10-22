@@ -159,6 +159,44 @@ Starting from version I<2.00>, any backward incompatible changes will only be in
 
 Use Form::Tiny::Error::Required instead.
 
+=head3 Subroutine call parameters are getting standarized
+
+Many parts of the system can be customized with code references (anonymous subroutines). The problem is they were designed in isolation, per feature and not as a whole.
+
+Because of this, parameters they get passed tend to vary. For example the C<default> sub will get passed a single parameter, which is a form instance, while form validator will not get passed a form instance, making it hard or impossible to make use of instance data in certain places.
+
+To combat this, in the future release all listed places will consistently get passed the form instance as their first parameter, followed by their current parameters:
+
+	form_field -> adjust
+	form_field -> coerce
+	form_validator
+	form_filter
+	field_filter
+
+For example:
+
+	form_field 'field' => (
+		# before
+		adjust => sub { shift() + 1 },
+		# after
+		adjust => sub { $_[1] + 1 },
+	);
+
+Or with signatures:
+
+	form_field 'field' => (
+		# before
+		adjust => sub ($value) { $value + 1 },
+		# after
+		adjust => sub ($self, $value) { $value + 1 },
+	);
+
+Starting with I<2.03>, a new import flag C<-consistent> will be added, which enables the new parameter lists:
+
+	use Form::Tiny -consistent;
+
+A warning will be raised if Form::Tiny is imported without this flag. After the deprecation period and removal of old syntax, the flag will be made redundant.
+
 =head1 SEE ALSO
 
 =over

@@ -40,7 +40,10 @@ sub import
 		push @wanted_roles, @{$behaviors{$type}->{roles}};
 	}
 
-	create_form_meta($caller, @wanted_roles);
+	my $meta = create_form_meta($caller, @wanted_roles);
+
+	carp "Form $caller created without -consistent flag is deprecated. See compatibility docs"
+		unless $meta->consistent_api;
 
 	{
 		no strict 'refs';
@@ -90,7 +93,12 @@ sub _generate_helpers
 		},
 		form_trim_strings => sub {
 			$field_context = undef;
-			$caller->form_meta->add_filter(Str, \&trim);
+			if ($caller->form_meta->consistent_api) {
+				$caller->form_meta->add_filter(Str, sub { trim $_[1] });
+			}
+			else {
+				$caller->form_meta->add_filter(Str, \&trim);
+			}
 		},
 	};
 }
@@ -112,6 +120,10 @@ sub _get_behaviors
 		-filtered => {
 			subs => [qw(form_filter field_filter form_trim_strings)],
 			roles => [qw(Form::Tiny::Meta::Filtered)],
+		},
+		-consistent => {
+			subs => [],
+			roles => [qw(Form::Tiny::Meta::Consistent)],
 		},
 	};
 }
