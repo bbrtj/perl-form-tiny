@@ -11,6 +11,7 @@ use Carp qw(croak carp);
 use Form::Tiny::FieldDefinitionBuilder;
 use Form::Tiny::Hook;
 use Form::Tiny::Error;
+use Form::Tiny::Utils qw(try);
 
 use namespace::clean;
 
@@ -46,7 +47,7 @@ has 'complete' => (
 
 has 'messages' => (
 	is => 'ro',
-	isa => HashRef[Str],
+	isa => HashRef [Str],
 	default => sub { {} },
 );
 
@@ -154,9 +155,13 @@ sub add_message
 {
 	my ($self, $name, $message) = @_;
 
-	local $@;
+	my $isa;
+	my $err = try sub {
+		$isa = "Form::Tiny::Error::$name"->isa('Form::Tiny::Error')
+	};
+
 	croak "$name is not a valid Form::Tiny error class name"
-		unless eval { "Form::Tiny::Error::$name"->isa('Form::Tiny::Error') };
+		unless !$err && $isa;
 
 	$self->messages->{$name} = $message;
 	return $self;

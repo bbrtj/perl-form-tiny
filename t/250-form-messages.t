@@ -17,7 +17,7 @@ use Test::More;
 
 	dies_ok {
 		form_message Requried => 'typo in name';
-	};
+	} 'typo dies ok';
 
 	note $@;
 
@@ -34,7 +34,8 @@ subtest 'testing required message' => sub {
 	ok !$form->valid, 'validation failed ok';
 	is_deeply $form->errors_hash, {
 		'required' => ['reqmsg']
-	}, 'errors ok';
+		},
+		'errors ok';
 };
 
 subtest 'testing invalid format message' => sub {
@@ -43,7 +44,8 @@ subtest 'testing invalid format message' => sub {
 	ok !$form->valid, 'validation failed ok';
 	is_deeply $form->errors_hash, {
 		'' => ['invformsg']
-	}, 'errors ok';
+		},
+		'errors ok';
 };
 
 subtest 'testing strict message' => sub {
@@ -52,7 +54,8 @@ subtest 'testing strict message' => sub {
 	ok !$form->valid, 'validation failed ok';
 	is_deeply $form->errors_hash, {
 		'' => ['strictmsg']
-	}, 'errors ok';
+		},
+		'errors ok';
 };
 
 done_testing();
