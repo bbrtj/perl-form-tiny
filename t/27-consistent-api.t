@@ -8,7 +8,6 @@ my $tester = sub {
 
 	return sub {
 		my ($self, $value) = @_;
-		# use Data::Dumper; $Data::Dumper::Maxdepth = 1; warn Dumper(\@_);
 
 		note "testing $stage";
 		isa_ok $self, 'TestForm';
