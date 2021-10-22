@@ -140,7 +140,7 @@ Form::Tiny - Input validator implementation centered around Type::Tiny
 
 	package MyForm;
 
-	use Form::Tiny -base;
+	use Form::Tiny -consistent;
 	use Types::Standard qw(Int);
 
 	form_field 'my_field' => (
@@ -223,6 +223,11 @@ Installed functions: all of C<-base> plus C<form_filter field_filter form_trim_s
 This flag makes your form check for strictness before the validation.
 
 Installed functions: same as C<-base>
+
+=item * C<-consistent>
+
+Turns on consistent subroutine API in the form package. This will become a default in the future, after the deprecation period.
+See L<Form::Tiny::Manual::Compatibility/Current deprecations> for details.
 
 =back
 
