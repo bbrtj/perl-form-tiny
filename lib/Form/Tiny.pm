@@ -18,7 +18,7 @@ sub import
 	my ($package, $caller) = (shift, scalar caller);
 
 	my @wanted = @_;
-	my @wanted_subs = qw(form_field form_cleaner form_hook field_validator);
+	my @wanted_subs = qw(form_field form_cleaner form_hook field_validator form_message);
 	my @wanted_roles;
 
 	my %subs = %{$package->_generate_helpers($caller)};
@@ -98,6 +98,13 @@ sub _generate_helpers
 			}
 			else {
 				$caller->form_meta->add_filter(Str, \&trim);
+			}
+		},
+		form_message => sub {
+			$field_context = undef;
+			my %params = @_;
+			for my $key (keys %params) {
+				$caller->form_meta->add_message($key, $params{$key});
 			}
 		},
 	};
@@ -246,6 +253,14 @@ In the first (hash) version, C<%arguments> need to be a plain hash (not a hashre
 In the second (coderef) version, C<$coderef> gets passed the form instance as its only argument and should return a hashref or a constructed object of L<Form::Tiny::FieldDefinition>. A hashref must contain a C<name>. Note that this creates I<dynamic field>, which will be resolved repeatedly during form validation. As such, it should not contain any randomness.
 
 If you need a subclass of the default implementation, and you don't need a dynamic field, you can use the third style of the call, which takes a constructed object of L<Form::Tiny::FieldDefinition> or its subclass.
+
+=head3 form_message
+
+	form_message
+		$type1 => $message1,
+		$type2 => $message2;
+
+Override form default error messages, possibly multiple at a time. Types can be any of C<Required> (when a mandatory field is missing), C<IsntStrict> (when form is strict and the check for it fails) and C<InvalidFormat> (when passed input format is not a hash reference) - currently only those types have their own dedicated error message.
 
 =head3 form_hook
 

@@ -78,6 +78,7 @@ Form::Tiny allows you to define forms much like you would define a Moose class. 
 	use Types::Standard qw(Enum Str);
 
 	form_trim_strings;
+	form_message Required => 'This one is mandatory!';
 
 	form_field 'url' => (
 		type => Str,

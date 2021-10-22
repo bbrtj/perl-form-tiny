@@ -85,7 +85,7 @@ sub _check_strict
 	};
 
 	if ($error) {
-		$obj->add_error(Form::Tiny::Error::IsntStrict->new);
+		$obj->add_error($self->build_error(IsntStrict =>));
 	}
 
 	return $input;

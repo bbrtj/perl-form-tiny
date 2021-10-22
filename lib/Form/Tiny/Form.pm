@@ -222,12 +222,12 @@ sub _ft_validate
 				$self->_ft_assign_field($dirty, $validator, $validator->get_default($self));
 			}
 			elsif ($validator->required) {
-				$self->add_error(Form::Tiny::Error::Required->new(field => $curr_f));
+				$self->add_error($self->form_meta->build_error(Required => field => $curr_f));
 			}
 		}
 	}
 	else {
-		$self->add_error(Form::Tiny::Error::InvalidFormat->new);
+		$self->add_error($self->form_meta->build_error(InvalidFormat =>));
 	}
 
 	$meta->run_hooks_for('after_validate', $self, $dirty);
