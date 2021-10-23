@@ -8,7 +8,7 @@ use Types::Standard qw(Enum CodeRef Bool);
 
 use namespace::clean;
 
-our $VERSION = '2.02';
+our $VERSION = '2.03';
 
 use constant {
 	HOOK_REFORMAT => 'reformat',

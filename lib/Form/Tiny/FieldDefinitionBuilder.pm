@@ -12,7 +12,7 @@ use Form::Tiny::FieldDefinition;
 
 use namespace::clean;
 
-our $VERSION = '2.02';
+our $VERSION = '2.03';
 
 has "data" => (
 	is => "ro",

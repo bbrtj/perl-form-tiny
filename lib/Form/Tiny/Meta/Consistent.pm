@@ -6,7 +6,7 @@ use warnings;
 
 use Moo::Role;
 
-our $VERSION = '2.02';
+our $VERSION = '2.03';
 
 requires 'consistent_api';
 

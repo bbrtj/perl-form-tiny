@@ -12,7 +12,7 @@ use Form::Tiny::Error;
 use Form::Tiny::Utils qw(try get_package_form_meta);
 use Moo::Role;
 
-our $VERSION = '2.02';
+our $VERSION = '2.03';
 
 has 'field_defs' => (
 	is => 'ro',
