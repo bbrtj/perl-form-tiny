@@ -157,7 +157,7 @@ sub add_message
 
 	my $isa;
 	my $err = try sub {
-		$isa = "Form::Tiny::Error::$name"->isa('Form::Tiny::Error')
+		$isa = "Form::Tiny::Error::$name"->isa('Form::Tiny::Error');
 	};
 
 	croak "$name is not a valid Form::Tiny error class name"

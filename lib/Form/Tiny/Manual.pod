@@ -448,14 +448,16 @@ Enables initial filtering for the input fields. This behavior is added to the fo
 
 The filtering system performs a type check on field values and only apply a filtering subroutine when the type matches. This is done before the validation, and so can affect the validation result. Filters behave much like type coercion, but they are more flexible and can be stacked by having multiple filters for the same field, each using value returned by the previous one.
 
+Filter subroutines should accept two parameters: C<($self, $value)>, and must return a C<$value>, changed or unchanged.
+
 An example filter that turns integers into their absolute values:
 
-	form_filter Int, sub { abs shift() };
+	form_filter Int, sub { abs pop() };
 
 A filter can be also narrowed down to a single form field with C<field_filter> keyword, which will apply to the last field declared:
 
 	form_field 'my_field';
-	field_filter Int, sub { abs shift() };
+	field_filter Int, sub { abs pop() };
 
 One special keyword exists for string trimming using the filters system:
 

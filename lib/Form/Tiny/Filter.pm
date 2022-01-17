@@ -4,7 +4,7 @@ use v5.10;
 use strict;
 use warnings;
 use Moo;
-use Types::Standard qw(HasMethods CodeRef Maybe Str);
+use Types::Standard qw(HasMethods CodeRef);
 
 use namespace::clean;
 
@@ -16,24 +16,11 @@ has "type" => (
 	required => 1,
 );
 
-has 'field' => (
-	is => 'ro',
-	isa => Maybe [Str],
-	default => sub { undef },
-);
-
 has "code" => (
 	is => "ro",
 	isa => CodeRef,
 	required => 1,
 );
-
-sub check_field
-{
-	my ($self, $field) = @_;
-
-	return ($self->field // $field) eq $field;
-}
 
 sub filter
 {
@@ -59,7 +46,7 @@ Form::Tiny::Filter - a representation of a filter
 	# in your form class
 
 	# the following will be coerced into Form::Tiny::Filter
-	form_filer Str, sub { uc shift() };
+	form_filter Str, sub { uc pop() };
 
 =head1 DESCRIPTION
 
@@ -73,12 +60,6 @@ A Type::Tiny type that will be checked against.
 
 Required.
 
-=head2 field
-
-B<DEPRECATED>
-
-A string name of a field that should be filtered, or undef if this filter should execute for every field in the form.
-
 =head2 code
 
 A code reference accepting a single scalar and performing the filtering. The scalar will already be checked against the type.
@@ -86,10 +67,6 @@ A code reference accepting a single scalar and performing the filtering. The sca
 Required.
 
 =head1 METHODS
-
-=head2 check_field
-
-Accepts a single string, which is a name of a field. Returns a boolean value, which determines whether this filter should be used for that field.
 
 =head2 filter
 
