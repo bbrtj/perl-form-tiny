@@ -39,7 +39,7 @@ for my $case (@test_data) {
 			);
 			is !!$form->valid, !!$result, "validation output ok";
 			for my $error (@{$form->errors}) {
-				isa_ok($error, "Form::Tiny::Error::DoesNotExist");
+				isa_ok($error, "Form::Tiny::Error::Required");
 			}
 		}
 	}

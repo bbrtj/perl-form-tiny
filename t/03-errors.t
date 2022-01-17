@@ -11,7 +11,7 @@ my $form = Form::Tiny::Inline->is(qw(Strict))->new(
 
 my @data = (
 	[[], "Form::Tiny::Error::InvalidFormat"],
-	[{}, "Form::Tiny::Error::DoesNotExist"],
+	[{}, "Form::Tiny::Error::Required"],
 	[{test => 1.5}, "Form::Tiny::Error::DoesNotValidate"],
 	[{test => 1, more => 1}, "Form::Tiny::Error::IsntStrict"],
 );

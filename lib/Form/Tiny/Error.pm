@@ -67,19 +67,13 @@ sub as_string
 
 {
 
-	package Form::Tiny::Error::DoesNotExist;
+	package Form::Tiny::Error::Required;
 	use parent -norequire, "Form::Tiny::Error";
 
 	sub default_error
 	{
 		return "field is required";
 	}
-}
-
-{
-
-	package Form::Tiny::Error::Required;
-	use parent -norequire, "Form::Tiny::Error::DoesNotExist";
 }
 
 {
@@ -141,8 +135,6 @@ A couple of in-place subclasses are provided to differentiate the type of error 
 =item * Form::Tiny::Error::InvalidFormat
 
 =item * Form::Tiny::Error::Required
-
-=item * Form::Tiny::Error::DoesNotExist (DEPRECATED, use Form::Tiny::Error::Required)
 
 =item * Form::Tiny::Error::IsntStrict
 

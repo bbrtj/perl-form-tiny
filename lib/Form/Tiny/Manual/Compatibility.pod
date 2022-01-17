@@ -10,6 +10,12 @@ This documentation page is listing all non-backward compatible changes in usage 
 
 =head1 CHANGES
 
+=head2 Form::Tiny::Error::DoesNotExist was removed
+
+I<Changed in 2.04>
+
+Use Form::Tiny::Error::Required instead.
+
 =head2 Using three-argument field_filter (passing context explicitly)
 
 I<Changed in 2.04>
@@ -158,10 +164,6 @@ If you happened to use the module during its early days, you must adjust your co
 Starting from version I<2.00>, any backward incompatible changes will only be introduced to the module after a 3 month deprecation period. This does not cover bug fixes and changes to internal methods not meant to be used or depended on.
 
 =head2 Current deprecations
-
-=head3 Form::Tiny::Error::DoesNotExist is deprecated
-
-Use Form::Tiny::Error::Required instead.
 
 =head3 Subroutine call parameters are getting standarized
 
