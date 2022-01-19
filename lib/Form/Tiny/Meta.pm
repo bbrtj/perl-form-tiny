@@ -51,8 +51,6 @@ has 'messages' => (
 	default => sub { {} },
 );
 
-sub consistent_api { 0 }
-
 sub build_error
 {
 	my ($self, $name, %params) = @_;

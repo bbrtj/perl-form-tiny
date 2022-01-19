@@ -42,9 +42,6 @@ sub import
 
 	my $meta = create_form_meta($caller, @wanted_roles);
 
-	carp "Form $caller created without -consistent flag is deprecated. See compatibility docs"
-		unless $meta->consistent_api;
-
 	{
 		no strict 'refs';
 		no warnings 'redefine';
@@ -91,12 +88,7 @@ sub _generate_helpers
 		},
 		form_trim_strings => sub {
 			$field_context = undef;
-			if ($caller->form_meta->consistent_api) {
-				$caller->form_meta->add_filter(Str, sub { trim $_[1] });
-			}
-			else {
-				$caller->form_meta->add_filter(Str, \&trim);
-			}
+			$caller->form_meta->add_filter(Str, sub { trim $_[1] });
 		},
 		form_message => sub {
 			$field_context = undef;
@@ -116,7 +108,6 @@ sub _get_behaviors
 	};
 
 	return {
-		-base => $empty,
 		-nomoo => $empty,
 		-strict => {
 			subs => [],
@@ -126,10 +117,10 @@ sub _get_behaviors
 			subs => [qw(form_filter field_filter form_trim_strings)],
 			roles => [qw(Form::Tiny::Meta::Filtered)],
 		},
-		-consistent => {
-			subs => [],
-			roles => [qw(Form::Tiny::Meta::Consistent)],
-		},
+
+		# legacy no-op flags
+		-base => $empty,
+		-consistent => $empty,
 	};
 }
 
@@ -145,7 +136,7 @@ Form::Tiny - Input validator implementation centered around Type::Tiny
 
 	package MyForm;
 
-	use Form::Tiny -consistent;
+	use Form::Tiny;
 	use Types::Standard qw(Int);
 
 	form_field 'my_field' => (
@@ -203,36 +194,23 @@ After C<use Form::Tiny> statement, your package gains all the Moo keywords, some
 
 =head2 Available import flags
 
+No matter which flag was used in import, using C<Form::Tiny> always installs these functions: C<form_field form_cleaner form_hook>
+
 =over
-
-=item * C<-base>
-
-This flag is here only for backwards compatibility. It does not do anything particular on its own.
-
-Installed functions: C<form_field form_cleaner form_hook>
 
 =item * C<-nomoo>
 
 This flag stops Form::Tiny from importing Moo into your namespace. Unless you use a different class system (like L<Moose>) will have to declare your own constructor.
 
-Installed functions: same as C<-base>
-
 =item * C<-filtered>
 
 This flag enables filters in your form.
 
-Installed functions: all of C<-base> plus C<form_filter field_filter form_trim_strings>
+Additional installed functions: C<form_filter field_filter form_trim_strings>
 
 =item * C<-strict>
 
 This flag makes your form check for strictness before the validation.
-
-Installed functions: same as C<-base>
-
-=item * C<-consistent>
-
-Turns on consistent subroutine API in the form package. This will become a default in the future, after the deprecation period.
-See L<Form::Tiny::Manual::Compatibility/Current deprecations> for details.
 
 =back
 

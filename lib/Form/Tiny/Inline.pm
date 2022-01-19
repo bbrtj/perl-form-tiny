@@ -51,7 +51,7 @@ sub BUILD
 	}
 
 	if ($meta->can('add_filter')) {
-		$meta->add_filter(Str, \&trim);
+		$meta->add_filter(Str, sub { trim(pop) });
 		for my $filter (@{$args->{filters} // []}) {
 			$meta->add_filter(@$filter);
 		}
@@ -137,3 +137,4 @@ Inline forms are designed to cover all the basic use cases, but they are not as 
 When ran on a Form::Tiny::Inline class, it produces a new object that you can call C<< ->new >> on.
 
 	$inline_form_builder = Form::Tiny::Inline->is("Filtered", "Strict");
+

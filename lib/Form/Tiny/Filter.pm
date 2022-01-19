@@ -24,10 +24,10 @@ has "code" => (
 
 sub filter
 {
-	my ($self, $value, @params) = @_;
+	my ($self, $obj, $value) = @_;
 
 	if ($self->type->check($value)) {
-		return $self->code->(@params, $value);
+		return $self->code->($obj, $value);
 	}
 
 	return $value;
@@ -62,7 +62,7 @@ Required.
 
 =head2 code
 
-A code reference accepting a single scalar and performing the filtering. The scalar will already be checked against the type.
+A code reference C<($form, $value)> and performing the filtering. The scalar C<$value> will already be checked against the type. Should return modified C<$value>.
 
 Required.
 
@@ -70,8 +70,9 @@ Required.
 
 =head2 filter
 
-	$filtered = $filter->filter($filtered, @more_params);
+	$filtered = $filter->filter($filtered, $form);
 
-Accepts a single scalar, checks if it matches the type and runs the code reference with it as an argument. Can accept more parameters, which will be inserted before the value in the subroutine call (the value is always the last parameter to the coderef).
+Checks if C<$filtered> matches the type and runs the code reference. C<$form> is a form instance in which the filtering happens, and will be passed before C<$filtered>. The C<$filtered> value is the last parameter to the coderef, so it can be retrieved using C<pop()>.
 
 The return value is the scalar value, either changed or unchanged.
+

@@ -11,7 +11,7 @@ BEGIN {
 
 my $form = Form::Tiny::Inline->is(qw(Filtered))->new(
 	field_defs => [{name => "test"}],
-	filters => [[Int, sub { abs(shift) }]],
+	filters => [[Int, sub { abs(pop) }]],
 );
 
 my @data = (

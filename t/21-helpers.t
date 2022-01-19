@@ -42,7 +42,7 @@ use Test::More;
 	};
 
 	form_filter Int, sub {
-		abs shift;
+		abs pop;
 	};
 }
 

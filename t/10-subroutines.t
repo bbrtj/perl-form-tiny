@@ -15,7 +15,7 @@ use Data::Dumper;
 		type => Str->where(q{ /\A0x[0-9a-fA-F]+\z/ }),
 
 		coerce => sub {
-			my $val = shift;
+			my ($self, $val) = @_;
 			if (defined $val && $val =~ /\A[0-9]+\z/) {
 				return "0x" . sprintf("%x", $val);
 			}
@@ -23,7 +23,7 @@ use Data::Dumper;
 		},
 
 		adjust => sub {
-			return lc shift;
+			return lc pop;
 		},
 	);
 

@@ -10,12 +10,12 @@ use Test::More;
 	use Types::Standard qw(Str Int);
 
 	form_field 'f1';
-	field_filter Str, sub { shift() . '+' };
-	field_filter Str, sub { shift() . '-' };
+	field_filter Str, sub { pop() . '+' };
+	field_filter Str, sub { pop() . '-' };
 
 	form_field 'f2';
 
-	form_filter Int, sub { shift() . '!' };
+	form_filter Int, sub { pop() . '!' };
 }
 
 my @data = (

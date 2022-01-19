@@ -10,6 +10,7 @@ my $tester = sub {
 		my ($self, $value) = @_;
 
 		note "testing $stage";
+		is scalar @_, 2;
 		isa_ok $self, 'TestForm';
 		is $value, 'value';
 
@@ -20,7 +21,7 @@ my $tester = sub {
 {
 
 	package TestForm;
-	use Form::Tiny -consistent, -filtered;
+	use Form::Tiny -filtered;
 	use Types::Standard qw(Str);
 
 	form_trim_strings;
@@ -36,8 +37,7 @@ my $tester = sub {
 }
 
 my $form = TestForm->new;
-ok $form->form_meta->consistent_api, 'consistent api flag ok';
 $form->set_input({val => 'value'});
 ok $form->valid, 'validation ok';
 
-done_testing 12;
+done_testing 16;

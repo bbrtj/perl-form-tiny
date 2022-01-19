@@ -34,3 +34,4 @@ While it may come useful, it is often unnecessary. The module already does not c
 =head2 Type::Tiny::XS
 
 Form::Tiny uses a lot of Type::Tiny type constraints, both internally and in its form classes. Installing L<Type::Tiny::XS> should give them some XS boost, although it may be hard to measure exactly what kind of performance boost it gives.
+
