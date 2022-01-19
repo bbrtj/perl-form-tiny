@@ -472,6 +472,14 @@ One special keyword exists for string trimming using the filters system:
 
 When the field is filtered, the form filters are applied before field filters. Each type of filter is applied in the order they were defined.
 
+=head3 Plugins
+
+Form::Tiny can be extended with plugins:
+
+	use Form::Tiny -plugins => [qw(Plugin1 +Namespace::Plugin2)];
+
+Added behavior is entirely up to the plugin. See L<Form::Tiny::Plugin> for details on how to implement a plugin.
+
 =head2 Inline forms
 
 The module enables a way to create a form without the need of a dedicated package. This is done with the L<Form::Tiny::Inline> class. This requires the user to pass all the data to the constructor, as shown in the example:

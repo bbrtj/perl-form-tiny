@@ -10,6 +10,7 @@ use Import::Into;
 use Form::Tiny::Form;
 use Form::Tiny::Utils qw(trim :meta_handlers);
 require Moo;
+require Moo::Role;
 
 our $VERSION = '2.03';
 
@@ -18,66 +19,93 @@ sub import
 	my ($package, $caller) = (shift, scalar caller);
 
 	my @wanted = @_;
-	my @wanted_subs = qw(form_field form_cleaner form_hook field_validator form_message);
-	my @wanted_roles;
 
-	my %subs = %{$package->_generate_helpers($caller)};
-	my %behaviors = %{$package->_get_behaviors};
+	# special case - we want to always have -base flag, but just once
+	@wanted = (-base, grep { $_ ne -base } @wanted);
 
-	unless (scalar grep { $_ eq -nomoo } @wanted) {
+	# very special case - do something UNLESS -nomoo was passed
+	unless (_get_flag(\@wanted, -nomoo)) {
 		Moo->import::into($caller);
 	}
 
-	require Moo::Role;
-	Moo::Role->apply_roles_to_package(
-		$caller, 'Form::Tiny::Form'
-	);
-
-	foreach my $type (@wanted) {
-		croak "no Form::Tiny import behavior for: $type"
-			unless exists $behaviors{$type};
-		push @wanted_subs, @{$behaviors{$type}->{subs}};
-		push @wanted_roles, @{$behaviors{$type}->{roles}};
-	}
-
-	my $meta = create_form_meta($caller, @wanted_roles);
-
-	{
-		no strict 'refs';
-		no warnings 'redefine';
-
-		*{"${caller}::$_"} = $subs{$_} foreach @wanted_subs;
-	}
+	ft_install($caller, @wanted);
 
 	return;
 }
 
+sub ft_install
+{
+	my ($caller, @import_flags) = @_;
+
+	my $context;
+	my $wanted = {
+		subs => {},
+		roles => [],
+		meta_roles => [],
+	};
+
+	my $plugins = _get_flag(\@import_flags, -plugins, 1);
+
+	_select_behaviors($wanted, \@import_flags, _get_behaviors(_generate_helpers($caller, \$context)));
+
+	foreach my $plugin (@$plugins) {
+		$plugin = "Form::Tiny::Plugin::$plugin";
+		$plugin =~ s/^.+\+//;
+		my $success = eval "use $plugin; 1";
+
+		croak "could not load plugin $plugin"
+			unless $success;
+		croak "$plugin is not a Form::Tiny::Plugin"
+			unless $plugin->isa('Form::Tiny::Plugin');
+
+		_select_behaviors($wanted, [$plugin], { $plugin => $plugin->plugin($caller, \$context) });
+	}
+
+	# apply roles to package
+	Moo::Role->apply_roles_to_package(
+		$caller, @{$wanted->{roles}}
+	);
+
+	# create metapackage with roles
+	create_form_meta($caller, @{$wanted->{meta_roles}});
+
+	# install DSL
+	{
+		no strict 'refs';
+		no warnings 'redefine';
+
+		*{"${caller}::$_"} = $wanted->{subs}{$_}
+			foreach keys %{$wanted->{subs}};
+	}
+
+	return \$context;
+}
+
 sub _generate_helpers
 {
-	my ($package, $caller) = @_;
+	my ($caller, $field_context) = @_;
 
-	my $field_context;
 	my $use_context = sub {
 		croak 'context using DSL keyword called without context'
-			unless defined $field_context;
-		unshift @_, $field_context;
+			unless defined $$field_context;
+		unshift @_, $$field_context;
 		return @_;
 	};
 
 	return {
 		form_field => sub {
-			$field_context = $caller->form_meta->add_field(@_);
+			$$field_context = $caller->form_meta->add_field(@_);
 		},
 		form_cleaner => sub {
-			$field_context = undef;
+			$$field_context = undef;
 			$caller->form_meta->add_hook(cleanup => @_);
 		},
 		form_hook => sub {
-			$field_context = undef;
+			$$field_context = undef;
 			$caller->form_meta->add_hook(@_);
 		},
 		form_filter => sub {
-			$field_context = undef;
+			$$field_context = undef;
 			$caller->form_meta->add_filter(@_);
 		},
 		field_filter => sub {
@@ -87,11 +115,11 @@ sub _generate_helpers
 			$caller->form_meta->add_field_validator($use_context->(@_));
 		},
 		form_trim_strings => sub {
-			$field_context = undef;
+			$$field_context = undef;
 			$caller->form_meta->add_filter(Str, sub { trim $_[1] });
 		},
 		form_message => sub {
-			$field_context = undef;
+			$$field_context = undef;
 			my %params = @_;
 			for my $key (keys %params) {
 				$caller->form_meta->add_message($key, $params{$key});
@@ -102,26 +130,67 @@ sub _generate_helpers
 
 sub _get_behaviors
 {
-	my $empty = {
-		subs => [],
-		roles => [],
-	};
+	my ($subs) = @_;
 
 	return {
-		-nomoo => $empty,
+		-base => {
+			subs => {map { $_ => $subs->{$_} } qw(
+				form_field field_validator
+				form_cleaner form_hook
+				form_message
+			)},
+			roles => ['Form::Tiny::Form'],
+		},
 		-strict => {
-			subs => [],
-			roles => [qw(Form::Tiny::Meta::Strict)],
+			meta_roles => [qw(Form::Tiny::Meta::Strict)],
 		},
 		-filtered => {
-			subs => [qw(form_filter field_filter form_trim_strings)],
-			roles => [qw(Form::Tiny::Meta::Filtered)],
+			subs => {map { $_ => $subs->{$_} } qw(
+				form_filter field_filter
+				form_trim_strings
+			)},
+			meta_roles => [qw(Form::Tiny::Meta::Filtered)],
 		},
 
 		# legacy no-op flags
-		-base => $empty,
-		-consistent => $empty,
+		-consistent => {},
 	};
+}
+
+sub _select_behaviors
+{
+	my ($wanted, $types, $behaviors) = @_;
+
+	foreach my $type (@$types) {
+		croak "no Form::Tiny import behavior for: $type"
+			unless exists $behaviors->{$type};
+
+		%{$wanted->{subs}} = (%{$wanted->{subs}}, %{$behaviors->{$type}{subs} // {}});
+		push @{$wanted->{roles}}, @{$behaviors->{$type}{roles} // []};
+		push @{$wanted->{meta_roles}}, @{$behaviors->{$type}{meta_roles} // []};
+	}
+}
+
+sub _get_flag
+{
+	my ($flags, $wanted, $with_param) = @_;
+	$with_param //= 0;
+
+	for my $n (0 .. $#$flags) {
+		if ($flags->[$n] eq $wanted) {
+			my $param = 1;
+			if ($with_param) {
+				croak "Form::Tiny flag $wanted needs a parameter"
+					if $n == $#$flags;
+				$param = $flags->[$n + 1];
+			}
+
+			splice @$flags, $n, 1 + $with_param;
+			return $param;
+		}
+	}
+
+	return;
 }
 
 1;
@@ -176,6 +245,8 @@ Form::Tiny is a customizable hashref validator with DSL for form building.
 
 =item * L<Form::Tiny::Filter> - Filter class specification
 
+=item * L<Form::Tiny::Plugin> - How to write your own plugin?
+
 =back
 
 =head1 IMPORTING
@@ -211,6 +282,10 @@ Additional installed functions: C<form_filter field_filter form_trim_strings>
 =item * C<-strict>
 
 This flag makes your form check for strictness before the validation.
+
+=item * C<< -plugins => ['Plugin1', '+Full::Namespace::To::Plugin2'] >>
+
+Load plugins into Form::Tiny. Plugins may introduce additional keywords, mix in roles or add metaclass roles. See L<Form::Tiny::Plugin> for details on how to implement a plugin.
 
 =back
 
