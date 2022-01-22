@@ -44,7 +44,7 @@ sub ft_install
 		meta_roles => [],
 	};
 
-	my $plugins = _get_flag(\@import_flags, -plugins, 1);
+	my $plugins = _get_flag(\@import_flags, 'plugins', 1);
 
 	_select_behaviors($wanted, \@import_flags, _get_behaviors(_generate_helpers($caller, \$context)));
 
@@ -53,7 +53,7 @@ sub ft_install
 		$plugin =~ s/^.+\+//;
 		my $success = eval "use $plugin; 1";
 
-		croak "could not load plugin $plugin"
+		croak "could not load plugin $plugin: $@"
 			unless $success;
 		croak "$plugin is not a Form::Tiny::Plugin"
 			unless $plugin->isa('Form::Tiny::Plugin');
@@ -283,7 +283,7 @@ Additional installed functions: C<form_filter field_filter form_trim_strings>
 
 This flag makes your form check for strictness before the validation.
 
-=item * C<< -plugins => ['Plugin1', '+Full::Namespace::To::Plugin2'] >>
+=item * C<< plugins => ['Plugin1', '+Full::Namespace::To::Plugin2'] >>
 
 Load plugins into Form::Tiny. Plugins may introduce additional keywords, mix in roles or add metaclass roles. See L<Form::Tiny::Plugin> for details on how to implement a plugin.
 

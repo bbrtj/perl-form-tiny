@@ -476,7 +476,7 @@ When the field is filtered, the form filters are applied before field filters. E
 
 Form::Tiny can be extended with plugins:
 
-	use Form::Tiny -plugins => [qw(Plugin1 +Namespace::Plugin2)];
+	use Form::Tiny plugins => [qw(Plugin1 +Namespace::Plugin2)];
 
 Added behavior is entirely up to the plugin. See L<Form::Tiny::Plugin> for details on how to implement a plugin.
 

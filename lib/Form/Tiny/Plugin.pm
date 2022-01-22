@@ -69,7 +69,7 @@ The context may be either L<Form::Tiny::FieldDefinition> or L<Form::Tiny::FieldD
 
 To use your plugin in a form, L<Form::Tiny> must be imported like this:
 
-	use Form::Tiny -plugins => [qw(MyPlugin +Full::Namespace::Plugin)];
+	use Form::Tiny plugins => [qw(MyPlugin +Full::Namespace::Plugin)];
 
 Prepending the name with a plus sign will stop Form::Tiny from prepending the given name with C<Form::Tiny::Plugin::>.
 

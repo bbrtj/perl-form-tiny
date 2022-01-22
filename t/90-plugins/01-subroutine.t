@@ -8,7 +8,7 @@ use lib 't/lib';
 {
 	package My::Form;
 
-	use Form::Tiny -plugins => ['MyPlugin'];
+	use Form::Tiny plugins => ['MyPlugin'];
 
 	test_caller __PACKAGE__;
 

@@ -8,7 +8,7 @@ use lib 't/lib';
 {
 	package My::Form;
 
-	use Form::Tiny -plugins => ['MyMetaRolePlugin', '+Form::Tiny::Plugin::MyRolePlugin'], -strict;
+	use Form::Tiny plugins => ['MyMetaRolePlugin', '+Form::Tiny::Plugin::MyRolePlugin'], -strict;
 
 	form_field 'abc';
 }

@@ -8,7 +8,7 @@ use lib 't/lib';
 {
 	package My::Form;
 
-	use Form::Tiny -plugins => ['MyPlugin', 'MyRolePlugin'], -filtered;
+	use Form::Tiny plugins => ['MyPlugin', 'MyRolePlugin'], -filtered;
 
 	form_trim_strings;
 
