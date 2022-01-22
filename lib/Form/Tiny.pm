@@ -28,6 +28,10 @@ sub import
 	}
 
 	ft_install($caller, @wanted);
+	namespace::clean->import(
+		-cleanee => $caller,
+		-except => 'form_meta'
+	);
 
 	return;
 }
@@ -75,6 +79,8 @@ sub ft_install
 			return get_package_form_meta($caller);
 		};
 	}
+
+
 
 	return \$context;
 }
