@@ -7,11 +7,13 @@ use Moo;
 use Types::Standard qw(Str ArrayRef HashRef InstanceOf Bool);
 use Scalar::Util qw(blessed);
 use Carp qw(croak carp);
+use List::Util qw(uniq);
 
 use Form::Tiny::FieldDefinitionBuilder;
 use Form::Tiny::Hook;
 use Form::Tiny::Error;
 use Form::Tiny::Utils qw(try);
+require Moo::Role;
 
 use namespace::clean;
 
@@ -19,6 +21,13 @@ our $VERSION = '2.03';
 
 # more clear error messages in some crucial cases
 our @CARP_NOT = qw(Form::Tiny Form::Tiny::Form);
+
+has 'package' => (
+	is => 'ro',
+	writer => 'set_package',
+	isa => Str,
+	predicate => 1,
+);
 
 has 'fields' => (
 	is => 'ro',
@@ -43,6 +52,20 @@ has 'complete' => (
 	isa => Bool,
 	writer => '_complete',
 	default => sub { 0 },
+);
+
+has 'meta_roles' => (
+	is => 'ro',
+	writer => 'set_meta_roles',
+	isa => ArrayRef,
+	default => sub { [] },
+);
+
+has 'form_roles' => (
+	is => 'ro',
+	writer => 'set_form_roles',
+	isa => ArrayRef,
+	default => sub { [] },
 );
 
 has 'messages' => (
@@ -162,6 +185,27 @@ sub add_message
 		unless !$err && $isa;
 
 	$self->messages->{$name} = $message;
+	return $self;
+}
+
+# this is required so that proper hooks on inherit_from can be fired
+sub inherit_roles_from
+{
+	my ($self, $parent) = @_;
+
+	if (defined $parent) {
+		$self->set_meta_roles([ uniq(@{$parent->meta_roles}, @{$self->meta_roles}) ]);
+		$self->set_form_roles([ uniq(@{$parent->form_roles}, @{$self->form_roles}) ]);
+	}
+
+	Moo::Role->apply_roles_to_object(
+		$self, @{$self->meta_roles}
+	) if @{$self->meta_roles};
+
+	Moo::Role->apply_roles_to_package(
+		$self->package, @{$self->form_roles}
+	) if $self->has_package && @{$self->form_roles};
+
 	return $self;
 }
 

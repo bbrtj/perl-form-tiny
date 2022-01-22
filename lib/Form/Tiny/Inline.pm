@@ -24,6 +24,7 @@ has '_meta' => (
 	default => sub {
 		my ($self) = @_;
 		my $meta = create_anon_form_meta(@{$self->_meta_roles});
+		$meta->inherit_roles_from; # no inheritance, but we need this
 		$meta->setup;
 
 		return $meta;

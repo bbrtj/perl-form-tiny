@@ -10,7 +10,6 @@ use Import::Into;
 use Form::Tiny::Form;
 use Form::Tiny::Utils qw(trim :meta_handlers);
 require Moo;
-require Moo::Role;
 
 our $VERSION = '2.03';
 
@@ -61,13 +60,9 @@ sub ft_install
 		_select_behaviors($wanted, [$plugin], { $plugin => $plugin->plugin($caller, \$context) });
 	}
 
-	# apply roles to package
-	Moo::Role->apply_roles_to_package(
-		$caller, @{$wanted->{roles}}
-	);
-
 	# create metapackage with roles
-	create_form_meta($caller, @{$wanted->{meta_roles}});
+	my $meta = create_form_meta($caller, @{$wanted->{meta_roles}});
+	$meta->set_form_roles($wanted->{roles});
 
 	# install DSL
 	{
@@ -76,6 +71,9 @@ sub ft_install
 
 		*{"${caller}::$_"} = $wanted->{subs}{$_}
 			foreach keys %{$wanted->{subs}};
+		*{"${caller}::form_meta"} = sub {
+			return get_package_form_meta($caller);
+		};
 	}
 
 	return \$context;
