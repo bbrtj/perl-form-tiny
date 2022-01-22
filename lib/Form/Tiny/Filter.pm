@@ -8,7 +8,7 @@ use Types::Standard qw(HasMethods CodeRef);
 
 use namespace::clean;
 
-our $VERSION = '2.03';
+our $VERSION = '2.04';
 
 has "type" => (
 	is => "ro",

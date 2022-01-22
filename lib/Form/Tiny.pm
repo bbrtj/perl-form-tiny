@@ -11,7 +11,7 @@ use Form::Tiny::Form;
 use Form::Tiny::Utils qw(trim :meta_handlers);
 require Moo;
 
-our $VERSION = '2.03';
+our $VERSION = '2.04';
 
 sub import
 {
@@ -382,7 +382,7 @@ This was enabled by default once. Refer to L<Form::Tiny::Manual::Compatibility/"
 
 =head1 AUTHOR
 
-Bartosz Jarzyna E<lt>brtastic.dev@gmail.comE<gt>
+Bartosz Jarzyna E<lt>bbrtj.pro@gmail.comE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 

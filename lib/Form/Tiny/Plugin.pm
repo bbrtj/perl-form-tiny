@@ -63,7 +63,7 @@ Where:
 
 =item * C<$context> will be a scalar reference to the current field context of the form
 
-The context may be either L<Form::Tiny::FieldDefinition> or L<Form::Tiny::FieldDefinitionBuilder> (depending on whether the field was dynamic).
+The context may be referencing either L<Form::Tiny::FieldDefinition> or L<Form::Tiny::FieldDefinitionBuilder> (depending on whether the field was dynamic).
 
 =back
 

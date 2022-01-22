@@ -6,7 +6,7 @@ Form::Tiny::Manual::Performance - validation performance tips
 
 =head1 DESCRIPTION
 
-Form::Tiny is a pretty fast validation framework (L<benchmark|https://brtastic.xyz/blog/article/validation-frameworks-benchmark>), but when the need arise, certain steps can be taken to improve it even further.
+Form::Tiny is a pretty fast validation framework (L<benchmark|https://bbrtj.eu/blog/article/validation-frameworks-benchmark>), but when the need arise, certain steps can be taken to improve it even further.
 
 =head1 THINGS THAT SLOW THE MODULE DOWN
 
