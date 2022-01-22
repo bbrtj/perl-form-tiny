@@ -7,12 +7,11 @@ use Moo;
 use Types::Standard qw(Str ArrayRef HashRef InstanceOf Bool);
 use Scalar::Util qw(blessed);
 use Carp qw(croak carp);
-use List::Util qw(uniq);
 
 use Form::Tiny::FieldDefinitionBuilder;
 use Form::Tiny::Hook;
 use Form::Tiny::Error;
-use Form::Tiny::Utils qw(try);
+use Form::Tiny::Utils qw(try uniq);
 require Moo::Role;
 
 use namespace::clean;

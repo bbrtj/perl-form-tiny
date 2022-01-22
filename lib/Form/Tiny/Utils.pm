@@ -11,6 +11,7 @@ our @EXPORT;
 our @EXPORT_OK = qw(
 	try
 	trim
+	uniq
 	create_anon_form_meta
 	create_form_meta
 	get_package_form_meta
@@ -52,6 +53,12 @@ sub trim
 	$value =~ s/\s+\z//;
 
 	return $value;
+}
+
+sub uniq
+{
+	my %seen;
+	return grep { !$seen{$_}++ } @_;
 }
 
 # FORM METADATA
