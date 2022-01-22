@@ -11,7 +11,7 @@ sub plugin
 
 	return {
 		roles => [__PACKAGE__],
-	}
+	};
 }
 
 use Moo::Role;

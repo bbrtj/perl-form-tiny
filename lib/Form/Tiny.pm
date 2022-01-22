@@ -61,7 +61,7 @@ sub ft_install
 		croak "$plugin is not a Form::Tiny::Plugin"
 			unless $plugin->isa('Form::Tiny::Plugin');
 
-		_select_behaviors($wanted, [$plugin], { $plugin => $plugin->plugin($caller, \$context) });
+		_select_behaviors($wanted, [$plugin], {$plugin => $plugin->plugin($caller, \$context)});
 	}
 
 	# create metapackage with roles
@@ -79,8 +79,6 @@ sub ft_install
 			return get_package_form_meta($caller);
 		};
 	}
-
-
 
 	return \$context;
 }
@@ -138,21 +136,27 @@ sub _get_behaviors
 
 	return {
 		-base => {
-			subs => {map { $_ => $subs->{$_} } qw(
-				form_field field_validator
-				form_cleaner form_hook
-				form_message
-			)},
+			subs => {
+				map { $_ => $subs->{$_} }
+					qw(
+					form_field field_validator
+					form_cleaner form_hook
+					form_message
+					)
+			},
 			roles => ['Form::Tiny::Form'],
 		},
 		-strict => {
 			meta_roles => [qw(Form::Tiny::Meta::Strict)],
 		},
 		-filtered => {
-			subs => {map { $_ => $subs->{$_} } qw(
-				form_filter field_filter
-				form_trim_strings
-			)},
+			subs => {
+				map { $_ => $subs->{$_} }
+					qw(
+					form_filter field_filter
+					form_trim_strings
+					)
+			},
 			meta_roles => [qw(Form::Tiny::Meta::Filtered)],
 		},
 

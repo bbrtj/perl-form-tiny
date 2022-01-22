@@ -7,10 +7,12 @@ use lib 't/lib';
 use ParentForm;
 use ChildForm;
 
-my @wanted_roles = (qw(
-	Form::Tiny::Meta::Strict
-	Form::Tiny::Meta::Filtered
-));
+my @wanted_roles = (
+	qw(
+		Form::Tiny::Meta::Strict
+		Form::Tiny::Meta::Filtered
+	)
+);
 
 subtest 'test intermediate class' => sub {
 	my $meta = ParentForm->form_meta;
@@ -39,6 +41,5 @@ subtest 'test child class' => sub {
 	is scalar @{$meta->hooks->{before_validate}}, 1, 'before_validate hooks categories count ok';
 	is scalar @{$meta->filters}, 2, 'filters count ok';
 };
-
 
 done_testing;

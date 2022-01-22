@@ -26,7 +26,7 @@ sub plugin
 				$$context = Form::Tiny::FieldDefinition->new(name => shift);
 			},
 		},
-	}
+	};
 }
 
 1;

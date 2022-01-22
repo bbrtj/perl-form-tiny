@@ -5,6 +5,7 @@ use Test::More;
 use lib 't/lib';
 
 {
+
 	package PluginInheritanceParentForm;
 
 	use Form::Tiny plugins => ['MyRolePlugin', 'MyMetaRolePlugin'];
@@ -12,6 +13,7 @@ use lib 't/lib';
 }
 
 {
+
 	package PluginInheritanceChildForm;
 
 	use Form::Tiny;
@@ -20,6 +22,7 @@ use lib 't/lib';
 }
 
 {
+
 	package PluginInheritanceGrandchildForm;
 
 	use Form::Tiny -filtered;
@@ -33,11 +36,16 @@ subtest 'test child plugin class' => sub {
 };
 
 subtest 'test grandchild plugin class' => sub {
-	ok(PluginInheritanceGrandchildForm->form_meta->DOES('Form::Tiny::Plugin::MyMetaRolePlugin'), 'meta role plugin ok');
-	ok(PluginInheritanceGrandchildForm->form_meta->DOES('Form::Tiny::Meta::Filtered'), 'filtered meta role plugin ok');
+	ok(
+		PluginInheritanceGrandchildForm->form_meta->DOES('Form::Tiny::Plugin::MyMetaRolePlugin'),
+		'meta role plugin ok'
+	);
+	ok(
+		PluginInheritanceGrandchildForm->form_meta->DOES('Form::Tiny::Meta::Filtered'),
+		'filtered meta role plugin ok'
+	);
 	ok(PluginInheritanceGrandchildForm->DOES('Form::Tiny::Plugin::MyRolePlugin'), 'role plugin ok');
 };
-
 
 done_testing;
 
