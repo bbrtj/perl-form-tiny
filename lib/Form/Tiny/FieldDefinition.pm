@@ -234,12 +234,14 @@ sub validate
 			}
 		}
 		else {
-			$form->add_error(Form::Tiny::Error::DoesNotValidate->new(
-				{
-					field => $self->name,
-					error => $error,
-				}
-			));
+			$form->add_error(
+				Form::Tiny::Error::DoesNotValidate->new(
+					{
+						field => $self->name,
+						error => $error,
+					}
+				)
+			);
 		}
 	}
 

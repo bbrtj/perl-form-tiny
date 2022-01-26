@@ -98,7 +98,8 @@ sub _ft_mangle_field
 
 		if ($out_ref) {
 			$$out_ref = $current;
-		} else {
+		}
+		else {
 			$path_value->set_value($current);
 		}
 
@@ -202,7 +203,8 @@ sub _ft_validate_flat
 		if (exists $fields->{$curr_f}) {
 			next if $self->_ft_mangle_field(
 				$validator,
-				($inline_hook
+				(
+					$inline_hook
 					? $inline_hook->($self, $validator, $fields->{$curr_f})
 					: $fields->{$curr_f}
 				),
@@ -249,10 +251,14 @@ sub _ft_validate_nested
 
 		# for when it didn't pass the existence test
 		if ($validator->has_default) {
-			$self->_ft_assign_field($dirty, $validator, Form::Tiny::PathValue->new(
-				path => $validator->get_name_path->path,
-				value => $validator->get_default($self),
-			));
+			$self->_ft_assign_field(
+				$dirty,
+				$validator,
+				Form::Tiny::PathValue->new(
+					path => $validator->get_name_path->path,
+					value => $validator->get_default($self),
+				)
+			);
 		}
 		elsif ($validator->required) {
 			$self->add_error($meta->build_error(Required => field => $curr_f));

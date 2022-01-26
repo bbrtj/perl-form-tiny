@@ -49,7 +49,10 @@ sub ft_install
 
 	my $plugins = $self->_get_flag(\@import_flags, 'plugins', 1);
 
-	$self->_select_behaviors($wanted, \@import_flags, $self->_get_behaviors($self->_generate_helpers($caller, \$context)));
+	$self->_select_behaviors(
+		$wanted, \@import_flags,
+		$self->_get_behaviors($self->_generate_helpers($caller, \$context))
+	);
 
 	foreach my $plugin (@$plugins) {
 		$plugin = "Form::Tiny::Plugin::$plugin";
