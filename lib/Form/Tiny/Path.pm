@@ -19,7 +19,6 @@ has 'path' => (
 	is => 'ro',
 	isa => ArrayRef,
 	writer => '_set_path',
-	coerce => 1,
 	required => 1,
 );
 
@@ -27,7 +26,6 @@ has 'meta' => (
 	is => 'ro',
 	isa => ArrayRef,
 	writer => '_set_meta',
-	lazy => 1,
 	required => 1,
 );
 

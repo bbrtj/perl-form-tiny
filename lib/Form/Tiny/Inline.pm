@@ -19,7 +19,6 @@ with 'Form::Tiny::Form';
 has '_meta' => (
 	is => 'ro',
 	isa => InstanceOf ['Form::Tiny::Meta'],
-	builder => '_build_meta',
 	init_arg => undef,
 	default => sub {
 		my ($self) = @_;
