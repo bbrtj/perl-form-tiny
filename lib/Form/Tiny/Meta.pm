@@ -170,7 +170,7 @@ sub add_field
 	my $builder = Form::Tiny::FieldDefinitionBuilder->new(data => $scalar_param)->build;
 	push @{$self->fields}, $builder;
 
-	if ($self->is_flat && (!$builder->isa('Form::Tiny::FieldDefinition') || @{$builder->get_name_path->path} > 1)) {
+	if ($self->is_flat && ($builder->isa('Form::Tiny::FieldDefinitionBuilder') || @{$builder->get_name_path->path} > 1)) {
 		$self->set_flat(0);
 	}
 
@@ -267,6 +267,8 @@ sub inherit_from
 			keys %hooks
 		}
 	);
+
+	$self->set_flat($parent->is_flat);
 
 	return $self;
 }
