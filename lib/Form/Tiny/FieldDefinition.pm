@@ -169,10 +169,7 @@ sub get_default
 	if ($self->has_default) {
 		my $default = $self->default->($form);
 		if (!$self->has_type || $self->type->check($default)) {
-			return Form::Tiny::PathValue->new(
-				path => $self->get_name_path->path,
-				value => $default,
-			);
+			return $default;
 		}
 
 		croak 'invalid default value was set';
@@ -237,14 +234,12 @@ sub validate
 			}
 		}
 		else {
-			my $exception = Form::Tiny::Error::DoesNotValidate->new(
+			$form->add_error(Form::Tiny::Error::DoesNotValidate->new(
 				{
 					field => $self->name,
 					error => $error,
 				}
-			);
-
-			$form->add_error($exception);
+			));
 		}
 	}
 

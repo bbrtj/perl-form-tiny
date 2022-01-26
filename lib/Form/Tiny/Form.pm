@@ -82,9 +82,9 @@ sub _ft_clear_form
 
 sub _ft_mangle_field
 {
-	my ($self, $def, $path_value) = @_;
+	my ($self, $def, $path_value, $out_ref) = @_;
 
-	my $current = $path_value->value;
+	my $current = $out_ref ? $path_value : $path_value->value;
 
 	# if the parameter is required (hard), we only consider it if not empty
 	if (!$def->hard_required || ref $current || length($current // "")) {
@@ -95,7 +95,12 @@ sub _ft_mangle_field
 			$current = $def->get_adjusted($self, $current);
 		}
 
-		$path_value->set_value($current);
+		if ($out_ref) {
+			$$out_ref = $current;
+		} else {
+			$path_value->set_value($current);
+		}
+
 		return 1;
 	}
 
@@ -182,10 +187,81 @@ sub _ft_assign_field
 	$$current = $path_value->value;
 }
 
+### OPTIMIZATION: detect and use faster route for flat forms
+
+sub _ft_validate_flat
+{
+	my ($self, $fields, $dirty) = @_;
+	my $meta = $self->form_meta;
+
+	my $inline_hook = $meta->_inline_hook('before_mangle');
+	foreach my $validator (@{$self->field_defs}) {
+		my $curr_f = $validator->name;
+
+		if (exists $fields->{$curr_f}) {
+			next if $self->_ft_mangle_field(
+				$validator,
+				($inline_hook
+					? $inline_hook->($self, $validator, $fields->{$curr_f})
+					: $fields->{$curr_f}
+				),
+				\$dirty->{$curr_f}
+			);
+		}
+
+		# for when it didn't pass the existence test
+		if ($validator->has_default) {
+			$dirty->{$curr_f} = $validator->get_default($self);
+		}
+		elsif ($validator->required) {
+			$self->add_error($meta->build_error(Required => field => $curr_f));
+		}
+	}
+}
+
+sub _ft_validate_nested
+{
+	my ($self, $fields, $dirty) = @_;
+	my $meta = $self->form_meta;
+
+	my $inline_hook = $meta->_inline_hook('before_mangle');
+	foreach my $validator (@{$self->field_defs}) {
+		my $curr_f = $validator->name;
+
+		my $current_data = $self->_ft_find_field($fields, $validator);
+		if (defined $current_data) {
+			my $all_ok = 1;
+
+			# This may have multiple iterations only if there's an array
+			foreach my $path_value (@$current_data) {
+				unless ($path_value->structure) {
+					$path_value->set_value($inline_hook->($self, $validator, $path_value->value))
+						if $inline_hook;
+					$all_ok = $self->_ft_mangle_field($validator, $path_value) && $all_ok;
+				}
+				$self->_ft_assign_field($dirty, $validator, $path_value);
+			}
+
+			# found and valid, go to the next field
+			next if $all_ok;
+		}
+
+		# for when it didn't pass the existence test
+		if ($validator->has_default) {
+			$self->_ft_assign_field($dirty, $validator, Form::Tiny::PathValue->new(
+				path => $validator->get_name_path->path,
+				value => $validator->get_default($self),
+			));
+		}
+		elsif ($validator->required) {
+			$self->add_error($meta->build_error(Required => field => $curr_f));
+		}
+	}
+}
+
 sub _ft_validate
 {
 	my ($self) = @_;
-	my $dirty = {};
 	my $meta = $self->form_meta;
 	$self->_ft_clear_errors;
 
@@ -194,40 +270,19 @@ sub _ft_validate
 		$fields = $meta->run_hooks_for('reformat', $self, $fields);
 	};
 
+	my $dirty = {};
 	if (!$err && ref $fields eq 'HASH') {
 		$meta->run_hooks_for('before_validate', $self, $fields);
-		foreach my $validator (@{$self->field_defs}) {
-			my $curr_f = $validator->name;
 
-			my $current_data = $self->_ft_find_field($fields, $validator);
-			if (defined $current_data) {
-				my $all_ok = 1;
-
-				# This may have multiple iterations only if there's an array
-				foreach my $path_value (@$current_data) {
-					unless ($path_value->structure) {
-						my $value = $meta->run_hooks_for('before_mangle', $self, $validator, $path_value->value);
-						$path_value->set_value($value);
-						$all_ok = $self->_ft_mangle_field($validator, $path_value) && $all_ok;
-					}
-					$self->_ft_assign_field($dirty, $validator, $path_value);
-				}
-
-				# found and valid, go to the next field
-				next if $all_ok;
-			}
-
-			# for when it didn't pass the existence test
-			if ($validator->has_default) {
-				$self->_ft_assign_field($dirty, $validator, $validator->get_default($self));
-			}
-			elsif ($validator->required) {
-				$self->add_error($self->form_meta->build_error(Required => field => $curr_f));
-			}
+		if ($meta->is_flat) {
+			$self->_ft_validate_flat($fields, $dirty);
+		}
+		else {
+			$self->_ft_validate_nested($fields, $dirty);
 		}
 	}
 	else {
-		$self->add_error($self->form_meta->build_error(InvalidFormat =>));
+		$self->add_error($meta->build_error(InvalidFormat =>));
 	}
 
 	$meta->run_hooks_for('after_validate', $self, $dirty);

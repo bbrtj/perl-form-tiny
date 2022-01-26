@@ -37,6 +37,12 @@ has 'fields' => (
 	default => sub { [] },
 );
 
+has 'is_flat' => (
+	is => 'ro',
+	writer => 'set_flat',
+	default => sub { 1 },
+);
+
 has 'hooks' => (
 	is => 'ro',
 	writer => 'set_hooks',
@@ -103,6 +109,26 @@ sub run_hooks_for
 	return $data[-1];
 }
 
+sub _inline_hook
+{
+	my ($self, $stage) = @_;
+
+	my @hooks = @{$self->hooks->{$stage} // []};
+
+	return undef if @hooks == 0;
+	return sub {
+		my @data = @_;
+
+		for my $hook (@hooks) {
+			my $ret = $hook->code->(@data);
+			splice @data, -1, 1, $ret
+				if $hook->is_modifying;
+		}
+
+		return $data[-1];
+	};
+}
+
 sub setup
 {
 	my ($self) = @_;
@@ -143,6 +169,10 @@ sub add_field
 
 	my $builder = Form::Tiny::FieldDefinitionBuilder->new(data => $scalar_param)->build;
 	push @{$self->fields}, $builder;
+
+	if ($self->is_flat && (!$builder->isa('Form::Tiny::FieldDefinition') || @{$builder->get_name_path->path} > 1)) {
+		$self->set_flat(0);
+	}
 
 	return $builder;
 }
