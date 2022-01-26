@@ -86,8 +86,9 @@ sub _ft_mangle_field
 
 	my $current = $out_ref ? $path_value : $path_value->value;
 
-	# if the parameter is required (hard), we only consider it if not empty
-	if (!$def->hard_required || ref $current || length($current // '')) {
+	# We got the parameter, now we have to check if it is not empty
+	# Even if it is, it may still be handled if isn't hard-required
+	if (ref $current || length($current // '') || !$def->hard_required) {
 
 		# coerce, validate, adjust
 		$current = $def->get_coerced($self, $current);
