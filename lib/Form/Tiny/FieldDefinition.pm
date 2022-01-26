@@ -125,31 +125,31 @@ sub hard_required
 sub get_coerced
 {
 	my ($self, $form, $value) = @_;
-
 	my $coerce = $self->coerce;
-	my $coerced = $value;
 
-	my $error = try sub {
-		if (ref $coerce eq "CODE") {
-			$coerced = $coerce->($form, $value);
-		}
-		elsif ($coerce) {
-			$coerced = $self->type->coerce($value);
-		}
-	};
+	if ($coerce) {
+		my $error = try sub {
+			if (ref $coerce eq "CODE") {
+				$value = $coerce->($form, $value);
+			}
+			else {
+				$value = $self->type->coerce($value);
+			}
+		};
 
-	if ($error) {
-		$form->add_error(
-			Form::Tiny::Error::DoesNotValidate->new(
-				{
-					field => $self->name,
-					error => $self->has_message ? $self->message : $error,
-				}
-			)
-		);
+		if ($error) {
+			$form->add_error(
+				Form::Tiny::Error::DoesNotValidate->new(
+					{
+						field => $self->name,
+						error => $self->has_message ? $self->message : $error,
+					}
+				)
+			);
+		}
 	}
 
-	return $coerced;
+	return $value;
 }
 
 sub get_adjusted
