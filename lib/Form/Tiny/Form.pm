@@ -37,33 +37,33 @@ has '_ft_field_cache' => (
 	init_arg => undef,
 );
 
-has "input" => (
-	is => "ro",
-	writer => "set_input",
+has 'input' => (
+	is => 'ro',
+	writer => 'set_input',
 	trigger => \&_ft_clear_form,
 );
 
-has "fields" => (
-	is => "ro",
+has 'fields' => (
+	is => 'ro',
 	isa => Maybe [HashRef],
-	writer => "_ft_set_fields",
-	clearer => "_ft_clear_fields",
+	writer => '_ft_set_fields',
+	clearer => '_ft_clear_fields',
 	init_arg => undef,
 );
 
-has "valid" => (
-	is => "ro",
+has 'valid' => (
+	is => 'ro',
 	isa => Bool,
 	lazy => 1,
-	builder => "_ft_validate",
+	builder => '_ft_validate',
 	clearer => 1,
-	predicate => "is_validated",
+	predicate => 'is_validated',
 	init_arg => undef,
 );
 
-has "errors" => (
-	is => "ro",
-	isa => ArrayRef [InstanceOf ["Form::Tiny::Error"]],
+has 'errors' => (
+	is => 'ro',
+	isa => ArrayRef [InstanceOf ['Form::Tiny::Error']],
 	lazy => 1,
 	default => sub { [] },
 	init_arg => undef,
@@ -87,7 +87,7 @@ sub _ft_mangle_field
 	my $current = $out_ref ? $path_value : $path_value->value;
 
 	# if the parameter is required (hard), we only consider it if not empty
-	if (!$def->hard_required || ref $current || length($current // "")) {
+	if (!$def->hard_required || ref $current || length($current // '')) {
 
 		# coerce, validate, adjust
 		$current = $def->get_coerced($self, $current);
@@ -321,7 +321,7 @@ sub add_error
 		if (defined blessed $error[0]) {
 			$error = shift @error;
 			croak 'error passed to add_error must be an instance of Form::Tiny::Error'
-				unless $error->isa("Form::Tiny::Error");
+				unless $error->isa('Form::Tiny::Error');
 		}
 		else {
 			$error = Form::Tiny::Error->new(error => @error);

@@ -15,11 +15,11 @@ our $VERSION = '2.04';
 
 requires qw(setup);
 
-has "filters" => (
-	is => "ro",
+has 'filters' => (
+	is => 'ro',
 	writer => 'set_filters',
 	isa => ArrayRef [
-		InstanceOf ["Form::Tiny::Filter"]
+		InstanceOf ['Form::Tiny::Filter']
 	],
 	default => sub { [] },
 );

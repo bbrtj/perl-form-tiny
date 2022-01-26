@@ -19,30 +19,30 @@ use namespace::clean;
 
 our $VERSION = '2.04';
 
-has "name" => (
-	is => "ro",
+has 'name' => (
+	is => 'ro',
 	isa => NonEmptySimpleStr,
 	required => 1,
 );
 
-has "name_path" => (
-	is => "ro",
-	isa => InstanceOf ["Form::Tiny::Path"],
-	reader => "get_name_path",
+has 'name_path' => (
+	is => 'ro',
+	isa => InstanceOf ['Form::Tiny::Path'],
+	reader => 'get_name_path',
 	init_arg => undef,
 	lazy => 1,
 	default => sub { Form::Tiny::Path->from_name(shift->name) },
 );
 
-has "required" => (
-	is => "ro",
-	isa => Enum [0, 1, "soft", "hard"],
+has 'required' => (
+	is => 'ro',
+	isa => Enum [0, 1, 'soft', 'hard'],
 	default => sub { 0 },
 );
 
-has "type" => (
-	is => "ro",
-	isa => HasMethods ["validate", "check"],
+has 'type' => (
+	is => 'ro',
+	isa => HasMethods ['validate', 'check'],
 	predicate => 1,
 );
 
@@ -52,34 +52,34 @@ has 'addons' => (
 	default => sub { {} },
 );
 
-has "coerce" => (
-	is => "ro",
+has 'coerce' => (
+	is => 'ro',
 	isa => Bool | CodeRef,
 	default => sub { 0 },
 );
 
-has "adjust" => (
-	is => "ro",
+has 'adjust' => (
+	is => 'ro',
 	isa => CodeRef,
-	predicate => "is_adjusted",
-	writer => "set_adjustment",
+	predicate => 'is_adjusted',
+	writer => 'set_adjustment',
 );
 
-has "default" => (
-	is => "ro",
+has 'default' => (
+	is => 'ro',
 	isa => CodeRef,
 	predicate => 1,
 );
 
-has "message" => (
-	is => "ro",
+has 'message' => (
+	is => 'ro',
 	isa => StringLike,
 	predicate => 1,
 );
 
-has "data" => (
-	is => "ro",
-	writer => "set_data",
+has 'data' => (
+	is => 'ro',
+	writer => 'set_data',
 	predicate => 1,
 );
 
@@ -87,18 +87,18 @@ sub BUILD
 {
 	my ($self, $args) = @_;
 
-	if ($self->coerce && ref $self->coerce ne "CODE") {
+	if ($self->coerce && ref $self->coerce ne 'CODE') {
 
 		# checks for coercion == 1
 		my $t = $self->type;
-		croak "type doesn't provide coercion"
+		croak 'type doesn\'t provide coercion'
 			if !$self->has_type
-			|| !($t->can("coerce") && $t->can("has_coercion") && $t->has_coercion);
+			|| !($t->can('coerce') && $t->can('has_coercion') && $t->has_coercion);
 	}
 
 	if ($self->has_default) {
 
-		croak "default value for an array field is unsupported"
+		croak 'default value for an array field is unsupported'
 			if scalar grep { $_ eq 'ARRAY' } @{$self->get_name_path->meta};
 	}
 
@@ -112,14 +112,14 @@ sub is_subform
 {
 	my ($self) = @_;
 
-	return $self->has_type && $self->type->DOES("Form::Tiny::Form");
+	return $self->has_type && $self->type->DOES('Form::Tiny::Form');
 }
 
 sub hard_required
 {
 	my ($self) = @_;
 
-	return $self->required eq "hard" || $self->required eq "1";
+	return $self->required eq '1' || $self->required eq 'hard';
 }
 
 sub get_coerced
@@ -129,7 +129,7 @@ sub get_coerced
 
 	if ($coerce) {
 		my $error = try sub {
-			if (ref $coerce eq "CODE") {
+			if (ref $coerce eq 'CODE') {
 				$value = $coerce->($form, $value);
 			}
 			else {
@@ -212,7 +212,7 @@ sub validate
 	for my $error (@errors) {
 		if ($self->is_subform && ref $error eq 'ARRAY') {
 			foreach my $exception (@$error) {
-				if (defined blessed $exception && $exception->isa("Form::Tiny::Error")) {
+				if (defined blessed $exception && $exception->isa('Form::Tiny::Error')) {
 					my $path = $self->get_name_path;
 					$path = $path->clone->append(HASH => $exception->field)
 						if defined $exception->field;
@@ -259,7 +259,7 @@ Form::Tiny::FieldDefinition - definition of a field to be validated
 	# you usually don't have to do this by hand, see examples in Form::Tiny::Manual
 	# name is the only required attribute
 	my $definition = Form::Tiny::FieldDefinition->new(
-		name => "something",
+		name => 'something',
 		type => Str,
 		...
 	);
@@ -294,7 +294,7 @@ They both can be escaped by a backslash C<\> to lose their special meaning.
 
 A field is not required by default (value C<0>), which means that its absence does not produce an error.
 
-A field can also be soft required (C<"soft">) or hard required (C<"hard"> or C<1>).
+A field can also be soft required (C<'soft'>) or hard required (C<'hard'> or C<1>).
 
 Soft required field produce errors only if it is undefined or not present in the input data.
 

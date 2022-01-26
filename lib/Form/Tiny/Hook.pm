@@ -28,14 +28,14 @@ my @hooks = (
 	HOOK_AFTER_ERROR,
 );
 
-has "hook" => (
-	is => "ro",
+has 'hook' => (
+	is => 'ro',
 	isa => Enum [@hooks],
 	required => 1,
 );
 
-has "code" => (
-	is => "ro",
+has 'code' => (
+	is => 'ro',
 	isa => CodeRef,
 	required => 1,
 );

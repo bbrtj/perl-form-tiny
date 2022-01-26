@@ -115,7 +115,7 @@ sub _inline_hook
 
 	my @hooks = @{$self->hooks->{$stage} // []};
 
-	return undef if @hooks == 0;
+	return if @hooks == 0;
 	return sub {
 		my @data = @_;
 

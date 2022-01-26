@@ -12,10 +12,10 @@ use Moo::Role;
 our $VERSION = '2.04';
 
 use constant {
-	MARKER_NONE => "",
-	MARKER_SKIP => "skip",
-	MARKER_ARRAY => "array",
-	MARKER_LEAF => "leaf",
+	MARKER_NONE => '',
+	MARKER_SKIP => 'skip',
+	MARKER_ARRAY => 'array',
+	MARKER_LEAF => 'leaf',
 };
 
 requires qw(setup);

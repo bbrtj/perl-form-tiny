@@ -122,7 +122,7 @@ Form::Tiny::Inline - Form::Tiny without hassle
 
 	my $form = Form::Tiny::Inline->new(
 		field_defs => [
-			{name => "some_field"},
+			{name => 'some_field'},
 			...
 		],
 	);
@@ -137,5 +137,5 @@ Inline forms are designed to cover all the basic use cases, but they are not as 
 
 When ran on a Form::Tiny::Inline class, it produces a new object that you can call C<< ->new >> on.
 
-	$inline_form_builder = Form::Tiny::Inline->is("Filtered", "Strict");
+	$inline_form_builder = Form::Tiny::Inline->is('Filtered', 'Strict');
 
