@@ -28,10 +28,6 @@ sub import
 	}
 
 	$package->ft_install($caller, @wanted);
-	namespace::clean->import(
-		-cleanee => $caller,
-		-except => 'form_meta'
-	);
 
 	return;
 }
