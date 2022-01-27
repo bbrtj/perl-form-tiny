@@ -385,14 +385,6 @@ sub _ft_clear_errors
 	return;
 }
 
-sub form_meta
-{
-	my ($self) = @_;
-	my $package = defined blessed $self ? blessed $self : $self;
-
-	return get_package_form_meta($package);
-}
-
 # This fixes form inheritance for other role systems than Moose
 around DOES => sub {
 	my ($orig, $self, @args) = @_;

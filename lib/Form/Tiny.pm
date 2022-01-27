@@ -6,10 +6,12 @@ use warnings;
 use Carp qw(croak carp);
 use Types::Standard qw(Str);
 use Import::Into;
+use Scalar::Util qw(blessed);
 
 use Form::Tiny::Form;
 use Form::Tiny::Utils qw(trim :meta_handlers);
 require Moo;
+require Moo::Role;
 
 our $VERSION = '2.05';
 
@@ -29,6 +31,7 @@ sub import
 
 	$package->ft_install($caller, @wanted);
 
+	Moo::Role->apply_roles_to_package($caller, __PACKAGE__);
 	return;
 }
 
@@ -74,9 +77,6 @@ sub ft_install
 
 		*{"${caller}::$_"} = $wanted->{subs}{$_}
 			foreach keys %{$wanted->{subs}};
-		*{"${caller}::form_meta"} = sub {
-			return get_package_form_meta($caller);
-		};
 	}
 
 	return \$context;
@@ -199,6 +199,19 @@ sub _get_flag
 
 	return;
 }
+
+# role to add form_meta method
+
+use Moo::Role;
+
+sub form_meta
+{
+	my ($self) = @_;
+	my $package = defined blessed $self ? blessed $self : $self;
+
+	return get_package_form_meta($package);
+}
+
 
 1;
 
