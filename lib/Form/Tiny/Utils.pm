@@ -97,25 +97,7 @@ sub get_package_form_meta
 
 	my $form_meta = $meta{$package_name};
 
-	if (!$form_meta->complete) {
-
-		# when this breaks, mst gets to point and laugh at me
-		my @parents = do {
-			no strict 'refs';
-			@{"${package_name}::ISA"};
-		};
-
-		my @real_parents = grep { $_->DOES('Form::Tiny::Form') } @parents;
-
-		croak 'Form::Tiny does not support multiple inheritance'
-			if @real_parents > 1;
-
-		my ($parent) = @real_parents;
-		$form_meta->inherit_roles_from($parent ? $parent->form_meta : undef);
-		$form_meta->inherit_from($parent->form_meta) if $parent;
-		$form_meta->setup;
-	}
-
+	$form_meta->bootstrap;
 	return $form_meta;
 }
 

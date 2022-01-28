@@ -7,11 +7,12 @@ use Moo;
 use Types::Standard qw(Str ArrayRef HashRef InstanceOf Bool);
 use Scalar::Util qw(blessed);
 use Carp qw(croak carp);
+use Sub::Util qw(set_subname);
 
 use Form::Tiny::FieldDefinitionBuilder;
 use Form::Tiny::Hook;
 use Form::Tiny::Error;
-use Form::Tiny::Utils qw(try uniq);
+use Form::Tiny::Utils qw(try uniq get_package_form_meta);
 require Moo::Role;
 
 use namespace::clean;
@@ -23,7 +24,7 @@ our @CARP_NOT = qw(Form::Tiny Form::Tiny::Form);
 
 has 'package' => (
 	is => 'ro',
-	writer => 'set_package',
+	writer => '_set_package',
 	isa => Str,
 	predicate => 1,
 );
@@ -55,7 +56,7 @@ has 'hooks' => (
 has 'complete' => (
 	is => 'ro',
 	isa => Bool,
-	writer => '_complete',
+	writer => '_set_complete',
 	default => sub { 0 },
 );
 
@@ -78,6 +79,25 @@ has 'messages' => (
 	isa => HashRef [Str],
 	default => sub { {} },
 );
+
+sub set_package
+{
+	my ($self, $package) = @_;
+	$self->_set_package($package);
+
+	if (!$package->can('form_meta')) {
+		no strict 'refs';
+		no warnings 'redefine';
+
+		*{"${package}::form_meta"} = sub {
+			my ($instance) = @_;
+			my $package = defined blessed $instance ? blessed $instance : $instance;
+
+			return get_package_form_meta($package);
+		};
+		set_subname "${package}::form_meta", *{"${package}::form_meta"};
+	}
+}
 
 sub build_error
 {
@@ -129,13 +149,40 @@ sub _inline_hook
 	};
 }
 
+sub bootstrap
+{
+	my ($self) = @_;
+	return unless !$self->complete;
+
+	# package name may be non-existent if meta is anon
+	if ($self->has_package) {
+		# when this breaks, mst gets to point and laugh at me
+		my @parents = do {
+			my $package_name = $self->package;
+			no strict 'refs';
+			@{"${package_name}::ISA"};
+		};
+
+		my @real_parents = grep { $_->can('form_meta') && $_->form_meta->isa(__PACKAGE__) } @parents;
+
+		croak 'Form::Tiny does not support multiple inheritance'
+			if @real_parents > 1;
+
+		my ($parent) = @real_parents;
+		$self->inherit_roles_from($parent ? $parent->form_meta : undef);
+		$self->inherit_from($parent->form_meta) if $parent;
+	}
+
+	$self->setup;
+}
+
 sub setup
 {
 	my ($self) = @_;
 
 	# at this point, all roles should already be merged and all inheritance done
 	# we can make the meta definition complete
-	$self->_complete(1);
+	$self->_set_complete(1);
 	return;
 }
 
