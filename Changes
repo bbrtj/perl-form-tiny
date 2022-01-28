@@ -1,5 +1,12 @@
 Revision history for Perl extension Form::Tiny.
 
+2.07 Fri Jan 28 18:00:00 2022
+	- Form::Tiny package is no longer a role (revert change made in 2.06)
+	- form_meta method is now installed by a metaclass upon setting the package name
+	- Form::Tiny::Meta can now properly finalize itself with ->bootstrap method
+	- inheritance candidates are now chosen based on their meta classes
+	- add Sub::Util dependency and use it to prevent namespace::autoclean from removing form_meta method
+
 2.06 Thu Jan 27 20:00:00 2022
 	- Form::Tiny package is now a role providing form_meta method
 	- form_meta method is now namespace::autoclean resistant
