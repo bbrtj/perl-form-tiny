@@ -26,7 +26,7 @@ has 'package' => (
 	is => 'ro',
 	writer => '_set_package',
 	isa => Str,
-	predicate => 1,
+	predicate => 'has_package',
 );
 
 has 'fields' => (

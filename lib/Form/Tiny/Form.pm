@@ -56,7 +56,7 @@ has 'valid' => (
 	isa => Bool,
 	lazy => 1,
 	builder => '_ft_validate',
-	clearer => 1,
+	clearer => 'clear_valid',
 	predicate => 'is_validated',
 	init_arg => undef,
 );

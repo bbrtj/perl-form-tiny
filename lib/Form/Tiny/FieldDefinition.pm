@@ -43,7 +43,7 @@ has 'required' => (
 has 'type' => (
 	is => 'ro',
 	isa => HasMethods ['validate', 'check'],
-	predicate => 1,
+	predicate => 'has_type',
 );
 
 has 'addons' => (
@@ -68,19 +68,19 @@ has 'adjust' => (
 has 'default' => (
 	is => 'ro',
 	isa => CodeRef,
-	predicate => 1,
+	predicate => 'has_default',
 );
 
 has 'message' => (
 	is => 'ro',
 	isa => StringLike,
-	predicate => 1,
+	predicate => 'has_message',
 );
 
 has 'data' => (
 	is => 'ro',
 	writer => 'set_data',
-	predicate => 1,
+	predicate => 'has_data',
 );
 
 sub BUILD
