@@ -111,38 +111,40 @@ sub _ft_mangle_field
 sub _ft_find_field
 {
 	my ($self, $fields, $field_def) = @_;
+	my @path = @{$field_def->get_name_path->path};
+	my @meta = @{$field_def->get_name_path->meta};
 
 	# the result goes here
 	my @found;
 	my $traverser;
 	$traverser = sub {
-		my ($curr_path, $path, $index, $value) = @_;
-		my $last = $index == @{$path->meta};
+		my ($curr_path, $index, $value) = @_;
 
-		if ($last) {
+		if ($index == @meta) {
+			# we reached the end of the tree
 			push @found, [$curr_path, $value];
 		}
 		else {
-			my $next = $path->path->[$index];
-			my $meta = $path->meta->[$index];
+			my $next = $path[$index];
+			my $meta = $meta[$index];
 
 			if ($meta eq 'ARRAY' && ref $value eq 'ARRAY') {
 				for my $ind (0 .. $#$value) {
 					return    # may be an error, exit early
-						unless $traverser->([@$curr_path, $ind], $path, $index + 1, $value->[$ind]);
+						unless $traverser->([@$curr_path, $ind], $index + 1, $value->[$ind]);
 				}
 
 				if (@$value == 0) {
 
 					# we wanted to have a deeper structure, but its not there, so clearly an error
-					return unless $index == $#{$path->meta};
+					return unless $index == $#meta;
 
 					# we had aref here, so we want it back in resulting hash
 					push @found, [$curr_path, [], 1];
 				}
 			}
 			elsif ($meta eq 'HASH' && ref $value eq 'HASH' && exists $value->{$next}) {
-				return $traverser->([@$curr_path, $next], $path, $index + 1, $value->{$next});
+				return $traverser->([@$curr_path, $next], $index + 1, $value->{$next});
 			}
 			else {
 				# something's wrong with the input here - does not match the spec
@@ -153,7 +155,7 @@ sub _ft_find_field
 		return 1;    # all ok
 	};
 
-	if ($traverser->([], $field_def->get_name_path, 0, $fields)) {
+	if ($traverser->([], 0, $fields)) {
 		return [
 			map {
 				{
@@ -169,23 +171,25 @@ sub _ft_find_field
 
 sub _ft_assign_field
 {
-	my ($self, $fields, $field_def, $path_value) = @_;
+	my ($self, $fields, $field_def, $path_values) = @_;
 
 	my @arrays = map { $_ eq 'ARRAY' } @{$field_def->get_name_path->meta};
-	my @parts = @{$path_value->{path}};
-	my $current = \$fields;
-	for my $i (0 .. $#parts) {
+	for my $path_value (@$path_values) {
+		my @parts = @{$path_value->{path}};
+		my $current = \$fields;
+		for my $i (0 .. $#parts) {
 
-		# array_path will contain array indexes for each array marker
-		if ($arrays[$i]) {
-			$current = \${$current}->[$parts[$i]];
+			# array_path will contain array indexes for each array marker
+			if ($arrays[$i]) {
+				$current = \${$current}->[$parts[$i]];
+			}
+			else {
+				$current = \${$current}->{$parts[$i]};
+			}
 		}
-		else {
-			$current = \${$current}->{$parts[$i]};
-		}
+
+		$$current = $path_value->{value};
 	}
-
-	$$current = $path_value->{value};
 }
 
 ### OPTIMIZATION: detect and use faster route for flat forms
@@ -233,6 +237,7 @@ sub _ft_validate_nested
 		my $current_data = $self->_ft_find_field($fields, $validator);
 		if (defined $current_data) {
 			my $all_ok = 1;
+			my @to_assign;
 
 			# This may have multiple iterations only if there's an array
 			foreach my $path_value (@$current_data) {
@@ -241,8 +246,10 @@ sub _ft_validate_nested
 						if $inline_hook;
 					$all_ok = $self->_ft_mangle_field($validator, $path_value) && $all_ok;
 				}
-				$self->_ft_assign_field($dirty, $validator, $path_value);
+				push @to_assign, $path_value;
 			}
+
+			$self->_ft_assign_field($dirty, $validator, \@to_assign);
 
 			# found and valid, go to the next field
 			next if $all_ok;
@@ -253,10 +260,10 @@ sub _ft_validate_nested
 			$self->_ft_assign_field(
 				$dirty,
 				$validator,
-				{
+				[{
 					path => $validator->get_name_path->path,
 					value => $validator->get_default($self),
-				}
+				}]
 			);
 		}
 		elsif ($validator->required) {
