@@ -16,7 +16,7 @@ use Form::Tiny::Path;
 
 use namespace::clean;
 
-our $VERSION = '2.07';
+our $VERSION = '2.08';
 
 has 'name' => (
 	is => 'ro',
