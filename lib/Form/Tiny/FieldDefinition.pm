@@ -153,28 +153,26 @@ sub get_coerced
 
 sub get_adjusted
 {
-	my ($self, $form, $value) = @_;
+	my $self = shift;
 
-	if ($self->is_adjusted) {
-		return $self->adjust->($form, $value);
-	}
-	return $value;
+	return pop() unless $self->is_adjusted;
+
+	return $self->adjust->(@_);
 }
 
 sub get_default
 {
 	my ($self, $form) = @_;
 
-	if ($self->has_default) {
-		my $default = $self->default->($form);
-		if (!$self->has_type || $self->type->check($default)) {
-			return $default;
-		}
+	croak 'no default value set but was requested'
+		unless $self->has_default;
 
-		croak 'invalid default value was set';
+	my $default = $self->default->($form);
+	if (!$self->has_type || $self->type->check($default)) {
+		return $default;
 	}
 
-	croak 'no default value set but was requested';
+	croak 'invalid default value was set';
 }
 
 sub validate
@@ -189,17 +187,12 @@ sub validate
 				if !$self->type->check($value);
 		}
 		else {
-			my $error = $self->type->validate($value);
-			if (defined $error) {
-				push @errors, $error;
-			}
+			push @errors, $self->type->validate($value) // ();
 		}
 	}
 
 	if (@errors == 0) {
-		my $validators = $self->addons->{validators} // [];
-
-		for my $validator (@{$validators}) {
+		for my $validator (@{$self->addons->{validators} // []}) {
 			my ($message, $code) = @{$validator};
 
 			if (!$code->($form, $value)) {
@@ -209,7 +202,7 @@ sub validate
 	}
 
 	for my $error (@errors) {
-		if ($self->is_subform && ref $error eq 'ARRAY') {
+		if (ref $error eq 'ARRAY' && $self->is_subform) {
 			foreach my $exception (@$error) {
 				if (defined blessed $exception && $exception->isa('Form::Tiny::Error')) {
 					my $path = $self->get_name_path;
