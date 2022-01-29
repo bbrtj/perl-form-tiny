@@ -16,6 +16,7 @@ our @EXPORT_OK = qw(
 	create_form_meta
 	get_package_form_meta
 	set_form_meta_class
+	has_form_meta
 );
 
 our %EXPORT_TAGS = (
@@ -25,6 +26,7 @@ our %EXPORT_TAGS = (
 			create_form_meta
 			get_package_form_meta
 			set_form_meta_class
+			has_form_meta
 		)
 	],
 );
@@ -86,6 +88,11 @@ sub create_form_meta
 	$meta{$package}->set_package($package);
 
 	return $meta{$package};
+}
+
+sub has_form_meta
+{
+	return exists $meta{ref $_[0] || $_[0]};
 }
 
 sub get_package_form_meta

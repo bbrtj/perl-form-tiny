@@ -9,6 +9,7 @@ use Scalar::Util qw(blessed);
 use Types::Standard qw(HashRef);
 
 use Form::Tiny::FieldDefinition;
+use Form::Tiny::Utils qw(has_form_meta);
 
 use namespace::clean;
 
@@ -32,8 +33,8 @@ sub build
 	my $data = $self->data;
 	my $dynamic = ref $data eq 'CODE';
 	if ($dynamic && defined blessed $context) {
-		croak 'building a dynamic field definition requires Form::Tiny::Form object'
-			unless $context->DOES('Form::Tiny::Form');
+		croak 'building a dynamic field definition requires Form::Tiny form'
+			unless has_form_meta($context);
 		$data = $data->($context);
 		$dynamic = 0;
 	}

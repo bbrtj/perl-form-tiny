@@ -10,7 +10,7 @@ use Types::TypeTiny qw(StringLike);
 use Carp qw(croak);
 use Scalar::Util qw(blessed);
 
-use Form::Tiny::Utils qw(try);
+use Form::Tiny::Utils qw(try has_form_meta);
 use Form::Tiny::Error;
 use Form::Tiny::Path;
 use Form::Tiny::PathValue;
@@ -112,7 +112,7 @@ sub is_subform
 {
 	my ($self) = @_;
 
-	return $self->has_type && $self->type->DOES('Form::Tiny::Form');
+	return $self->has_type && has_form_meta($self->type);
 }
 
 sub hard_required

@@ -9,7 +9,7 @@ use Scalar::Util qw(blessed);
 
 use Form::Tiny::PathValue;
 use Form::Tiny::Error;
-use Form::Tiny::Utils qw(try get_package_form_meta);
+use Form::Tiny::Utils qw(try);
 use Moo::Role;
 
 our $VERSION = '2.07';
@@ -384,14 +384,6 @@ sub _ft_clear_errors
 	@{$self->errors} = ();
 	return;
 }
-
-# This fixes form inheritance for other role systems than Moose
-around DOES => sub {
-	my ($orig, $self, @args) = @_;
-
-	return Moo::Role::does_role($self, @args)
-		|| $self->$orig(@args);
-};
 
 1;
 
