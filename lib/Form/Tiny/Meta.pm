@@ -154,6 +154,7 @@ sub bootstrap
 
 	# package name may be non-existent if meta is anon
 	if ($self->has_package) {
+
 		# when this breaks, mst gets to point and laugh at me
 		my @parents = do {
 			my $package_name = $self->package;

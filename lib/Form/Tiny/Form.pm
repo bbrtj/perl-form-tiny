@@ -121,6 +121,7 @@ sub _ft_find_field
 		my ($curr_path, $index, $value) = @_;
 
 		if ($index == @meta) {
+
 			# we reached the end of the tree
 			push @found, [$curr_path, $value];
 		}
@@ -260,10 +261,12 @@ sub _ft_validate_nested
 			$self->_ft_assign_field(
 				$dirty,
 				$validator,
-				[{
-					path => $validator->get_name_path->path,
-					value => $validator->get_default($self),
-				}]
+				[
+					{
+						path => $validator->get_name_path->path,
+						value => $validator->get_default($self),
+					}
+				]
 			);
 		}
 		elsif ($validator->required) {
