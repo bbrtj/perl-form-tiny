@@ -7,7 +7,6 @@ use Types::Standard qw(Maybe ArrayRef InstanceOf HashRef Bool);
 use Carp qw(croak);
 use Scalar::Util qw(blessed);
 
-use Form::Tiny::PathValue;
 use Form::Tiny::Error;
 use Form::Tiny::Utils qw(try);
 use Moo::Role;
@@ -84,7 +83,7 @@ sub _ft_mangle_field
 {
 	my ($self, $def, $path_value, $out_ref) = @_;
 
-	my $current = $out_ref ? $path_value : $path_value->value;
+	my $current = $out_ref ? $path_value : $path_value->{value};
 
 	# We got the parameter, now we have to check if it is not empty
 	# Even if it is, it may still be handled if isn't hard-required
@@ -100,7 +99,7 @@ sub _ft_mangle_field
 			$$out_ref = $current;
 		}
 		else {
-			$path_value->set_value($current);
+			$path_value->{value} = $current;
 		}
 
 		return 1;
@@ -157,11 +156,11 @@ sub _ft_find_field
 	if ($traverser->([], $field_def->get_name_path, 0, $fields)) {
 		return [
 			map {
-				Form::Tiny::PathValue->new(
+				{
 					path => $_->[0],
 					value => $_->[1],
 					structure => $_->[2]
-				)
+				}
 			} @found
 		];
 	}
@@ -173,7 +172,7 @@ sub _ft_assign_field
 	my ($self, $fields, $field_def, $path_value) = @_;
 
 	my @arrays = map { $_ eq 'ARRAY' } @{$field_def->get_name_path->meta};
-	my @parts = @{$path_value->path};
+	my @parts = @{$path_value->{path}};
 	my $current = \$fields;
 	for my $i (0 .. $#parts) {
 
@@ -186,7 +185,7 @@ sub _ft_assign_field
 		}
 	}
 
-	$$current = $path_value->value;
+	$$current = $path_value->{value};
 }
 
 ### OPTIMIZATION: detect and use faster route for flat forms
@@ -237,8 +236,8 @@ sub _ft_validate_nested
 
 			# This may have multiple iterations only if there's an array
 			foreach my $path_value (@$current_data) {
-				unless ($path_value->structure) {
-					$path_value->set_value($inline_hook->($self, $validator, $path_value->value))
+				unless ($path_value->{structure}) {
+					$path_value->{value} = ($inline_hook->($self, $validator, $path_value->{value}))
 						if $inline_hook;
 					$all_ok = $self->_ft_mangle_field($validator, $path_value) && $all_ok;
 				}
@@ -254,10 +253,10 @@ sub _ft_validate_nested
 			$self->_ft_assign_field(
 				$dirty,
 				$validator,
-				Form::Tiny::PathValue->new(
+				{
 					path => $validator->get_name_path->path,
 					value => $validator->get_default($self),
-				)
+				}
 			);
 		}
 		elsif ($validator->required) {
