@@ -116,11 +116,9 @@ sub run_hooks_for
 {
 	my ($self, $stage, @data) = @_;
 
-	my @hooks = @{$self->hooks->{$stage} // []};
-
 	# running hooks always returns the last element they're passed
 	# (unless they are not modifying, then they don't return anything)
-	for my $hook (@hooks) {
+	for my $hook (@{$self->hooks->{$stage} // []}) {
 		my $ret = $hook->code->(@data);
 		splice @data, -1, 1, $ret
 			if $hook->is_modifying;
@@ -135,7 +133,7 @@ sub _inline_hook
 
 	my @hooks = @{$self->hooks->{$stage} // []};
 
-	return if @hooks == 0;
+	return undef if @hooks == 0;
 	return sub {
 		my @data = @_;
 
@@ -152,7 +150,7 @@ sub _inline_hook
 sub bootstrap
 {
 	my ($self) = @_;
-	return unless !$self->complete;
+	return if $self->complete;
 
 	# package name may be non-existent if meta is anon
 	if ($self->has_package) {
@@ -189,6 +187,8 @@ sub setup
 sub resolved_fields
 {
 	my ($self, $object) = @_;
+
+	return [@{$self->fields}] if $self->is_flat;
 
 	croak 'resolved_fields requires form object'
 		unless defined blessed $object;
