@@ -6,6 +6,7 @@ use warnings;
 use Types::Standard qw(Maybe ArrayRef InstanceOf HashRef Bool);
 use Carp qw(croak);
 use Scalar::Util qw(blessed);
+use List::Util qw(first);
 
 use Form::Tiny::Error;
 use Form::Tiny::Utils qw(try);
@@ -20,17 +21,6 @@ has 'field_defs' => (
 	default => sub {
 		my ($self) = shift;
 		return $self->form_meta->resolved_fields($self);
-	},
-	lazy => 1,
-	init_arg => undef,
-);
-
-has '_ft_field_cache' => (
-	is => 'ro',
-	isa => HashRef [InstanceOf ['Form::Tiny::FieldDefinition']],
-	clearer => '_ft_clear_field_cache',
-	default => sub {
-		return {map { $_->name => $_ } @{shift()->field_defs}};
 	},
 	lazy => 1,
 	init_arg => undef,
@@ -73,7 +63,6 @@ sub _ft_clear_form
 	my ($self) = @_;
 
 	$self->_ft_clear_field_defs;
-	$self->_ft_clear_field_cache;
 	$self->_ft_clear_fields;
 	$self->clear_valid;
 	$self->_ft_clear_errors;
@@ -354,9 +343,9 @@ sub add_error
 	}
 
 	# check if the field exists
-	for ($error->field) {
+	for my $name ($error->field) {
 		croak "form does not contain a field definition for $_"
-			if defined $_ && !exists $self->_ft_field_cache->{$_};
+			if defined $name && !defined first { $_->name eq $name } @{$self->field_defs};
 	}
 
 	# unwrap nested form errors
