@@ -176,10 +176,9 @@ sub _ft_assign_field
 
 sub _ft_validate_flat
 {
-	my ($self, $fields, $dirty) = @_;
+	my ($self, $fields, $dirty, $inline_hook) = @_;
 	my $meta = $self->form_meta;
 
-	my $inline_hook = $meta->_inline_hook('before_mangle');
 	foreach my $validator (@{$self->field_defs}) {
 		my $curr_f = $validator->name;
 
@@ -207,10 +206,9 @@ sub _ft_validate_flat
 
 sub _ft_validate_nested
 {
-	my ($self, $fields, $dirty) = @_;
+	my ($self, $fields, $dirty, $inline_hook) = @_;
 	my $meta = $self->form_meta;
 
-	my $inline_hook = $meta->_inline_hook('before_mangle');
 	foreach my $validator (@{$self->field_defs}) {
 		my $curr_f = $validator->name;
 
@@ -260,30 +258,30 @@ sub valid
 	my $meta = $self->form_meta;
 	$self->_ft_clear_errors;
 
+	my %hooks = %{$meta->inline_hooks};
 	my $fields = $self->input;
-	my $err = try sub {
-		$fields = $meta->run_hooks_for('reformat', $self, $fields);
-	};
-
 	my $dirty = {};
-	if (!$err && ref $fields eq 'HASH') {
-		$meta->run_hooks_for('before_validate', $self, $fields);
+	if (
+		(!$hooks{reformat} || !try sub { $fields = $hooks{reformat}->($self, $fields) })
+		&& ref $fields eq 'HASH'
+	) {
+		$hooks{before_validate}->($self, $fields)
+			if $hooks{before_validate};
 
-		if ($meta->is_flat) {
-			$self->_ft_validate_flat($fields, $dirty);
-		}
-		else {
-			$self->_ft_validate_nested($fields, $dirty);
-		}
+		$meta->is_flat
+			? $self->_ft_validate_flat($fields, $dirty, $hooks{before_mangle})
+			: $self->_ft_validate_nested($fields, $dirty, $hooks{before_mangle})
+			;
 	}
 	else {
 		$self->add_error($meta->build_error(InvalidFormat =>));
 	}
 
-	$meta->run_hooks_for('after_validate', $self, $dirty);
+	$hooks{after_validate}->($self, $dirty)
+		if $hooks{after_validate};
 
-	$meta->run_hooks_for('cleanup', $self, $dirty)
-		if !$self->has_errors;
+	$hooks{cleanup}->($self, $dirty)
+		if $hooks{cleanup} && !$self->has_errors;
 
 	my $form_valid = !$self->has_errors;
 	$self->_ft_set_fields($form_valid ? $dirty : undef);
