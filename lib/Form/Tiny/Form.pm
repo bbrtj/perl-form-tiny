@@ -345,7 +345,7 @@ sub add_error
 
 	# check if the field exists
 	for my $name ($error->field) {
-		croak "form does not contain a field definition for $_"
+		croak "form does not contain a field definition for $name"
 			if defined $name && !defined first { $_->name eq $name }
 			@{$self->field_defs};
 	}
