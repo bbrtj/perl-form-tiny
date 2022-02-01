@@ -40,21 +40,12 @@ has 'fields' => (
 	init_arg => undef,
 );
 
-has 'valid' => (
-	is => 'ro',
-	isa => Bool,
-	lazy => 1,
-	builder => '_ft_validate',
-	clearer => 'clear_valid',
-	predicate => 'is_validated',
-	init_arg => undef,
-);
-
 has 'errors' => (
 	is => 'ro',
 	isa => ArrayRef [InstanceOf ['Form::Tiny::Error']],
 	lazy => 1,
 	default => sub { [] },
+	clearer => '_ft_clear_errors',
 	init_arg => undef,
 );
 
@@ -64,7 +55,6 @@ sub _ft_clear_form
 
 	$self->_ft_clear_field_defs;
 	$self->_ft_clear_fields;
-	$self->clear_valid;
 	$self->_ft_clear_errors;
 }
 
@@ -264,7 +254,7 @@ sub _ft_validate_nested
 	}
 }
 
-sub _ft_validate
+sub valid
 {
 	my ($self) = @_;
 	my $meta = $self->form_meta;
@@ -299,6 +289,16 @@ sub _ft_validate
 	$self->_ft_set_fields($form_valid ? $dirty : undef);
 
 	return $form_valid;
+}
+
+sub is_validated {
+	# NOOP
+	return 0;
+}
+
+sub clear_valid {
+	# NOOP
+	return;
 }
 
 sub check
@@ -375,14 +375,6 @@ sub has_errors
 	return @{$self->errors} > 0;
 }
 
-sub _ft_clear_errors
-{
-	my ($self) = @_;
-
-	@{$self->errors} = ();
-	return;
-}
-
 1;
 
 __END__
@@ -421,14 +413,6 @@ Contains the validated and cleaned fields set after the validation is complete. 
 
 Contains an array reference of L<Form::Tiny::FieldDefinition> instances fetched from the metaclass with context of current instance. Rebuilds everytime new input data is set.
 
-=head3 valid
-
-Contains the result of the validation - a boolean value. Gets produced lazily upon accessing it, so calling C<< $form->valid; >> validates the form automatically.
-
-B<clearer:> I<clear_valid>
-
-B<predicate:> I<is_validated>
-
 =head3 errors
 
 Contains an array reference of form errors which were detected by the last performed validation. Each error is an instance of L<Form::Tiny::Error>.
@@ -446,6 +430,12 @@ Returns the form metaobject, an instance of L<Form::Tiny::Meta>.
 =head3 new
 
 This is a Moose-flavored constructor for the class. It accepts a hash or hash reference of parameters, which are the attributes specified above.
+
+=head3 valid
+
+Performs the validation and returns a boolean which indicates whether the form is valid or not.
+
+Accepts no arguments. Input must be set before calling this method.
 
 =head3 check
 
