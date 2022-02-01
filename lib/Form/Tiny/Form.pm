@@ -292,13 +292,13 @@ sub valid
 
 sub is_validated
 {
-	# NOOP
+	warn '$form->is_validated is deprecated';
 	return 0;
 }
 
 sub clear_valid
 {
-	# NOOP
+	warn '$form->clear_valid is deprecated';
 	return;
 }
 
