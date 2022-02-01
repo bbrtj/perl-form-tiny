@@ -264,7 +264,8 @@ sub valid
 	if (
 		(!$hooks{reformat} || !try sub { $fields = $hooks{reformat}->($self, $fields) })
 		&& ref $fields eq 'HASH'
-	) {
+		)
+	{
 		$hooks{before_validate}->($self, $fields)
 			if $hooks{before_validate};
 
@@ -272,13 +273,13 @@ sub valid
 			? $self->_ft_validate_flat($fields, $dirty, $hooks{before_mangle})
 			: $self->_ft_validate_nested($fields, $dirty, $hooks{before_mangle})
 			;
+
+		$hooks{after_validate}->($self, $dirty)
+			if $hooks{after_validate};
 	}
 	else {
 		$self->add_error($meta->build_error(InvalidFormat =>));
 	}
-
-	$hooks{after_validate}->($self, $dirty)
-		if $hooks{after_validate};
 
 	$hooks{cleanup}->($self, $dirty)
 		if $hooks{cleanup} && !$self->has_errors;
@@ -289,12 +290,14 @@ sub valid
 	return $form_valid;
 }
 
-sub is_validated {
+sub is_validated
+{
 	# NOOP
 	return 0;
 }
 
-sub clear_valid {
+sub clear_valid
+{
 	# NOOP
 	return;
 }
@@ -343,7 +346,8 @@ sub add_error
 	# check if the field exists
 	for my $name ($error->field) {
 		croak "form does not contain a field definition for $_"
-			if defined $name && !defined first { $_->name eq $name } @{$self->field_defs};
+			if defined $name && !defined first { $_->name eq $name }
+			@{$self->field_defs};
 	}
 
 	# unwrap nested form errors
