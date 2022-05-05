@@ -167,12 +167,7 @@ sub get_default
 	croak 'no default value set but was requested'
 		unless $self->has_default;
 
-	my $default = $self->default->($form);
-	if (!$self->has_type || $self->type->check($default)) {
-		return $default;
-	}
-
-	croak 'invalid default value was set';
+	return $self->default->($form);
 }
 
 sub validate
