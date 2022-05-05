@@ -283,7 +283,6 @@ sub inherit_roles_from
 
 	if (defined $parent) {
 		$self->set_meta_roles([uniq(@{$parent->meta_roles}, @{$self->meta_roles})]);
-		$self->set_form_roles([uniq(@{$parent->form_roles}, @{$self->form_roles})]);
 	}
 
 	Moo::Role->apply_roles_to_object(
@@ -333,3 +332,4 @@ sub inherit_from
 }
 
 1;
+
