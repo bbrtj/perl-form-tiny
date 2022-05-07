@@ -6,6 +6,18 @@ use Test::Exception;
 use Data::Dumper;
 
 {
+	package TestFormNested;
+
+	use Form::Tiny;
+
+	form_field sub {
+		return {
+			name => 'dynamic_nested',
+		};
+	};
+}
+
+{
 	package TestForm;
 
 	use Form::Tiny;
@@ -22,6 +34,10 @@ use Data::Dumper;
 			name => 'dynamic_' . $self->name_part,
 		};
 	};
+
+	form_field 'nested' => (
+		type => TestFormNested->new,
+	);
 }
 
 my $form = TestForm->new(name_part => 'field');
@@ -40,6 +56,9 @@ sub fdef
 my $expected = {
 	static => fdef('static'),
 	dynamic_field => fdef('dynamic_field'),
+	nested => {
+		dynamic_nested => fdef('nested')->type->field_defs->[0],
+	},
 };
 
 dies_ok {

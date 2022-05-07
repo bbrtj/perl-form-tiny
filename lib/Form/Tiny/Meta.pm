@@ -367,7 +367,7 @@ sub _build_blueprint
 		my $value = $def;
 		if ($def->is_subform) {
 			my $meta = get_package_form_meta(ref $def->type);
-			$value = $meta->blueprint;
+			$value = $meta->blueprint($def->type);
 		}
 
 		my @meta = @{$def->get_name_path->meta};
