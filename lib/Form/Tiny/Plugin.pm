@@ -5,6 +5,8 @@ use strict;
 use warnings;
 use Carp qw(croak);
 
+our $VERSION = '2.10';
+
 sub plugin
 {
 	my ($class, $caller, $context) = @_;
