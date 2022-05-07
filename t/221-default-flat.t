@@ -50,8 +50,8 @@ for my $conf ({name => 'a.*.b'}, {name => 'aoeu.*'}) {
 		);
 		$form->set_input({});
 		$form->valid;
-	}
-	'invalid form configuration dies';
+		}
+		'invalid form configuration dies';
 }
 
 done_testing();

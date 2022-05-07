@@ -183,7 +183,6 @@ sub _find_field
 	return;
 }
 
-
 sub _assign_field
 {
 	my ($fields, $field_def, $path_values) = @_;
@@ -206,7 +205,6 @@ sub _assign_field
 		$$current = $path_value->{value};
 	}
 }
-
 
 1;
 

@@ -6,6 +6,7 @@ use Test::Exception;
 use Data::Dumper;
 
 {
+
 	package TestFormNested;
 
 	use Form::Tiny;
@@ -18,6 +19,7 @@ use Data::Dumper;
 }
 
 {
+
 	package TestForm;
 
 	use Form::Tiny;

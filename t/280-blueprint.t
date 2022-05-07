@@ -9,7 +9,7 @@ use TestForm;
 sub fdef
 {
 	my ($name, $class) = @_;
-	$class //=  'TestForm';
+	$class //= 'TestForm';
 
 	for my $def (@{$class->form_meta->fields}) {
 		return $def if $def->name eq $name;
