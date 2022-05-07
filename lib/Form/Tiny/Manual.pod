@@ -579,7 +579,7 @@ It is required that class parents are specified before any calls to Form::Tiny D
 
 =item * L<Type::Tiny>, the awesome type system
 
-=item * L<Form::Tiny>, the importer class for this distribution
+=item * L<Form::Tiny>, the importer package for this distribution
 
 =item * L<Form::Tiny::Manual::Cookbook>, common tasks performed with Form::Tiny
 
