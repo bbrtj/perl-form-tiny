@@ -17,7 +17,7 @@ require Moo::Role;
 
 use namespace::clean;
 
-our $VERSION = '2.09';
+our $VERSION = '2.10';
 
 # more clear error messages in some crucial cases
 our @CARP_NOT = qw(Form::Tiny Form::Tiny::Form);
