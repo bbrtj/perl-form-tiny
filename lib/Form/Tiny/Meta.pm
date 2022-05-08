@@ -185,6 +185,8 @@ sub bootstrap
 			if @real_parents > 1;
 
 		my ($parent) = @real_parents;
+
+		# this is required so that proper hooks on inherit_from can be fired
 		$self->inherit_roles_from($parent ? $parent->form_meta : undef);
 		$self->inherit_from($parent->form_meta) if $parent;
 	}
@@ -289,7 +291,6 @@ sub add_message
 	return $self;
 }
 
-# this is required so that proper hooks on inherit_from can be fired
 sub inherit_roles_from
 {
 	my ($self, $parent) = @_;
@@ -345,14 +346,12 @@ sub inherit_from
 	return $self;
 }
 
-# Builds a "blueprint" of form fields. It will describe how the 'fields' hashref should look like
-# Since we don't know anything about dynamic fields in meta context,
-# croaks if it encounters any such field in the main form or any of the subforms
 sub _build_blueprint
 {
 	my ($self, $context) = @_;
 	my %result;
 
+	# croak, since we don't know anything about dynamic fields in static context
 	croak "Can't create a blueprint of a dynamic form"
 		if $self->is_dynamic && !$context;
 
@@ -387,8 +386,6 @@ sub _build_blueprint
 	return \%result;
 }
 
-# Builds a "blueprint" of form fields in the object context
-# Note: does not cache the result like 'blueprint' does.
 sub blueprint
 {
 	my ($self, $context) = @_;
@@ -397,6 +394,7 @@ sub blueprint
 		return $self->_build_blueprint($context);
 	}
 	else {
+		# $context can be skipped if the form is not dynamic
 		return $self->static_blueprint;
 	}
 }
