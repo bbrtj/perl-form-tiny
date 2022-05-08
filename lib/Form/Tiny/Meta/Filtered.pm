@@ -13,7 +13,7 @@ use Moo::Role;
 
 our $VERSION = '2.11';
 
-requires qw(setup);
+requires qw(inherit_from setup);
 
 has 'filters' => (
 	is => 'ro',
