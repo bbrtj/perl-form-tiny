@@ -374,7 +374,7 @@ sub _build_blueprint
 		my @path = @{$def->get_name_path->path};
 
 		# adjust path so that instead of stars (*) we get zeros
-		@path = map { $meta[$_] eq 'ARRAY' ? 0 : $path[$_] } keys @path;
+		@path = map { $meta[$_] eq 'ARRAY' ? 0 : $path[$_] } 0 .. $#path;
 
 		Form::Tiny::Utils::_assign_field(
 			\%result,
