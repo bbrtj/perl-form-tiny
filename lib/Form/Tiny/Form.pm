@@ -19,8 +19,7 @@ has 'field_defs' => (
 	isa => ArrayRef [InstanceOf ['Form::Tiny::FieldDefinition']],
 	clearer => '_ft_clear_field_defs',
 	default => sub {
-		my ($self) = shift;
-		return $self->form_meta->resolved_fields($self);
+		return $_[0]->form_meta->resolved_fields($_[0]);
 	},
 	lazy => 1,
 	init_arg => undef,
@@ -51,7 +50,7 @@ has 'errors' => (
 
 sub _ft_clear_form
 {
-	my ($self) = @_;
+	my $self = shift;
 
 	$self->_ft_clear_field_defs;
 	$self->_ft_clear_fields;
@@ -92,7 +91,6 @@ sub _ft_mangle_field
 sub _ft_validate_flat
 {
 	my ($self, $fields, $dirty, $inline_hook) = @_;
-	my $meta = $self->form_meta;
 
 	foreach my $validator (@{$self->field_defs}) {
 		my $curr_f = $validator->name;
@@ -114,7 +112,7 @@ sub _ft_validate_flat
 			$dirty->{$curr_f} = $validator->get_default($self);
 		}
 		elsif ($validator->required) {
-			$self->add_error($meta->build_error(Required => field => $curr_f));
+			$self->add_error($self->form_meta->build_error(Required => field => $curr_f));
 		}
 	}
 }
@@ -122,7 +120,6 @@ sub _ft_validate_flat
 sub _ft_validate_nested
 {
 	my ($self, $fields, $dirty, $inline_hook) = @_;
-	my $meta = $self->form_meta;
 
 	foreach my $validator (@{$self->field_defs}) {
 		my $curr_f = $validator->name;
@@ -162,7 +159,7 @@ sub _ft_validate_nested
 			);
 		}
 		elsif ($validator->required) {
-			$self->add_error($meta->build_error(Required => field => $curr_f));
+			$self->add_error($self->form_meta->build_error(Required => field => $curr_f));
 		}
 	}
 }
@@ -276,8 +273,7 @@ sub errors_hash
 
 sub has_errors
 {
-	my ($self) = @_;
-	return @{$self->errors} > 0;
+	return @{$_[0]->errors} > 0;
 }
 
 1;

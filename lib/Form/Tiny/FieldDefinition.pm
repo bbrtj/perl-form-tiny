@@ -182,12 +182,14 @@ sub validate
 				if !$self->type->check($value);
 		}
 		else {
-			push @errors, $self->type->validate($value) // ();
+			my $error = $self->type->validate($value);
+			push @errors, $error
+				if defined $error;
 		}
 	}
 
-	if (@errors == 0) {
-		for my $validator (@{$self->addons->{validators} // []}) {
+	if (@errors == 0 && (my $validators = $self->addons->{validators})) {
+		for my $validator (@{$validators}) {
 			my ($message, $code) = @{$validator};
 
 			if (!$code->($form, $value)) {

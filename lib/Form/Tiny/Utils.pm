@@ -97,6 +97,9 @@ sub has_form_meta
 
 sub get_package_form_meta
 {
+	# short-circuit if the meta has already been built
+	return $meta{$_[0]} if $meta{$_[0]} && $meta{$_[0]}->complete;
+
 	my ($package_name) = @_;
 
 	croak "no form meta declared for $package_name"
@@ -105,6 +108,7 @@ sub get_package_form_meta
 	my $form_meta = $meta{$package_name};
 
 	$form_meta->bootstrap;
+
 	return $form_meta;
 }
 
@@ -124,8 +128,9 @@ sub set_form_meta_class
 sub _find_field
 {
 	my ($fields, $field_def) = @_;
+
 	my @path = @{$field_def->get_name_path->path};
-	my @meta = @{$field_def->get_name_path->meta};
+	my @arrays = map { $_ eq 'ARRAY' } @{$field_def->get_name_path->meta};
 
 	# the result goes here
 	my @found;
@@ -133,36 +138,42 @@ sub _find_field
 	$traverser = sub {
 		my ($curr_path, $index, $value) = @_;
 
-		if ($index == @meta) {
+		if ($index == @path) {
 
 			# we reached the end of the tree
 			push @found, [$curr_path, $value];
 		}
 		else {
-			my $next = $path[$index];
-			my $meta = $meta[$index];
+			my $is_array = $arrays[$index];
+			my $current_ref = ref $value;
 
-			if ($meta eq 'ARRAY' && ref $value eq 'ARRAY') {
-				for my $ind (0 .. $#$value) {
-					return    # may be an error, exit early
-						unless $traverser->([@$curr_path, $ind], $index + 1, $value->[$ind]);
-				}
+			# make sure the actual ref type does not mismatch the spec
+			return unless $is_array eq ($current_ref eq 'ARRAY');
 
+			# it's not the leaf of the tree yet, so we require an array or a hash
+			return if !$is_array && $current_ref ne 'HASH';
+
+			if ($is_array) {
 				if (@$value == 0) {
 
 					# we wanted to have a deeper structure, but its not there, so clearly an error
-					return unless $index == $#meta;
+					return unless $index == $#path;
 
 					# we had aref here, so we want it back in resulting hash
 					push @found, [$curr_path, [], 1];
 				}
+				else {
+					for my $ind (0 .. $#$value) {
+						return    # may be an error, exit early
+							unless $traverser->([@$curr_path, $ind], $index + 1, $value->[$ind]);
+					}
+				}
 			}
-			elsif ($meta eq 'HASH' && ref $value eq 'HASH' && exists $value->{$next}) {
-				return $traverser->([@$curr_path, $next], $index + 1, $value->{$next});
-			}
+
 			else {
-				# something's wrong with the input here - does not match the spec
-				return;
+				my $next = $path[$index];
+				return unless exists $value->{$next};
+				return $traverser->([@$curr_path, $next], $index + 1, $value->{$next});
 			}
 		}
 

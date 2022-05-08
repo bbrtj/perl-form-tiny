@@ -103,10 +103,7 @@ sub set_package
 		no warnings 'redefine';
 
 		*{"${package}::form_meta"} = sub {
-			my ($instance) = @_;
-			my $package = defined blessed $instance ? blessed $instance : $instance;
-
-			return get_package_form_meta($package);
+			return get_package_form_meta(ref $_[0] || $_[0]);
 		};
 		set_subname "${package}::form_meta", *{"${package}::form_meta"};
 	}
