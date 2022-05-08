@@ -11,7 +11,7 @@ use Form::Tiny::Hook;
 use Form::Tiny::Filter;
 use Moo::Role;
 
-our $VERSION = '2.11';
+our $VERSION = '2.12';
 
 requires qw(inherit_from setup);
 

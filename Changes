@@ -1,5 +1,8 @@
 Revision history for Perl extension Form::Tiny.
 
+2.12 Sun May 8 2022
+	- improve performance and maintainability
+
 2.11 Sun May 8 2022
 	- add missing VERSION to Form::Tiny::Plugin
 	- fix compatibility with perl version 5.10

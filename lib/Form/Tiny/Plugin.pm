@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Carp qw(croak);
 
-our $VERSION = '2.11';
+our $VERSION = '2.12';
 
 sub plugin
 {

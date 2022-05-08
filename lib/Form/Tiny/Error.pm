@@ -10,7 +10,7 @@ use Carp qw(confess);
 
 use namespace::clean;
 
-our $VERSION = '2.11';
+our $VERSION = '2.12';
 
 use overload
 	q{""} => 'as_string',
