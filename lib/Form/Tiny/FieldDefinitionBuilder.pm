@@ -13,7 +13,7 @@ use Form::Tiny::Utils qw(has_form_meta);
 
 use namespace::clean;
 
-our $VERSION = '2.10';
+our $VERSION = '2.11';
 
 has 'data' => (
 	is => 'ro',
