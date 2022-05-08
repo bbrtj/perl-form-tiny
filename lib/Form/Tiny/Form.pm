@@ -6,7 +6,7 @@ use warnings;
 use Types::Standard qw(Maybe ArrayRef InstanceOf HashRef Bool);
 use Carp qw(croak);
 use Scalar::Util qw(blessed);
-use List::Util qw(first);
+use List::Util qw(any);
 
 use Form::Tiny::Error;
 use Form::Tiny::Utils qw(try);
@@ -246,7 +246,7 @@ sub add_error
 	# check if the field exists
 	for my $name ($error->field) {
 		croak "form does not contain a field definition for $name"
-			if defined $name && !defined first { $_->name eq $name }
+			if defined $name && !any { $_->name eq $name }
 			@{$self->field_defs};
 	}
 
