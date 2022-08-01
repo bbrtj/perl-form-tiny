@@ -43,14 +43,15 @@ sub ft_install
 		meta_roles => [],
 	};
 
-	my $plugins = $self->_get_flag(\@import_flags, 'plugins', 1);
+	my $plugins_flag = $self->_get_flag(\@import_flags, 'plugins', 1);
+	my @plugins = @{$plugins_flag // []};
 
 	$self->_select_behaviors(
 		$wanted, \@import_flags,
 		$self->_get_behaviors($self->_generate_helpers($caller, \$context))
 	);
 
-	foreach my $plugin (@$plugins) {
+	foreach my $plugin (@plugins) {
 		$plugin = "Form::Tiny::Plugin::$plugin";
 		$plugin =~ s/^.+\+//;
 		my $success = eval "use $plugin; 1";
