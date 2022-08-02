@@ -12,8 +12,6 @@ use Form::Tiny::Form;
 use Form::Tiny::Utils qw(trim :meta_handlers);
 require Moo;
 
-our $VERSION = '2.12';
-
 sub import
 {
 	my ($package, $caller) = (shift, scalar caller);

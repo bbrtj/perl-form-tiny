@@ -9,7 +9,6 @@ use Types::Standard qw(ArrayRef);
 
 use namespace::clean;
 
-our $VERSION = '2.12';
 
 our $nesting_separator = q{.};
 our $array_marker = q{*};

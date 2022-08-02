@@ -9,8 +9,6 @@ use Form::Tiny::Error;
 
 use Moo::Role;
 
-our $VERSION = '2.12';
-
 use constant {
 	MARKER_NONE => '',
 	MARKER_SKIP => 'skip',

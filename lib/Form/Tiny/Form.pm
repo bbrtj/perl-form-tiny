@@ -12,8 +12,6 @@ use Form::Tiny::Error;
 use Form::Tiny::Utils qw(try);
 use Moo::Role;
 
-our $VERSION = '2.12';
-
 has 'field_defs' => (
 	is => 'ro',
 	isa => ArrayRef [InstanceOf ['Form::Tiny::FieldDefinition']],

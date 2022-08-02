@@ -10,8 +10,6 @@ use Carp qw(confess);
 
 use namespace::clean;
 
-our $VERSION = '2.12';
-
 use overload
 	q{""} => 'as_string',
 	fallback => 1;
@@ -141,3 +139,4 @@ A couple of in-place subclasses are provided to differentiate the type of error 
 =item * Form::Tiny::Error::DoesNotValidate
 
 =back
+
