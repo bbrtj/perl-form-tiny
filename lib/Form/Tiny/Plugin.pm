@@ -118,21 +118,15 @@ Context is passed into the C<plugin> method as a scalar reference. Your DSL keyw
 
 		return {
 			subs => {
-				# copy over field's name into its data
-				name_to_data => sub {
+				# set field to required with a keyword
+				is_required => sub {
 					die 'no context'
 						unless defined $$context;
 
 					die 'field for rename must be static'
 						unless $$context->isa('Form::Tiny::FieldDefinition');
 
-					$$context->set_data({})
-						unless $$context->has_data;
-
-					die 'field ' . $$context->name . ' must have a hash reference in data'
-						unless ref $$context->data eq 'HASH';
-
-					$$context->data->{name} = $$context->name;
+					$$context->set_required(1);
 				},
 			},
 		};
