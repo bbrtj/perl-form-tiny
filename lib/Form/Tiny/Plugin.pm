@@ -142,3 +142,15 @@ Context is passed into the C<plugin> method as a scalar reference. Your DSL keyw
 		};
 	}
 
+=head2 Example plugins
+
+All of L<Form::Tiny> importing functionality is based on plugins. See these packages as a reference:
+
+=over
+
+=item * L<Form::Tiny::Plugin::Base>
+
+=item * L<Form::Tiny::Plugin::Filtered>
+
+=back
+
