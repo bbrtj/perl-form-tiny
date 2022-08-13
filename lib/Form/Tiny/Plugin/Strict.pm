@@ -1,4 +1,4 @@
-package Form::Tiny::Meta::Strict;
+package Form::Tiny::Plugin::Strict;
 
 use v5.10;
 use strict;
@@ -6,6 +6,17 @@ use warnings;
 
 use Form::Tiny::Utils qw(try);
 use Form::Tiny::Error;
+
+use parent 'Form::Tiny::Plugin';
+
+sub plugin
+{
+	my ($self, $caller, $context) = @_;
+
+	return {
+		meta_roles => [__PACKAGE__],
+	};
+}
 
 use Moo::Role;
 

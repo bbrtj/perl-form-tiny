@@ -5,6 +5,16 @@ use strict;
 use warnings;
 use Carp qw(croak);
 
+sub use_context
+{
+	my ($class, $context) = @_;
+
+	croak 'context using DSL keyword called without context'
+		unless defined $$context;
+
+	return $$context;
+}
+
 sub plugin
 {
 	my ($class, $caller, $context) = @_;

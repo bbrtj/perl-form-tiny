@@ -1,14 +1,44 @@
-package Form::Tiny::Meta::Filtered;
+package Form::Tiny::Plugin::Filtered;
 
 use v5.10;
 use strict;
 use warnings;
-use Types::Standard qw(ArrayRef InstanceOf);
+use Types::Standard qw(ArrayRef InstanceOf Str);
 use Scalar::Util qw(blessed);
 use Carp qw(carp);
 
 use Form::Tiny::Hook;
 use Form::Tiny::Filter;
+use Form::Tiny::Utils qw(trim);
+
+use parent 'Form::Tiny::Plugin';
+
+sub plugin
+{
+	my ($self, $caller, $context) = @_;
+
+	return {
+		subs => {
+			form_filter => sub {
+				$$context = undef;
+				$caller->form_meta->add_filter(@_);
+			},
+			field_filter => sub {
+				$caller->form_meta->add_field_filter($self->use_context($context), @_);
+			},
+			field_validator => sub {
+				$caller->form_meta->add_field_validator($self->use_context($context), @_);
+			},
+			form_trim_strings => sub {
+				$$context = undef;
+				$caller->form_meta->add_filter(Str, sub { trim $_[1] });
+			},
+		},
+
+		meta_roles => [__PACKAGE__],
+	};
+}
+
 use Moo::Role;
 
 requires qw(inherit_from setup);
@@ -69,7 +99,7 @@ sub _apply_filters
 after 'inherit_from' => sub {
 	my ($self, $parent) = @_;
 
-	if ($parent->DOES('Form::Tiny::Meta::Filtered')) {
+	if ($parent->DOES('Form::Tiny::Plugin::Filtered')) {
 		$self->set_filters([@{$parent->filters}, @{$self->filters}]);
 	}
 };

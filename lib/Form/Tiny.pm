@@ -3,26 +3,21 @@ package Form::Tiny;
 use v5.10;
 use strict;
 use warnings;
-use Carp qw(croak carp);
-use Types::Standard qw(Str);
+use Carp qw(croak);
 use Import::Into;
-use Scalar::Util qw(blessed);
 
 use Form::Tiny::Form;
-use Form::Tiny::Utils qw(trim :meta_handlers);
-require Moo;
+use Form::Tiny::Utils qw(:meta_handlers);
 
 sub import
 {
 	my ($package, $caller) = (shift, scalar caller);
 
-	my @wanted = @_;
-
-	# special case - we want to always have -base flag, but just once
-	@wanted = (-base, grep { $_ ne -base } @wanted);
+	my @wanted = (-base, @_);
 
 	# very special case - do something UNLESS -nomoo was passed
 	unless ($package->_get_flag(\@wanted, -nomoo)) {
+		require Moo;
 		Moo->import::into($caller);
 	}
 
@@ -34,24 +29,23 @@ sub ft_install
 {
 	my ($self, $caller, @import_flags) = @_;
 
+	my $plugins_flag = $self->_get_flag(\@import_flags, 'plugins', 1);
+	my @plugins = ($self->_get_plugins(\@import_flags), @{$plugins_flag // []});
+
+	# field context for form building
 	my $context;
+	my %seen;
 	my $wanted = {
 		subs => {},
 		roles => [],
 		meta_roles => [],
 	};
 
-	my $plugins_flag = $self->_get_flag(\@import_flags, 'plugins', 1);
-	my @plugins = @{$plugins_flag // []};
-
-	$self->_select_behaviors(
-		$wanted, \@import_flags,
-		$self->_get_behaviors($self->_generate_helpers($caller, \$context))
-	);
-
 	foreach my $plugin (@plugins) {
 		$plugin = "Form::Tiny::Plugin::$plugin";
 		$plugin =~ s/^.+\+//;
+		next if $seen{$plugin}++;
+
 		my $success = eval "use $plugin; 1";
 
 		croak "could not load plugin $plugin: $@"
@@ -59,7 +53,7 @@ sub ft_install
 		croak "$plugin is not a Form::Tiny::Plugin"
 			unless $plugin->isa('Form::Tiny::Plugin');
 
-		$self->_select_behaviors($wanted, [$plugin], {$plugin => $plugin->plugin($caller, \$context)});
+		$self->_merge_behaviors($wanted, $plugin->plugin($caller, \$context));
 	}
 
 	# create metapackage with roles
@@ -78,100 +72,37 @@ sub ft_install
 	return \$context;
 }
 
-sub _generate_helpers
+sub _get_plugins
 {
-	my ($self, $caller, $field_context) = @_;
+	my ($self, $flags) = @_;
 
-	my $use_context = sub {
-		croak 'context using DSL keyword called without context'
-			unless defined $$field_context;
-		unshift @_, $$field_context;
-		return @_;
-	};
-
-	return {
-		form_field => sub {
-			$$field_context = $caller->form_meta->add_field(@_);
-		},
-		form_cleaner => sub {
-			$$field_context = undef;
-			$caller->form_meta->add_hook(cleanup => @_);
-		},
-		form_hook => sub {
-			$$field_context = undef;
-			$caller->form_meta->add_hook(@_);
-		},
-		form_filter => sub {
-			$$field_context = undef;
-			$caller->form_meta->add_filter(@_);
-		},
-		field_filter => sub {
-			$caller->form_meta->add_field_filter($use_context->(@_));
-		},
-		field_validator => sub {
-			$caller->form_meta->add_field_validator($use_context->(@_));
-		},
-		form_trim_strings => sub {
-			$$field_context = undef;
-			$caller->form_meta->add_filter(Str, sub { trim $_[1] });
-		},
-		form_message => sub {
-			$$field_context = undef;
-			my %params = @_;
-			for my $key (keys %params) {
-				$caller->form_meta->add_message($key, $params{$key});
-			}
-		},
-	};
-}
-
-sub _get_behaviors
-{
-	my ($self, $subs) = @_;
-
-	return {
-		-base => {
-			subs => {
-				map { $_ => $subs->{$_} }
-					qw(
-					form_field field_validator
-					form_cleaner form_hook
-					form_message
-					)
-			},
-			roles => ['Form::Tiny::Form'],
-		},
-		-strict => {
-			meta_roles => [qw(Form::Tiny::Meta::Strict)],
-		},
-		-filtered => {
-			subs => {
-				map { $_ => $subs->{$_} }
-					qw(
-					form_filter field_filter
-					form_trim_strings
-					)
-			},
-			meta_roles => [qw(Form::Tiny::Meta::Filtered)],
-		},
+	my %known_flags = (
+		-base => ['Base'],
+		-strict => ['Strict'],
+		-filtered => ['Filtered'],
 
 		# legacy no-op flags
-		-consistent => {},
-	};
+		-consistent => [],
+	);
+
+	my @plugins;
+	foreach my $flag (@$flags) {
+		croak "no Form::Tiny import behavior for: $flag"
+			unless exists $known_flags{$flag};
+
+		push @plugins, @{$known_flags{$flag}};
+	}
+
+	return @plugins;
 }
 
-sub _select_behaviors
+sub _merge_behaviors
 {
-	my ($self, $wanted, $types, $behaviors) = @_;
+	my ($self, $wanted, $behaviors) = @_;
 
-	foreach my $type (@$types) {
-		croak "no Form::Tiny import behavior for: $type"
-			unless exists $behaviors->{$type};
-
-		%{$wanted->{subs}} = (%{$wanted->{subs}}, %{$behaviors->{$type}{subs} // {}});
-		push @{$wanted->{roles}}, @{$behaviors->{$type}{roles} // []};
-		push @{$wanted->{meta_roles}}, @{$behaviors->{$type}{meta_roles} // []};
-	}
+	%{$wanted->{subs}} = (%{$wanted->{subs}}, %{$behaviors->{subs} // {}});
+	push @{$wanted->{roles}}, @{$behaviors->{roles} // []};
+	push @{$wanted->{meta_roles}}, @{$behaviors->{meta_roles} // []};
 }
 
 sub _get_flag

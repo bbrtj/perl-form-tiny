@@ -19,7 +19,7 @@ Form building is done just by calling methods on the meta object. Each helper of
 
 The actual form object only stores data that is relevant to form state, not to form layout. Thanks to this model, the layout needs not to be rebuilt each time a new form object is constructed, which speeds up construction.
 
-Additional behavior like filtering is implemented by composing new roles to the meta object and declaring new hooks in C<setup> method. Refer to the code of L<Form::Tiny::Meta::Filtered> to see how meta roles may define additional behavior.
+Additional behavior like filtering is implemented by composing new roles to the meta object and declaring new hooks in C<setup> method. Refer to the code of L<Form::Tiny::Plugin::Filtered> to see how meta roles may define additional behavior.
 
 =head3 Why use meta object model at all?
 
