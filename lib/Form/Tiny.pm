@@ -34,27 +34,8 @@ sub ft_install
 
 	# field context for form building
 	my $context;
-	my %seen;
-	my $wanted = {
-		subs => {},
-		roles => [],
-		meta_roles => [],
-	};
 
-	foreach my $plugin (@plugins) {
-		$plugin = "Form::Tiny::Plugin::$plugin";
-		$plugin =~ s/^.+\+//;
-		next if $seen{$plugin}++;
-
-		my $success = eval "use $plugin; 1";
-
-		croak "could not load plugin $plugin: $@"
-			unless $success;
-		croak "$plugin is not a Form::Tiny::Plugin"
-			unless $plugin->isa('Form::Tiny::Plugin');
-
-		$self->_merge_behaviors($wanted, $plugin->plugin($caller, \$context));
-	}
+	my $wanted = $self->ft_run_plugins($caller, \$context, @plugins);
 
 	# create metapackage with roles
 	my $meta = create_form_meta($caller, @{$wanted->{meta_roles}});
@@ -70,6 +51,35 @@ sub ft_install
 	}
 
 	return \$context;
+}
+
+sub ft_run_plugins
+{
+	my ($self, $caller, $context_ref, @plugins) = @_;
+
+	my $wanted = {
+		subs => {},
+		roles => [],
+		meta_roles => [],
+	};
+
+	my %seen;
+	foreach my $plugin (@plugins) {
+		$plugin = "Form::Tiny::Plugin::$plugin";
+		$plugin =~ s/^.+\+//;
+		next if $seen{$plugin}++;
+
+		my $success = eval "use $plugin; 1";
+
+		croak "could not load plugin $plugin: $@"
+			unless $success;
+		croak "$plugin is not a Form::Tiny::Plugin"
+			unless $plugin->isa('Form::Tiny::Plugin');
+
+		$self->_merge_behaviors($wanted, $plugin->plugin($caller, $context_ref));
+	}
+
+	return $wanted;
 }
 
 sub _get_plugins

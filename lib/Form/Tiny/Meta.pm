@@ -12,7 +12,7 @@ use Sub::Util qw(set_subname);
 use Form::Tiny::FieldDefinitionBuilder;
 use Form::Tiny::Hook;
 use Form::Tiny::Error;
-use Form::Tiny::Utils qw(try uniq get_package_form_meta);
+use Form::Tiny::Utils qw(try uniq get_package_form_meta has_form_meta);
 require Moo::Role;
 
 use namespace::clean;
@@ -177,7 +177,7 @@ sub bootstrap
 			@{"${package_name}::ISA"};
 		};
 
-		my @real_parents = grep { $_->can('form_meta') && $_->form_meta->isa(__PACKAGE__) } @parents;
+		my @real_parents = grep { has_form_meta($_) } @parents;
 
 		croak 'Form::Tiny does not support multiple inheritance'
 			if @real_parents > 1;
@@ -187,6 +187,10 @@ sub bootstrap
 		# this is required so that proper hooks on inherit_from can be fired
 		$self->inherit_roles_from($parent ? $parent->form_meta : undef);
 		$self->inherit_from($parent->form_meta) if $parent;
+	}
+	else {
+		# no package means no inheritance, but run this to properly consume meta roles
+		$self->inherit_roles_from;
 	}
 
 	$self->setup;

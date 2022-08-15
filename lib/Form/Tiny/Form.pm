@@ -322,10 +322,6 @@ B<predicate:> I<has_errors>
 
 This section describes standalone methods available in the module - they are not directly connected to any of the attributes.
 
-=head3 form_meta
-
-Returns the form metaobject, an instance of L<Form::Tiny::Meta>.
-
 =head3 new
 
 This is a Moose-flavored constructor for the class. It accepts a hash or hash reference of parameters, which are the attributes specified above.
