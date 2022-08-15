@@ -487,11 +487,25 @@ The module enables a way to create a form without the need of a dedicated packag
 	my $form = Form::Tiny::Inline          #     An inline form ...
 	           ->is(qw/strict filtered/)   # ... with Strict and Filtered plugins ...
 	           ->new(                      # ... will be created with properties:
-		field_defs => [{name => "my_field"}],
+		fields => {my_field => { ... }},
 		cleaner => sub { ... },
 	);
 
-The possible constructor arguments are C<field_defs> (aref of hashrefs), C<filters> (aref of arefs, only when C<filtered>) and C<cleaner> (coderef). The same syntax as for regular helpers will work.
+The possible constructor arguments:
+
+=over
+
+=item * C<fields> (hashref of hashrefs)
+
+=item * C<field_defs> (aref of hashrefs) (legacy)
+
+=item * C<filters> (aref of arefs, only when C<filtered>)
+
+=item * C<cleaner> (coderef)
+
+=back
+
+The same syntax as for regular helpers will work.
 
 There's no way to define custom hooks (other than a single C<cleaner>) in inline forms. Additionally, a special case exists for the C<filtered> inline forms, as they will act as if you declared C<form_trim_strings> in their classes.
 

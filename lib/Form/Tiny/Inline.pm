@@ -84,6 +84,15 @@ sub new
 		$meta->set_form_roles($wanted->{roles});
 		$meta->bootstrap;
 
+		if ($args{fields}) {
+			for my $field_name (keys %{$args{fields}}) {
+				$meta->add_field({
+					name => $field_name,
+					%{$args{fields}{$field_name}},
+				});
+			}
+		}
+
 		for my $field (@{$args{field_defs} // []}) {
 			$meta->add_field($field);
 		}
