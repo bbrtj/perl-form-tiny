@@ -8,8 +8,6 @@ use Types::Standard qw(Maybe Str);
 use Types::TypeTiny qw(StringLike);
 use Carp qw(confess);
 
-use namespace::clean;
-
 use overload
 	q{""} => 'as_string',
 	fallback => 1;

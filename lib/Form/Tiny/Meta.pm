@@ -15,8 +15,6 @@ use Form::Tiny::Error;
 use Form::Tiny::Utils qw(try uniq get_package_form_meta has_form_meta);
 require Moo::Role;
 
-use namespace::clean;
-
 # more clear error messages in some crucial cases
 our @CARP_NOT = qw(Form::Tiny Form::Tiny::Form);
 

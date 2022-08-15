@@ -6,8 +6,6 @@ use warnings;
 use Moo;
 use Types::Standard qw(HasMethods CodeRef);
 
-use namespace::clean;
-
 has 'type' => (
 	is => 'ro',
 	isa => HasMethods ['check'],

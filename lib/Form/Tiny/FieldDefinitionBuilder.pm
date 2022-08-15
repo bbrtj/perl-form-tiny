@@ -11,8 +11,6 @@ use Types::Standard qw(HashRef);
 use Form::Tiny::FieldDefinition;
 use Form::Tiny::Utils qw(has_form_meta);
 
-use namespace::clean;
-
 has 'data' => (
 	is => 'ro',
 	required => 1,

@@ -14,8 +14,6 @@ use Form::Tiny::Utils qw(try has_form_meta);
 use Form::Tiny::Error;
 use Form::Tiny::Path;
 
-use namespace::clean;
-
 has 'name' => (
 	is => 'ro',
 	isa => NonEmptySimpleStr,

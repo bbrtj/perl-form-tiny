@@ -7,9 +7,6 @@ use Moo;
 use Carp qw(croak);
 use Types::Standard qw(ArrayRef);
 
-use namespace::clean;
-
-
 our $nesting_separator = q{.};
 our $array_marker = q{*};
 our $escape_character = q{\\};
@@ -137,3 +134,4 @@ sub join
 }
 
 1;
+

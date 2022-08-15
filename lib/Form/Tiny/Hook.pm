@@ -6,8 +6,6 @@ use warnings;
 use Moo;
 use Types::Standard qw(Enum CodeRef Bool);
 
-use namespace::clean;
-
 use constant {
 	HOOK_REFORMAT => 'reformat',
 	HOOK_BEFORE_MANGLE => 'before_mangle',
