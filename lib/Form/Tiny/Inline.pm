@@ -93,7 +93,8 @@ sub new
 		}
 
 		if ($meta->can('add_filter')) {
-			$meta->add_filter(Str, sub { trim(pop) });
+			$meta->add_global_trim_filter;
+
 			for my $filter (@{$args{filters} // []}) {
 				$meta->add_filter(@$filter);
 			}

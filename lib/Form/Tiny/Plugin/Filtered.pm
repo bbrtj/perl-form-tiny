@@ -31,7 +31,7 @@ sub plugin
 			},
 			form_trim_strings => sub {
 				$$context = undef;
-				$caller->form_meta->add_filter(Str, sub { trim $_[1] });
+				$caller->form_meta->add_global_trim_filter;
 			},
 		},
 
@@ -63,6 +63,13 @@ sub _create_filter
 		type => $filter,
 		code => $code
 	);
+}
+
+sub add_global_trim_filter
+{
+	my ($self) = @_;
+
+	return $self->add_filter(Str, sub { trim $_[1] });
 }
 
 sub add_filter
