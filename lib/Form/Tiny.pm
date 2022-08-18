@@ -242,13 +242,13 @@ Load plugins into Form::Tiny. Plugins may introduce additional keywords, mix in 
 
 	form_field $name => %arguments;
 	form_field $coderef;
-	form_field $object;
+	form_field($object); # watch out for indirect method call!
 
-This helper declares a new field for your form. Each style of calling this function should contain keys that meet the specification of L<Form::Tiny::FieldDefinition>, or an object of this class directly.
+This helper declares a new field for your form. Each style of calling this function should contain keys that meet the specification of L<Form::Tiny::FieldDefinition>, or an object of this class.
 
-In the first (hash) version, C<%arguments> need to be a plain hash (not a hashref) and should B<not> include the name in the hash, as it will be overriden by the first argument C<$name>. This form also sets the context for the form being built: see L<Form::Tiny::Manual/"Context"> for details.
+In the first (hash) version, C<%arguments> need to be a plain hash (not a hashref) and should B<not> include the C<name> in the hash, since it will be overriden by the first argument C<$name>. This form also sets the context for the form being built: see L<Form::Tiny::Manual/"Context"> for details.
 
-In the second (coderef) version, C<$coderef> gets passed the form instance as its only argument and should return a hashref or a constructed object of L<Form::Tiny::FieldDefinition>. A hashref must contain a C<name>. Note that this creates I<dynamic field>, which will be resolved before each form validation. Generally, you should avoid using dynamic fields and only use them when there is something special that you are trying to achieve.
+In the second (coderef) version, C<$coderef> gets passed the form instance as its only argument and should return a hash reference or a constructed object of L<Form::Tiny::FieldDefinition>. Unlike the first call style, hashref B<must> contain a C<name>. Note that this creates I<dynamic field>, which will be resolved later, before each form validation. Generally, you should avoid using dynamic fields and only use them when there is something special that you are trying to achieve.
 
 If you need a subclass of the default implementation, and you don't need a dynamic field, you can use the third style of the call, which takes a constructed object of L<Form::Tiny::FieldDefinition> or its subclass.
 

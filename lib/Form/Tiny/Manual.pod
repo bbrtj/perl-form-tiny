@@ -136,23 +136,12 @@ The example below illustrates how a form class could be used to validate data.
 
 You can use C<form_field> function to declare form fields, just like you would use C<has> to declare class properties in Moo/se.
 
-Each of field definitions will be coerced into an object of the L<Form::Tiny::FieldDefinition> class.
-
-	# this are static fields
 	form_field 'some_name';
 	form_field 'another_name' => (
 		required => 'soft',
 	);
 
-	# this is a dynamic field, which has access to form instance
-	form_field sub {
-		my ($self) = @_;
-
-		return {
-			name => $self->extra_field_name,
-			required => 1,
-		};
-	};
+Form fields end up as instances of L<Form::Tiny::FieldDefinition> or its descendants. Also see full keyword docs at L<Form::Tiny/form_field>.
 
 The only required element in hashes defining the fields is the key C<name>, which contains the string with name of the field in the form input. In the most basic style of C<form_field>, the name B<should not> be given explicitly, as it will be automatically overwritten by the first argument to that function. Other possible elements are:
 
