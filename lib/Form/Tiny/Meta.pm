@@ -348,8 +348,23 @@ sub inherit_from
 
 sub _build_blueprint
 {
-	my ($self, $context) = @_;
+	my ($self, $context, %params) = @_;
 	my %result;
+
+	my $recurse = $params{recurse} // 1;
+	my $transform_base = sub {
+		my ($def) = @_;
+
+		if ($def->is_subform && $recurse) {
+			my $meta = get_package_form_meta(ref $def->type);
+			return $meta->blueprint($def->type, %params);
+		}
+
+		return $def;
+	};
+
+	my $transform = $params{transform} // $transform_base;
+
 
 	# croak, since we don't know anything about dynamic fields in static context
 	croak "Can't create a blueprint of a dynamic form"
@@ -360,12 +375,6 @@ sub _build_blueprint
 	my $fields = $context ? $context->field_defs : $self->fields;
 
 	for my $def (@$fields) {
-		my $value = $def;
-		if ($def->is_subform) {
-			my $meta = get_package_form_meta(ref $def->type);
-			$value = $meta->blueprint($def->type);
-		}
-
 		my @meta = @{$def->get_name_path->meta};
 		my @path = @{$def->get_name_path->path};
 
@@ -377,7 +386,7 @@ sub _build_blueprint
 			$def, [
 				{
 					path => \@path,
-					value => $value
+					value => scalar $transform->($def, $transform_base),
 				}
 			]
 		);
@@ -388,10 +397,13 @@ sub _build_blueprint
 
 sub blueprint
 {
-	my ($self, $context) = @_;
+	my ($self, @args) = @_;
+	my $context;
+	$context = shift @args
+		if @args && has_form_meta($args[0]);
 
-	if ($self->is_dynamic) {
-		return $self->_build_blueprint($context);
+	if ($self->is_dynamic || @args) {
+		return $self->_build_blueprint($context, @args);
 	}
 	else {
 		# $context can be skipped if the form is not dynamic
