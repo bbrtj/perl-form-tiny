@@ -8,7 +8,7 @@ use Scalar::Util qw(blessed);
 use Carp qw(carp);
 
 use Form::Tiny::Hook;
-use Form::Tiny::Filter;
+use Form::Tiny::Plugin::Filtered::Filter;
 use Form::Tiny::Utils qw(trim);
 
 use parent 'Form::Tiny::Plugin';
@@ -47,7 +47,7 @@ has 'filters' => (
 	is => 'ro',
 	writer => 'set_filters',
 	isa => ArrayRef [
-		InstanceOf ['Form::Tiny::Filter']
+		InstanceOf ['Form::Tiny::Plugin::Filtered::Filter']
 	],
 	default => sub { [] },
 );
@@ -57,9 +57,9 @@ sub _create_filter
 	my ($self, $filter, $code) = @_;
 
 	return $filter
-		if defined blessed $filter && $filter->isa('Form::Tiny::Filter');
+		if defined blessed $filter && $filter->isa('Form::Tiny::Plugin::Filtered::Filter');
 
-	return Form::Tiny::Filter->new(
+	return Form::Tiny::Plugin::Filtered::Filter->new(
 		type => $filter,
 		code => $code
 	);

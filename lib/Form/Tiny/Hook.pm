@@ -68,7 +68,7 @@ Form::Tiny::Hook - a representation of a hook
 
 	# in your form class
 
-	# the following will be coerced into Form::Tiny::Filter
+	# the following will be coerced into Form::Tiny::Hook
 	form_hook before_validation => $coderef;
 
 =head1 DESCRIPTION

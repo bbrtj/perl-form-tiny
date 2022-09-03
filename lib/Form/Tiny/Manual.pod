@@ -435,7 +435,7 @@ B<Important note>: Strict mode will cause the system to crawl your entire input 
 
 =head3 Filters
 
-Turned on with the C<-filtered> flag in L<Form::Tiny>.
+Turned on by L<Form::Tiny::Plugin::Filtered> plugin or with the C<-filtered> flag in L<Form::Tiny>.
 
 Enables initial filtering for the input fields. This behavior is added to the form as a C<before_mangle> hook.
 

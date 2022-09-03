@@ -187,8 +187,6 @@ Form::Tiny is a customizable hashref validator with DSL for form building.
 
 =item * L<Form::Tiny::Hook> - Hook class specification
 
-=item * L<Form::Tiny::Filter> - Filter class specification
-
 =item * L<Form::Tiny::Plugin> - How to write your own plugin?
 
 =back
@@ -293,7 +291,6 @@ See L<Form::Tiny::Manual/"Filters"> for details on filters.
 
 	# uses current context
 	field_filter $type, $coderef;
-	field_filter Form::Tiny::Filter->new(...);
 
 Same as C<form_filter>, but is narrowed down to a single form field.
 
