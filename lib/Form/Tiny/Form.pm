@@ -6,7 +6,7 @@ use warnings;
 use Types::Standard qw(Maybe ArrayRef InstanceOf HashRef Bool);
 use Carp qw(croak);
 use Scalar::Util qw(blessed);
-use List::Util qw(any);
+use List::Util qw(first);
 
 use Form::Tiny::Error;
 use Form::Tiny::Utils qw(try);
@@ -162,6 +162,19 @@ sub _ft_validate_nested
 	}
 }
 
+sub _ft_find_field
+{
+	my ($self, $name, $raise) = @_;
+
+	my $def = first { $_->name eq $name } @{$self->field_defs};
+
+	if ($raise && !defined $def) {
+		croak "form does not contain a field definition for $name";
+	}
+
+	return $def;
+}
+
 sub valid
 {
 	my ($self) = @_;
@@ -242,11 +255,8 @@ sub add_error
 	}
 
 	# check if the field exists
-	for my $name ($error->field) {
-		croak "form does not contain a field definition for $name"
-			if defined $name && !any { $_->name eq $name }
-			@{$self->field_defs};
-	}
+	$self->_ft_find_field($error->field, 1)
+		if $error->has_field;
 
 	# unwrap nested form errors
 	$error = $error->error
@@ -272,6 +282,14 @@ sub errors_hash
 sub has_errors
 {
 	return @{$_[0]->errors} > 0;
+}
+
+sub value
+{
+	my ($self, $field_name) = @_;
+	my $field_def = $self->_ft_find_field($field_name, 1);
+
+	return $field_def->get_name_path->follow($self->fields);
 }
 
 1;

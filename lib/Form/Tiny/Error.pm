@@ -14,9 +14,9 @@ use overload
 
 has 'field' => (
 	is => 'ro',
-	isa => Maybe [Str],
+	isa => Str,
 	writer => 'set_field',
-	default => sub { undef },
+	predicate => 'has_field',
 );
 
 has 'error' => (

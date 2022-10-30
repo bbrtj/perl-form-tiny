@@ -137,5 +137,38 @@ sub join
 	return join $nesting_separator, $self->make_name_path($prefix);
 }
 
+sub follow
+{
+	my ($self, $structure) = @_;
+
+	return undef if !ref $structure;
+
+	my @found = ($structure);
+	my @path = @{$self->path};
+	my @meta = @{$self->meta};
+	my $has_array = 0;
+
+	for my $ind (0 .. $#path) {
+		my $is_array = $meta[$ind] eq 'ARRAY';
+		my @new_found;
+
+		for my $item (@found) {
+			if ($is_array && ref $item eq 'ARRAY') {
+				push @new_found, @{$item};
+			}
+			elsif (ref $item eq 'HASH' && exists $item->{$path[$ind]}) {
+				push @new_found, $item->{$path[$ind]};
+			}
+		}
+
+		@found = @new_found;
+		$has_array ||= $is_array;
+	}
+
+	return $has_array
+		? \@found
+		: $found[0];
+}
+
 1;
 
