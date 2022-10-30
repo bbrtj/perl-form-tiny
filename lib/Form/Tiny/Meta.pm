@@ -365,7 +365,6 @@ sub _build_blueprint
 
 	my $transform = $params{transform} // $transform_base;
 
-
 	# croak, since we don't know anything about dynamic fields in static context
 	croak "Can't create a blueprint of a dynamic form"
 		if $self->is_dynamic && !$context;

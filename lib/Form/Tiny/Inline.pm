@@ -20,6 +20,7 @@ sub new
 
 # actual inline form package
 {
+
 	package Form::Tiny::Inline::Form;
 
 	use v5.10;
@@ -61,6 +62,7 @@ sub new
 
 # builder package to allow adding meta roles with no package magic
 {
+
 	package Form::Tiny::Inline::Builder;
 
 	use v5.10;
@@ -86,10 +88,12 @@ sub new
 
 		if ($args{fields}) {
 			for my $field_name (keys %{$args{fields}}) {
-				$meta->add_field({
-					name => $field_name,
-					%{$args{fields}{$field_name}},
-				});
+				$meta->add_field(
+					{
+						name => $field_name,
+						%{$args{fields}{$field_name}},
+					}
+				);
 			}
 		}
 
