@@ -46,6 +46,7 @@ sub as_string
 
 	# Internal use only
 	package Form::Tiny::Error::NestedFormError;
+
 	use parent -norequire, 'Form::Tiny::Error';
 
 }
@@ -53,6 +54,7 @@ sub as_string
 {
 
 	package Form::Tiny::Error::InvalidFormat;
+
 	use parent -norequire, 'Form::Tiny::Error';
 
 	sub default_error
@@ -64,6 +66,7 @@ sub as_string
 {
 
 	package Form::Tiny::Error::Required;
+
 	use parent -norequire, 'Form::Tiny::Error';
 
 	sub default_error
@@ -75,6 +78,7 @@ sub as_string
 {
 
 	package Form::Tiny::Error::IsntStrict;
+
 	use parent -norequire, 'Form::Tiny::Error';
 
 	sub default_error
@@ -86,6 +90,7 @@ sub as_string
 {
 
 	package Form::Tiny::Error::DoesNotValidate;
+
 	use parent -norequire, 'Form::Tiny::Error';
 
 	sub default_error
