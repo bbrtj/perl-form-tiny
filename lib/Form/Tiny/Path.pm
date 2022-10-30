@@ -60,12 +60,12 @@ sub from_name
 	croak 'path specified was empty'
 		unless length $name;
 
+	# use custom escape character for path building
+	# (won't be mistaken for literal backslash)
 	my $escape = "\x00";
 	$name =~ s/(\Q$escape_character\E{1,2})/length $1 == 2 ? $escape_character : $escape/ge;
 
-	my $arr = quotemeta $array_marker;
-	my $sep = quotemeta $nesting_separator;
-	my @parts = split /(?<!$escape)$sep/, $name, -1;
+	my @parts = split /(?<!$escape)\Q$nesting_separator\E/, $name, -1;
 	my @meta;
 
 	for my $part (@parts) {
@@ -76,7 +76,11 @@ sub from_name
 			push @meta, 'HASH';
 		}
 	}
-	@parts = map { s/$escape($sep|$arr)/$1/ge; $_ } @parts;
+
+	@parts = map {
+		s{ $escape ( \Q$nesting_separator\E | \Q$array_marker\E ) }{$1}gx;
+		$_
+	} @parts;
 
 	return $self->new(path => \@parts, meta => \@meta);
 }
