@@ -362,6 +362,23 @@ I<validate> does the same thing, but instead of returning a boolean it returns a
 
 Both methods take input data as the only argument.
 
+=head3 value
+
+	if ($form->valid) {
+		my $value = $form->value('field_name');
+		my $values_array_ref = $form->value('array.*');
+	}
+
+Can be used to interact with L</fields> hashref indirectly with key safety checks.
+
+After validation, this method returns form value of the given field. If the form was not yet validated or the validation was unsuccessful, returns C<undef>.
+
+Accepts a single argument: a field name. Will raise an exception if such field was not defined.
+
+If the field contains an array (C<*>) will return an array reference of all values for that field. Order of those values will be the same as in the input array(s).
+
+I<Note:> currently, the field name passed must be a full field name (not a part of field name). For example, passing C<hash.hash> when the field is specified as C<hash.hash.field> will raise an exception. This may change in the future.
+
 =head3 errors_hash
 
 Helper method which returns errors much like the C<errors> form attribute, but in a hash reference with form field names as keys. Errors not assigned to any specific field end up in empty string key. The values are array references of error messages (strings).
