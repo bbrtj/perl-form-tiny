@@ -6,6 +6,7 @@ use Test::More;
 use Test::Exception;
 
 {
+
 	package ParentForm;
 
 	use Form::Tiny;
@@ -13,6 +14,7 @@ use Test::Exception;
 }
 
 {
+
 	package ChildForm;
 
 	use Form::Tiny;
@@ -20,6 +22,7 @@ use Test::Exception;
 }
 
 {
+
 	package ChildFormFixed;
 
 	use Form::Tiny;
@@ -29,12 +32,14 @@ use Test::Exception;
 }
 
 {
+
 	package EmptyForm;
 
 	use Form::Tiny;
 }
 
 {
+
 	package EmptyFormFixed;
 
 	use Form::Tiny;
