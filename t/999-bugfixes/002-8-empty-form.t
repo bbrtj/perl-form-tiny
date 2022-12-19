@@ -49,11 +49,11 @@ use Test::Exception;
 
 throws_ok {
 	ChildForm->new->field_defs;
-} qr/form ChildForm seems to be empty/;
+} qr/Form ChildForm seems to be empty/;
 
 throws_ok {
 	EmptyForm->new->form_meta;
-} qr/form EmptyForm seems to be empty/;
+} qr/Form EmptyForm seems to be empty/;
 
 # this dies because the form role was not yet merged
 dies_ok {

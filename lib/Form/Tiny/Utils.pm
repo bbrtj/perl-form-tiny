@@ -103,8 +103,9 @@ sub get_package_form_meta
 		croak "no form meta declared for $package_name"
 			unless exists $meta{$package_name};
 
-		croak
-			"form $package_name seems to be empty. Please implement the form or call __PACKAGE__->form_meta explicitly"
+		croak "Form $package_name seems to be empty. "
+			. 'Please implement the form or call __PACKAGE__->form_meta explicitly. '
+			. 'See Form::Tiny::Manual::Cookbook "Empty forms" section for details'
 			if ref $_[0];
 
 		$form_meta->bootstrap;
