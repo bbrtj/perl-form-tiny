@@ -96,17 +96,19 @@ sub has_form_meta
 
 sub get_package_form_meta
 {
-	# short-circuit if the meta has already been built
-	return $meta{$_[0]} if $meta{$_[0]} && $meta{$_[0]}->complete;
-
-	my ($package_name) = @_;
-
-	croak "no form meta declared for $package_name"
-		unless exists $meta{$package_name};
-
+	my $package_name = ref $_[0] || $_[0];
 	my $form_meta = $meta{$package_name};
 
-	$form_meta->bootstrap;
+	if (!$form_meta || !$form_meta->complete) {
+		croak "no form meta declared for $package_name"
+			unless exists $meta{$package_name};
+
+		croak
+			"form $package_name seems to be empty. Please implement the form or call __PACKAGE__->form_meta explicitly"
+			if ref $_[0];
+
+		$form_meta->bootstrap;
+	}
 
 	return $form_meta;
 }

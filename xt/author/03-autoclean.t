@@ -8,6 +8,8 @@ package Form
 	use Form::Tiny;
 
 	use namespace::autoclean;
+
+	__PACKAGE__->form_meta;
 }
 
 my $form = Form->new;
@@ -15,3 +17,4 @@ can_ok $form, 'form_meta';
 is $form->form_meta->package, 'Form';
 
 done_testing;
+
