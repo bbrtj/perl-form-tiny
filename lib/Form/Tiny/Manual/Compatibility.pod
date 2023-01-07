@@ -10,6 +10,12 @@ This documentation page is listing all non-backward compatible changes in usage 
 
 =head1 CHANGES
 
+=head2 Form::Tiny::Filter has been moved to Form::Tiny::Plugin::Filtered::Filter
+
+I<Changed in 2.17>
+
+Due to new internal structure, Filter has been moved to Plugin directory.
+
 =head2 is_validated and clear_valid methods are deprecated
 
 I<Changed in 2.10>
@@ -205,11 +211,7 @@ Starting from version I<2.00>, any backward incompatible changes will only be in
 
 =head2 Current deprecations
 
-=head3 Form::Tiny::Filter has been moved to Form::Tiny::Plugin::Filtered::Filter
-
-I<Deprecated in 2.14>
-
-Due to new internal structure, Filter has been moved to Plugin directory.
+None at this time.
 
 =head1 SEE ALSO
 
