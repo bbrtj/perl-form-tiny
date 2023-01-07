@@ -18,6 +18,9 @@ has 'path' => (
 	required => 1,
 );
 
+# Note: this clashes with 'meta' from Moo :/
+# will stay as it is though as long as it works (overrides the other meta)
+# properly, since can't know how much external code uses it
 has 'meta' => (
 	is => 'ro',
 	isa => ArrayRef,
