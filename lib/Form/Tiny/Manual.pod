@@ -42,7 +42,7 @@ Form::Tiny::Manual - reference for working with Form::Tiny
 		lucky_number => 6,
 	});
 
-	if ($input->valid) {
+	if ($form->valid) {
 		print Dumper $form->fields;
 	}
 	else {
