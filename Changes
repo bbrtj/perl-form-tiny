@@ -1,5 +1,8 @@
 Revision history for Perl extension Form::Tiny.
 
+2.18 TODO
+	- documentation fixes
+
 2.17 Sat Jan 7 2023
 	- resolve deprecation of Form::Tiny::Filter (removed the package)
 	- documentation improvements
