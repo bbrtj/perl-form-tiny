@@ -414,7 +414,7 @@ Hook types are listed below:
 
 While regular properties allow for single-field validation, sometimes a need
 arises to check if some fields are synchronized correctly, or even to perform
-some more complex validation. This can be done with the C<cleaup> hook, which
+some more complex validation. This can be done with the C<cleanup> hook, which
 will be only fired once after the validation for every individual field was
 successful. The cleaner subroutine should look like this:
 
