@@ -3,7 +3,10 @@ use strict;
 use warnings;
 use Test::More;
 
-use Object::Pad;
+BEGIN {
+	plan skip_all => 'these tests require Object::Pad'
+		unless eval { require Object::Pad; };
+}
 
 class ParentForm :repr(HASH)
 {
@@ -31,3 +34,4 @@ is $form->fields->{f1}, 'field f1';
 is $form->fields->{f2}, 'field f2';
 
 done_testing;
+
