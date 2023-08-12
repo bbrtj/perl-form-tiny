@@ -155,3 +155,11 @@ call C<form_meta> method on the package before going out of scope, for example:
 
 	__PACKAGE__->form_meta;
 
+=head1 SEE ALSO
+
+=over
+
+=item * L<Form::Tiny::Manual>, the main reference
+
+=back
+
