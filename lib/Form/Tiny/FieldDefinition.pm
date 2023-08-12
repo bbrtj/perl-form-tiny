@@ -374,8 +374,8 @@ B<predicate:> I<has_data>
 
 =head2 is_subform
 
-Checks if the field definition's type is a form - whether it mixes in
-L<Form::Tiny::Form> role.
+Checks if the field definition's type is a form - whether it has its own
+Form::Tiny metaobject.
 
 =head2 get_name_path
 
