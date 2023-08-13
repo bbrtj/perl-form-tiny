@@ -87,8 +87,8 @@ has '_subform' => (
 	is => 'ro',
 	isa => Bool,
 	reader => 'is_subform',
-	writer => '_set_subform',
-	default => sub { 0 },
+	lazy => 1,
+	default => sub { $_[0]->has_type && has_form_meta($_[0]->type) },
 	init_arg => undef,
 );
 
@@ -109,10 +109,6 @@ sub BUILD
 
 		croak 'default value for an array field is unsupported'
 			if scalar grep { $_ eq 'ARRAY' } @{$self->get_name_path->meta};
-	}
-
-	if ($self->has_type && has_form_meta($self->type)) {
-		$self->_set_subform(1);
 	}
 }
 
