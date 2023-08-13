@@ -42,11 +42,11 @@ sub _check_recursive
 
 	elsif ($metadata == MARKER_ARRAY) {
 		die $current_path unless ref $data eq 'ARRAY';
+
+		# no need to clone el for each array element
+		my $subel_path = $path->clone->append('ARRAY');
 		foreach my $value (@$data) {
-			$self->_check_recursive(
-				$obj, $value, $markers,
-				$path->clone->append('ARRAY')
-			);
+			$self->_check_recursive($obj, $value, $markers, $subel_path);
 		}
 	}
 
