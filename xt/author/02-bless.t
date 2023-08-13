@@ -4,6 +4,7 @@ use warnings;
 use Test::More;
 
 {
+
 	package ParentForm;
 
 	use Form::Tiny -nomoo;
@@ -18,6 +19,7 @@ use Test::More;
 }
 
 {
+
 	package ChildForm;
 
 	use Form::Tiny -nomoo;

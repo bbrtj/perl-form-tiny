@@ -6,6 +6,7 @@ use Test::More;
 # This behavior is documented in the Manual.
 # TODO: how could this be more meaningful?
 {
+
 	package Form::Nested;
 
 	use Form::Tiny;
@@ -21,6 +22,7 @@ use Test::More;
 }
 
 {
+
 	package Form::Parent;
 
 	use Form::Tiny;

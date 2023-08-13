@@ -4,6 +4,7 @@ use warnings;
 use Test::More;
 
 {
+
 	package Form::Nested;
 
 	use Form::Tiny;
@@ -18,6 +19,7 @@ use Test::More;
 }
 
 {
+
 	package Form::Parent;
 
 	use Form::Tiny;

@@ -4,6 +4,7 @@ use warnings;
 use Test::More;
 
 {
+
 	package Form;
 
 	use Form::Tiny;
