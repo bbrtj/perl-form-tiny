@@ -30,7 +30,7 @@ requires qw(setup);
 
 sub _check_recursive
 {
-	my ($self, $obj, $data, $markers, $path) = @_;
+	my ($self, $data, $markers, $path) = @_;
 
 	my $current_path = $path->join;
 	my $metadata = $markers->{$current_path} // MARKER_NONE;
@@ -46,7 +46,7 @@ sub _check_recursive
 		# no need to clone el for each array element
 		my $subel_path = $path->clone->append('ARRAY');
 		foreach my $value (@$data) {
-			$self->_check_recursive($obj, $value, $markers, $subel_path);
+			$self->_check_recursive($value, $markers, $subel_path);
 		}
 	}
 
@@ -56,7 +56,7 @@ sub _check_recursive
 		die $current_path unless ref $data eq 'HASH';
 		for my $key (keys %$data) {
 			$self->_check_recursive(
-				$obj, $data->{$key}, $markers,
+				$data->{$key}, $markers,
 				$path->clone->append(HASH => $key)
 			);
 		}
@@ -81,7 +81,7 @@ sub _check_strict
 	}
 
 	my $error = try sub {
-		$self->_check_recursive($obj, $input, \%markers, Form::Tiny::Path->empty);
+		$self->_check_recursive($input, \%markers, Form::Tiny::Path->empty);
 	};
 
 	if ($error) {
