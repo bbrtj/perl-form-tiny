@@ -3,7 +3,9 @@ use strict;
 use warnings;
 use Test::More;
 
-package Form::Nested {
+{
+	package Form::Nested;
+
 	use Form::Tiny;
 
 	form_field value1 => (
@@ -15,7 +17,9 @@ package Form::Nested {
 	);
 }
 
-package Form::Parent {
+{
+	package Form::Parent;
+
 	use Form::Tiny;
 
 	form_field subform => (

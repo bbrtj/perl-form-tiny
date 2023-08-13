@@ -5,8 +5,9 @@ use Test::More;
 
 # This behavior is documented in the Manual.
 # TODO: how could this be more meaningful?
+{
+	package Form::Nested;
 
-package Form::Nested {
 	use Form::Tiny;
 	use Types::Standard qw(Int);
 
@@ -19,7 +20,9 @@ package Form::Nested {
 	);
 }
 
-package Form::Parent {
+{
+	package Form::Parent;
+
 	use Form::Tiny;
 
 	form_field subform => (

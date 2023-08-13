@@ -3,8 +3,9 @@ use strict;
 use warnings;
 use Test::More;
 
-package Form
 {
+	package Form;
+
 	use Form::Tiny;
 
 	use namespace::autoclean;
