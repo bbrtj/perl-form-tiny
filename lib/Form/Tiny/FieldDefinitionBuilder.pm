@@ -11,7 +11,7 @@ use Types::Standard qw(HashRef);
 use Form::Tiny::FieldDefinition;
 use Form::Tiny::Utils qw(has_form_meta);
 
-has 'data' => (
+has 'build_data' => (
 	is => 'ro',
 	required => 1,
 );
@@ -27,7 +27,7 @@ sub build
 {
 	my ($self, $context) = @_;
 
-	my $data = $self->data;
+	my $data = $self->build_data;
 	my $dynamic = ref $data eq 'CODE';
 	if ($dynamic && defined blessed $context) {
 		croak 'building a dynamic field definition requires Form::Tiny form'

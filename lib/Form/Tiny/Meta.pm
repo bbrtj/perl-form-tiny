@@ -235,7 +235,7 @@ sub add_field
 		$scalar_param = {@parameters, name => $scalar_param};
 	}
 
-	my $builder = Form::Tiny::FieldDefinitionBuilder->new(data => $scalar_param)->build;
+	my $builder = Form::Tiny::FieldDefinitionBuilder->new(build_data => $scalar_param)->build;
 	push @{$self->fields}, $builder;
 
 	$self->set_dynamic(1)
