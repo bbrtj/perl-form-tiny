@@ -21,10 +21,9 @@ sub plugin
 use Moo::Role;
 
 use constant {
-	MARKER_NONE => '',
-	MARKER_SKIP => 'skip',
-	MARKER_ARRAY => 'array',
-	MARKER_LEAF => 'leaf',
+	MARKER_NONE => 0,
+	MARKER_ARRAY => 1,
+	MARKER_LEAF => 2,
 };
 
 requires qw(setup);
@@ -32,19 +31,16 @@ requires qw(setup);
 sub _check_recursive
 {
 	my ($self, $obj, $data, $markers, $path) = @_;
-	$path //= Form::Tiny::Path->empty;
 
 	my $current_path = $path->join;
 	my $metadata = $markers->{$current_path} // MARKER_NONE;
 
-	return if $metadata eq MARKER_SKIP;
-
-	if ($metadata eq MARKER_LEAF) {
+	if ($metadata == MARKER_LEAF) {
 
 		# we're at leaf and no error occured - we're good.
 	}
 
-	elsif ($metadata eq MARKER_ARRAY) {
+	elsif ($metadata == MARKER_ARRAY) {
 		die $current_path unless ref $data eq 'ARRAY';
 		foreach my $value (@$data) {
 			$self->_check_recursive(
@@ -73,24 +69,19 @@ sub _check_strict
 
 	my %markers;
 	foreach my $def (@{$obj->field_defs}) {
-		if ($def->is_subform) {
-			$markers{$def->name} = MARKER_SKIP;
-		}
-		else {
-			$markers{$def->name} = MARKER_LEAF;
-		}
+		$markers{$def->name} = MARKER_LEAF;
 
 		my $path = $def->get_name_path;
-		my @path_meta = @{$path->meta};
-		for my $ind (0 .. $#path_meta) {
-			if ($path_meta[$ind] eq 'ARRAY') {
+		my $path_meta = $path->meta;
+		for my $ind (0 .. $#$path_meta) {
+			if ($path_meta->[$ind] eq 'ARRAY') {
 				$markers{$path->join($ind - 1)} = MARKER_ARRAY;
 			}
 		}
 	}
 
 	my $error = try sub {
-		$self->_check_recursive($obj, $input, \%markers);
+		$self->_check_recursive($obj, $input, \%markers, Form::Tiny::Path->empty);
 	};
 
 	if ($error) {
