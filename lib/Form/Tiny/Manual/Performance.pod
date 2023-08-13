@@ -37,9 +37,9 @@ performance of the module by about 50%:
 
 	Parsing 100 hash references in an array
 
-	                  Rate form_tiny_strict        form_tiny
-	form_tiny_strict 156/s               --             -57%
-	form_tiny        359/s             131%               --
+			Rate strict normal
+	strict 232/s     --   -65%
+	normal 661/s   185%     --
 
 =head1 THINGS THAT SPEED THE MODULE UP
 
