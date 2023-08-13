@@ -20,6 +20,7 @@ has 'addons' => (
 	is => 'ro',
 	isa => HashRef,
 	default => sub { {} },
+	init_arg => undef,
 );
 
 sub build
@@ -49,7 +50,7 @@ sub build
 			$self->name;
 	}
 
-	$definition->addons($self->addons);
+	$definition->set_addons($self->addons);
 
 	return $definition;
 }

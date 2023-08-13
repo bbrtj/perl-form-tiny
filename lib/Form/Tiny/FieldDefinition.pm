@@ -44,9 +44,11 @@ has 'type' => (
 );
 
 has 'addons' => (
-	is => 'rw',
+	is => 'ro',
+	writer => 'set_addons',
 	isa => HashRef,
 	default => sub { {} },
+	init_arg => undef,
 );
 
 has 'coerce' => (
