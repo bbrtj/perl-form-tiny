@@ -1,5 +1,9 @@
 Revision history for Perl extension Form::Tiny.
 
+2.19 Mon Aug 14 2023
+	- fix inline form behavior in some edge cases
+	- rewrite Plugin::Strict to use recently added blueprint metaobject method
+
 2.18 Mon Aug 14 2023
 	- fix: field's addons (internal) are no longer assignable by the constructor
 	- fix: FieldDefinitionBuilder's "data" is now named "build_data" not to clash with FieldDefinition's "data"
