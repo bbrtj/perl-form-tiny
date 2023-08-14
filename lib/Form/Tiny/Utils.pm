@@ -5,6 +5,7 @@ use strict;
 use warnings;
 use Exporter qw(import);
 use Carp qw(croak);
+use Scalar::Util qw(blessed);
 
 our @EXPORT;
 our @EXPORT_OK = qw(
@@ -91,7 +92,8 @@ sub create_form_meta
 
 sub has_form_meta
 {
-	return exists $meta{ref $_[0] || $_[0]};
+	return exists $meta{ref $_[0] || $_[0]}
+		|| blessed $_[0] && $_[0]->DOES('Form::Tiny::Form');
 }
 
 sub get_package_form_meta
