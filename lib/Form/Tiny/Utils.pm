@@ -184,7 +184,11 @@ sub _find_field
 		return 1;    # all ok
 	};
 
-	if ($traverser->([], 0, $fields)) {
+	# manually free traverser after it's done (memroy leak)
+	my $result = $traverser->([], 0, $fields);
+	$traverser = undef;
+
+	if ($result) {
 		return [
 			map {
 				{
@@ -195,6 +199,7 @@ sub _find_field
 			} @found
 		];
 	}
+
 	return;
 }
 
@@ -206,6 +211,7 @@ sub _assign_field
 	for my $path_value (@$path_values) {
 		my @parts = @{$path_value->{path}};
 		my $current = \$fields;
+
 		for my $i (0 .. $#parts) {
 
 			# array_path will contain array indexes for each array marker
