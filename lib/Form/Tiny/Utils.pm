@@ -142,47 +142,48 @@ sub _find_field
 	$traverser = sub {
 		my ($curr_path, $index, $value) = @_;
 
-		if ($index == @path) {
-
-			# we reached the end of the tree
-			push @found, [$curr_path, $value];
-		}
-		else {
+		while ($index < @path) {
 			my $current_ref = ref $value;
 
 			if ($arrays[$index]) {
 
 				# It's an array, make sure the actual ref type does not mismatch the spec
-				return unless $current_ref eq 'ARRAY';
+				return 0 unless $current_ref eq 'ARRAY';
 
 				if (@$value == 0) {
 
 					# we wanted to have a deeper structure, but its not there, so clearly an error
-					return unless $index == $#path;
+					return 0 unless $index == $#path;
 
 					# we had aref here, so we want it back in resulting hash
 					push @found, [$curr_path, [], 1];
 				}
 				else {
 					for my $ind (0 .. $#$value) {
-						return    # may be an error, exit early
+						return 0    # may be an error, exit early
 							unless $traverser->([@$curr_path, $ind], $index + 1, $value->[$ind]);
 					}
 				}
+
+				return 1; # exit early, looping continued in recursive calls
 			}
 
 			else {
 				# it's not the leaf of the tree yet, so we require a hash
 				my $next = $path[$index];
-				return unless $current_ref eq 'HASH' && exists $value->{$next};
-				return $traverser->([@$curr_path, $next], $index + 1, $value->{$next});
+				return 0 unless $current_ref eq 'HASH' && exists $value->{$next};
+
+				$index += 1;
+				$value = $value->{$next};
+				push @$curr_path, $next;
 			}
 		}
 
+		push @found, [$curr_path, $value];
 		return 1;    # all ok
 	};
 
-	# manually free traverser after it's done (memroy leak)
+	# manually free traverser after it's done (memory leak)
 	my $result = $traverser->([], 0, $fields);
 	$traverser = undef;
 
