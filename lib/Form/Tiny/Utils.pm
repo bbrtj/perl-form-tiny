@@ -148,16 +148,13 @@ sub _find_field
 			push @found, [$curr_path, $value];
 		}
 		else {
-			my $is_array = $arrays[$index];
 			my $current_ref = ref $value;
 
-			# make sure the actual ref type does not mismatch the spec
-			return unless $is_array eq ($current_ref eq 'ARRAY');
+			if ($arrays[$index]) {
 
-			# it's not the leaf of the tree yet, so we require an array or a hash
-			return if !$is_array && $current_ref ne 'HASH';
+				# It's an array, make sure the actual ref type does not mismatch the spec
+				return unless $current_ref eq 'ARRAY';
 
-			if ($is_array) {
 				if (@$value == 0) {
 
 					# we wanted to have a deeper structure, but its not there, so clearly an error
@@ -175,8 +172,9 @@ sub _find_field
 			}
 
 			else {
+				# it's not the leaf of the tree yet, so we require a hash
 				my $next = $path[$index];
-				return unless exists $value->{$next};
+				return unless $current_ref eq 'HASH' && exists $value->{$next};
 				return $traverser->([@$curr_path, $next], $index + 1, $value->{$next});
 			}
 		}
