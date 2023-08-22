@@ -153,15 +153,13 @@ sub get_coerced
 
 sub get_adjusted
 {
-	my $self = shift;
-	my $value = pop;
+	my ($self, $form, $value) = @_;
 
-	if ($self->is_subform) {
-		$value = $self->type->fields;
-	}
+	$value = $self->type->fields
+		if $self->is_subform;
 
 	return $value unless $self->is_adjusted;
-	return $self->adjust->(@_, $value);
+	return $self->adjust->($form, $value);
 }
 
 sub get_default
