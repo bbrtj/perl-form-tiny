@@ -51,13 +51,13 @@ subtest 'should validate and adjust' => sub {
 	ok $form->valid, 'form valid ok';
 	is_deeply $form->fields, {
 		subform => [
-				{
-					value1 => 1,
-				},
-				{
-					value1 => 2,
-					comments => ['negative value'],
-				},
+			{
+				value1 => 1,
+			},
+			{
+				value1 => 2,
+				comments => ['negative value'],
+			},
 		],
 	};
 };

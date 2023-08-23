@@ -129,6 +129,8 @@ sub set_form_meta_class
 
 # internal use functions (not exported)
 
+# returns arrayref of subarraysrefs, each in format:
+# [path_aref, $value, $is_structure]
 sub _find_field
 {
 	my ($fields, $field_def) = @_;
@@ -187,28 +189,19 @@ sub _find_field
 	my $result = $traverser->([], 0, $fields);
 	$traverser = undef;
 
-	if ($result) {
-		return [
-			map {
-				{
-					path => $_->[0],
-					value => $_->[1],
-					structure => $_->[2]
-				}
-			} @found
-		];
-	}
-
+	return \@found if $result;
 	return;
 }
 
+# takes the same format as _find_field returns (in $path_values), and fills it
+# into $fields according to $field_def
 sub _assign_field
 {
 	my ($fields, $field_def, $path_values) = @_;
 
 	my @arrays = map { $_ eq 'ARRAY' } @{$field_def->get_name_path->meta};
 	for my $path_value (@$path_values) {
-		my @parts = @{$path_value->{path}};
+		my @parts = @{$path_value->[0]};
 		my $current = \$fields;
 
 		for my $i (0 .. $#parts) {
@@ -222,7 +215,7 @@ sub _assign_field
 			}
 		}
 
-		$$current = $path_value->{value};
+		$$current = $path_value->[1];
 	}
 }
 

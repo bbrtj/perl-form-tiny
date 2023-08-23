@@ -382,12 +382,7 @@ sub _build_blueprint
 
 		Form::Tiny::Utils::_assign_field(
 			\%result,
-			$def, [
-				{
-					path => \@path,
-					value => scalar $transform->($def, $transform_base),
-				}
-			]
+			$def, [[\@path, scalar $transform->($def, $transform_base)]]
 		);
 	}
 

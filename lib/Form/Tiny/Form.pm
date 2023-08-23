@@ -117,19 +117,17 @@ sub _ft_validate_nested
 		my $current_data = Form::Tiny::Utils::_find_field($fields, $validator);
 		if (defined $current_data) {
 			my $all_ok = 1;
-			my @to_assign;
 
 			# This may have multiple iterations only if there's an array
 			foreach my $path_value (@$current_data) {
-				unless ($path_value->{structure}) {
-					$path_value->{value} = ($inline_hook->($self, $validator, $path_value->{value}))
-						if $inline_hook;
-					$all_ok = $self->_ft_mangle_field($validator, \$path_value->{value}) && $all_ok;
-				}
-				push @to_assign, $path_value;
+				next if $path_value->[2];
+
+				$path_value->[1] = ($inline_hook->($self, $validator, $path_value->[1]))
+					if $inline_hook;
+				$all_ok = $self->_ft_mangle_field($validator, \$path_value->[1]) && $all_ok;
 			}
 
-			Form::Tiny::Utils::_assign_field($dirty, $validator, \@to_assign);
+			Form::Tiny::Utils::_assign_field($dirty, $validator, $current_data);
 
 			# found and valid, go to the next field
 			next if $all_ok;
@@ -140,12 +138,7 @@ sub _ft_validate_nested
 			Form::Tiny::Utils::_assign_field(
 				$dirty,
 				$validator,
-				[
-					{
-						path => $validator->get_name_path->path,
-						value => $validator->get_default($self),
-					}
-				]
+				[[$validator->get_name_path->path, $validator->get_default($self)]]
 			);
 		}
 		elsif ($validator->required) {
