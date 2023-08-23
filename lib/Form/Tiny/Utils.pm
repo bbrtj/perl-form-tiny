@@ -136,7 +136,7 @@ sub _find_field
 	my ($fields, $field_def) = @_;
 
 	my @path = @{$field_def->get_name_path->path};
-	my @arrays = map { $_ eq 'ARRAY' } @{$field_def->get_name_path->meta};
+	my $arrays = $field_def->get_name_path->meta_arrays;
 
 	# the result goes here
 	my @found;
@@ -147,7 +147,7 @@ sub _find_field
 		while ($index < @path) {
 			my $current_ref = ref $value;
 
-			if ($arrays[$index]) {
+			if ($arrays->[$index]) {
 
 				# It's an array, make sure the actual ref type does not mismatch the spec
 				return 0 unless $current_ref eq 'ARRAY';
@@ -199,15 +199,13 @@ sub _assign_field
 {
 	my ($fields, $field_def, $path_values) = @_;
 
-	my @arrays = map { $_ eq 'ARRAY' } @{$field_def->get_name_path->meta};
+	my $arrays = $field_def->get_name_path->meta_arrays;
 	for my $path_value (@$path_values) {
 		my @parts = @{$path_value->[0]};
 		my $current = \$fields;
 
 		for my $i (0 .. $#parts) {
-
-			# array_path will contain array indexes for each array marker
-			if ($arrays[$i]) {
+			if ($arrays->[$i]) {
 				$current = \${$current}->[$parts[$i]];
 			}
 			else {

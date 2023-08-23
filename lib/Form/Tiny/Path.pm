@@ -28,6 +28,19 @@ has 'meta' => (
 	required => 1,
 );
 
+# cache for meta array positions
+has 'meta_arrays' => (
+	is => 'ro',
+	default => sub {
+		return [
+			map {
+				$_ eq 'ARRAY'
+			} @{$_[0]->meta}
+		];
+	},
+	init_arg => undef,
+);
+
 sub BUILD
 {
 	my ($self) = @_;
@@ -41,7 +54,7 @@ sub BUILD
 			if scalar grep { length $_ eq 0 } @parts;
 
 		croak 'path specified started with an array: ' . $self->dump
-			if $self->meta->[0] eq 'ARRAY';
+			if $self->meta_arrays->[0];
 	}
 }
 
@@ -155,11 +168,11 @@ sub follow
 
 	my @found = ($structure);
 	my @path = @{$self->path};
-	my @meta = @{$self->meta};
+	my $meta = $self->meta_arrays;
 	my $has_array = 0;
 
 	for my $ind (0 .. $#path) {
-		my $is_array = $meta[$ind] eq 'ARRAY';
+		my $is_array = $meta->[$ind];
 		my @new_found;
 
 		for my $item (@found) {

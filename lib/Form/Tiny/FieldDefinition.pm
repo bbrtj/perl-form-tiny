@@ -110,7 +110,7 @@ sub BUILD
 	if ($self->has_default) {
 
 		croak 'default value for an array field is unsupported'
-			if scalar grep { $_ eq 'ARRAY' } @{$self->get_name_path->meta};
+			if scalar grep { $_ } @{$self->get_name_path->meta_arrays};
 	}
 }
 
