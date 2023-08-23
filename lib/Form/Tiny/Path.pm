@@ -111,6 +111,15 @@ sub append
 	return $self;
 }
 
+sub append_path
+{
+	my ($self, $other_path) = @_;
+
+	push @{$self->path}, @{$other_path->path};
+	push @{$self->meta}, @{$other_path->meta};
+	return $self;
+}
+
 sub make_name_path
 {
 	my ($self, $prefix) = @_;

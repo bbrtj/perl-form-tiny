@@ -155,6 +155,7 @@ sub get_adjusted
 {
 	my ($self, $form, $value) = @_;
 
+	# NOTE: subform must be already validated at this stage
 	$value = $self->type->fields
 		if $self->is_subform;
 
@@ -217,8 +218,9 @@ sub validate
 					$class = 'Form::Tiny::Error::NestedFormError';
 
 					my $path = $self->get_name_path;
-					$path = $path->clone->append(HASH => $exception->field)
-						if defined $exception->field;
+					$path = $path->clone->append_path(
+						$self->type->_ft_find_field($exception->field)->get_name_path
+					) if defined $exception->field;
 
 					$exception->set_field($path->join);
 				}
