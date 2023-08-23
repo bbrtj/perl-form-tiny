@@ -165,7 +165,7 @@ sub _find_field
 					}
 				}
 
-				return 1; # exit early, looping continued in recursive calls
+				return 1;    # exit early, looping continued in recursive calls
 			}
 
 			else {
