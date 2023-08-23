@@ -212,25 +212,23 @@ sub validate
 	for my $error (@errors) {
 		if (ref $error eq 'ARRAY' && $self->is_subform) {
 			foreach my $exception (@$error) {
+				my $class = 'Form::Tiny::Error::DoesNotValidate';
 				if (defined blessed $exception && $exception->isa('Form::Tiny::Error')) {
+					$class = 'Form::Tiny::Error::NestedFormError';
+
 					my $path = $self->get_name_path;
 					$path = $path->clone->append(HASH => $exception->field)
 						if defined $exception->field;
 
 					$exception->set_field($path->join);
-					$exception = Form::Tiny::Error::NestedFormError->new(
-						field => $self->name,
-						error => $exception,
-					);
-				}
-				else {
-					$exception = Form::Tiny::Error::DoesNotValidate->new(
-						field => $self->name,
-						error => $exception,
-					);
 				}
 
-				$form->add_error($exception);
+				$form->add_error(
+					$class->new(
+						field => $self->name,
+						error => $exception,
+					)
+				);
 			}
 		}
 		else {
