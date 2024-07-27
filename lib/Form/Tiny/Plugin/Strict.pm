@@ -28,7 +28,7 @@ has '_strict_blueprint' => (
 
 sub _check_recursive
 {
-	my ($self, $data, $blueprint) = @_;
+	my ($self, $data, $blueprint, $path ) = @_;
 	return 0 unless defined $blueprint;
 
 	my $ref = ref $blueprint;
@@ -36,17 +36,24 @@ sub _check_recursive
 	if ($ref eq 'ARRAY') {
 		return 0 unless ref $data eq 'ARRAY';
 
+                my $idx;
 		foreach my $value (@$data) {
-			return 0
-				unless $self->_check_recursive($value, $blueprint->[0]);
+                        my @lpath = ( @{$path}, $idx++ );
+                        if ( ! $self->_check_recursive($value, $blueprint->[0], \@lpath) ) {
+                            @{$path} = @lpath;
+                            return 0;
+                        }
 		}
 	}
 	elsif ($ref eq 'HASH') {
 		return 0 unless ref $data eq 'HASH';
 
 		for my $key (keys %$data) {
-			return 0
-				unless $self->_check_recursive($data->{$key}, $blueprint->{$key});
+                        my @lpath = ( @{$path}, $key );
+                        if ( !  $self->_check_recursive($data->{$key}, $blueprint->{$key}, \@lpath) ) {
+                            @{$path} = @lpath;
+                            return 0;
+                    }
 		}
 	}
 	else {
@@ -67,9 +74,14 @@ sub _check_strict
 			unless $self->is_dynamic;
 	}
 
-	my $strict = $self->_check_recursive($input, $blueprint);
+        my @unexpected_field;
+	my $strict = $self->_check_recursive($input, $blueprint, \@unexpected_field);
 	if (!$strict) {
-		$obj->add_error($self->build_error(IsntStrict =>));
+                my $field = join( q{.}, @unexpected_field);
+                my $error = $self->build_error(IsntStrict => );
+                $error->set_error( $error->error . ': ' . $field )
+                  if length($field);
+		$obj->add_error($error);
 	}
 
 	return $input;

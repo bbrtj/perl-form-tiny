@@ -54,7 +54,7 @@ subtest 'testing strict message' => sub {
 
 	ok !$form->valid, 'validation failed ok';
 	is_deeply $form->errors_hash, {
-		'' => ['strictmsg']
+		'' => ['strictmsg: loose']
 		},
 		'errors ok';
 };
