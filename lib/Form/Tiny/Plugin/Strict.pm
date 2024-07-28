@@ -5,6 +5,7 @@ use strict;
 use warnings;
 
 use Form::Tiny::Error;
+use Form::Tiny::Path;
 
 use parent 'Form::Tiny::Plugin';
 
@@ -28,39 +29,45 @@ has '_strict_blueprint' => (
 
 sub _check_recursive
 {
-	my ($self, $data, $blueprint, $path) = @_;
-	return 0 unless defined $blueprint;
+	my ($self, $data, $blueprint) = @_;
+	return [{path => Form::Tiny::Path->empty, error => 'unexpected'}]
+		unless defined $blueprint;
 
-	my $ref = ref $blueprint;
+	if (ref $blueprint eq 'ARRAY') {
+		return [{path => Form::Tiny::Path->empty, error => 'not an array'}]
+			unless ref $data eq 'ARRAY';
 
-	if ($ref eq 'ARRAY') {
-		return 0 unless ref $data eq 'ARRAY';
-
-		my $idx;
-		foreach my $value (@$data) {
-			my @lpath = (@{$path}, $idx++);
-			if (!$self->_check_recursive($value, $blueprint->[0], \@lpath)) {
-				@{$path} = @lpath;
-				return 0;
-			}
+		my @errors;
+		foreach my $key (0 .. $#$data) {
+			my $err = $self->_check_recursive($data->[$key], $blueprint->[0]);
+			push @errors, map {
+				$_->{path}->prepend(ARRAY => $key);
+				$_;
+			} @$err;
 		}
+
+		return \@errors;
 	}
-	elsif ($ref eq 'HASH') {
-		return 0 unless ref $data eq 'HASH';
+	elsif (ref $blueprint eq 'HASH') {
+		return [{path => Form::Tiny::Path->empty, error => 'not an object'}]
+			unless ref $data eq 'HASH';
 
+		my @errors;
 		for my $key (keys %$data) {
-			my @lpath = (@{$path}, $key);
-			if (!$self->_check_recursive($data->{$key}, $blueprint->{$key}, \@lpath)) {
-				@{$path} = @lpath;
-				return 0;
-			}
+			my $err = $self->_check_recursive($data->{$key}, $blueprint->{$key});
+			push @errors, map {
+				$_->{path}->prepend(HASH => $key);
+				$_;
+			} @$err;
 		}
+
+		return \@errors;
 	}
 	else {
 		# we're at leaf and no error occured - we're good.
 	}
 
-	return 1;
+	return [];
 }
 
 sub _check_strict
@@ -75,13 +82,15 @@ sub _check_strict
 	}
 
 	my @unexpected_field;
-	my $strict = $self->_check_recursive($input, $blueprint, \@unexpected_field);
-	if (!$strict) {
-		my $field = join(q{.}, @unexpected_field);
-		my $error = $self->build_error(IsntStrict =>);
-		$error->set_error($error->error . ': ' . $field)
-			if length($field);
-		$obj->add_error($error);
+	my $errors = $self->_check_recursive($input, $blueprint, \@unexpected_field);
+	foreach my $err (@$errors) {
+		$obj->add_error(
+			$self->build_error(
+				'IsntStrict',
+				extra_field => $err->{path}->join,
+				error => $err->{error},
+			)
+		);
 	}
 
 	return $input;
