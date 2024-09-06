@@ -113,10 +113,21 @@ sub clone
 	return $self->new(path => [@{$self->path}], meta => [@{$self->meta}]);
 }
 
+sub prepend
+{
+	my ($self, $meta, $key) = @_;
+	$key //= $array_marker
+		if $meta eq 'ARRAY';
+
+	unshift @{$self->path}, $key;
+	unshift @{$self->meta}, $meta;
+	return $self;
+}
+
 sub append
 {
 	my ($self, $meta, $key) = @_;
-	$key = $array_marker
+	$key //= $array_marker
 		if $meta eq 'ARRAY';
 
 	push @{$self->path}, $key;

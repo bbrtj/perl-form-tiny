@@ -244,7 +244,7 @@ sub add_error
 		if $error->has_field;
 
 	# unwrap nested form errors
-	$error = $error->error
+	$error = $error->get_error
 		if $error->isa('Form::Tiny::Error::NestedFormError');
 
 	push @{$self->errors}, $error;
@@ -258,7 +258,7 @@ sub errors_hash
 
 	my %ret;
 	for my $error (@{$self->errors}) {
-		push @{$ret{$error->field // ''}}, $error->error;
+		push @{$ret{$error->field // ''}}, $error->get_error;
 	}
 
 	return \%ret;

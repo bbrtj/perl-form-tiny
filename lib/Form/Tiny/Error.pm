@@ -32,12 +32,19 @@ sub default_error
 	return 'Unknown error';
 }
 
+sub get_error
+{
+	my ($self) = @_;
+
+	return $self->error;
+}
+
 sub as_string
 {
 	my ($self) = @_;
 
 	my $field = $self->field // 'general';
-	my $error = $self->error;
+	my $error = $self->get_error;
 	return "$field - $error";
 }
 
@@ -79,11 +86,29 @@ sub as_string
 
 	package Form::Tiny::Error::IsntStrict;
 
-	use parent -norequire, 'Form::Tiny::Error';
+	use Moo;
+	use Types::Standard qw(Str);
+
+	extends 'Form::Tiny::Error';
+
+	has 'extra_field' => (
+		is => 'ro',
+		isa => Str,
+		required => 1,
+	);
 
 	sub default_error
 	{
 		return 'input data has unexpected fields';
+	}
+
+	sub get_error
+	{
+		my ($self) = @_;
+
+		my $field = $self->extra_field;
+		my $error = $self->error;
+		return "$field: $error";
 	}
 }
 
