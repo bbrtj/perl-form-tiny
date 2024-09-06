@@ -140,7 +140,7 @@ Form::Tiny::Error - form error wrapper
 	);
 
 	my $field = $error->field; # field name or undef
-	my $data = $error->error; # error message or nested error object
+	my $data = $error->get_error; # error message or nested error object
 
 	# concatenated error message: "$field - $data"
 	my $message = $error->as_string;
@@ -153,7 +153,7 @@ Form::Tiny::Error - form error wrapper
 The form errors class features field name which caused validation error, error
 message and automatic stringification.
 
-The C<< $error->error >> can return a nested error object in case of nested
+The C<< $error->get_error >> can return a nested error object in case of nested
 forms.
 
 A couple of in-place subclasses are provided to differentiate the type of error
