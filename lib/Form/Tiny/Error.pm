@@ -4,13 +4,20 @@ use v5.10;
 use strict;
 use warnings;
 use Moo;
-use Types::Standard qw(Maybe Str);
+use Types::Standard qw(Maybe Str InstanceOf);
 use Types::TypeTiny qw(StringLike);
 use Carp qw(confess);
 
 use overload
 	q{""} => 'as_string',
 	fallback => 1;
+
+has 'field_def' => (
+	is => 'ro',
+	isa => InstanceOf['Form::Tiny::FieldDefinition'],
+	writer => 'set_field_def',
+	predicate => 'has_field_def',
+);
 
 has 'field' => (
 	is => 'ro',
@@ -25,6 +32,15 @@ has 'error' => (
 	writer => 'set_error',
 	builder => 'default_error',
 );
+
+sub BUILD
+{
+	my ($self) = @_;
+
+	if (!$self->field && $self->field_def) {
+		$self->set_field($self->field_def->name);
+	}
+}
 
 sub default_error
 {
@@ -135,10 +151,11 @@ Form::Tiny::Error - form error wrapper
 =head1 SYNOPSIS
 
 	my $error = Form::Tiny::Error::DoesNotValidate->new(
-		field => 'some_field',
+		field_def => $field_def_obj,
 		error => 'some message'
 	);
 
+	my $field_def = $error->field_def; # field definition object or undef
 	my $field = $error->field; # field name or undef
 	my $data = $error->get_error; # error message or nested error object
 
@@ -168,6 +185,31 @@ which occured. These are:
 =item * Form::Tiny::Error::IsntStrict
 
 =item * Form::Tiny::Error::DoesNotValidate
+
+=head1 ATTRIBUTES
+
+=head2 field_def
+
+The definition of a field which had the error - an instance of L<Form::Tiny::FieldDefinition>.
+
+B<writer> I<set_field_def>
+
+B<predicate:> I<has_field_def>
+
+=head2 field
+
+Name of the field with the error. May be a label or something user-readable.
+Will be pulled from L</field_def> if not passed.
+
+B<writer> I<set_field>
+
+B<predicate:> I<has_field>
+
+=head2 error
+
+The error string.
+
+B<writer> I<set_error>
 
 =back
 
