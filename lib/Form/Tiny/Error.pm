@@ -186,6 +186,8 @@ which occured. These are:
 
 =item * Form::Tiny::Error::DoesNotValidate
 
+=back
+
 =head1 ATTRIBUTES
 
 =head2 field_def
@@ -210,6 +212,4 @@ B<predicate:> I<has_field>
 The error string.
 
 B<writer> I<set_error>
-
-=back
 
